@@ -11,6 +11,7 @@ import {
 } from "../api";
 import { AgentResponse } from "../components/AgentResponse";
 import { AgentComparisonSummary } from "../components/AgentComparisonSummary";
+import { DemoQuestionPicker } from "../components/DemoQuestionPicker";
 import { SequentialTimeline } from "../components/SequentialTimeline";
 import { useLanguage } from "../i18n/LanguageContext";
 
@@ -52,13 +53,17 @@ export default function Stage3Question() {
   const [checkpointNote, setCheckpointNote] = useState("");
   const [error, setError] = useState("");
   const [apiReady, setApiReady] = useState(null);
+  const [demoQuestions, setDemoQuestions] = useState([]);
 
   useEffect(() => {
     checkHealth()
       .then((d) => setApiReady(d.llm_configured ?? d.openai_configured))
       .catch(() => setApiReady(false));
     fetchQuestions(lang)
-      .then((d) => setQuestion(d.main_question || ""))
+      .then((d) => {
+        setQuestion(d.main_question || "");
+        setDemoQuestions(d.questions || []);
+      })
       .catch(() => {});
     fetchSelectedModel()
       .then((d) => setModel(d.model || ""))
@@ -174,6 +179,15 @@ export default function Stage3Question() {
 
       <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
         <form onSubmit={handleSubmit} className="space-y-4">
+          <DemoQuestionPicker
+            questions={demoQuestions}
+            onSelect={(text) => {
+              setQuestion(text);
+              resetResults();
+            }}
+            t={t}
+            disabled={Boolean(sequentialRun && sequentialRun.status !== "completed")}
+          />
           <textarea
             value={question}
             onChange={(e) => setQuestion(e.target.value)}

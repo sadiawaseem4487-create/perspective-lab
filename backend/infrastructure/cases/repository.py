@@ -260,6 +260,7 @@ class CaseRepository:
                     payload["questions"].append(
                         {
                             "id": item.get("id"),
+                            "category": item.get("category", "general"),
                             "label": label.get(lang) or label.get("en", "") if isinstance(label, dict) else label,
                             "text": text.get(lang) or text.get("en", ""),
                         }

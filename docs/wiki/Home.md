@@ -28,8 +28,8 @@ Welcome to the project wiki. This is the single source of truth for architecture
 | Field | Value |
 |-------|-------|
 | **Product** | PerspectiveLab |
-| **Current sprint** | [Sprint 6 — GUI Shell](Sprints/Sprint-06-GUI-Shell.md) |
-| **Sprint 5 status** | 🟩 Complete (PR pending) |
+| **Current sprint** | [Sprint 7 — GUI Research](Sprints/Sprint-07-GUI-Research.md) |
+| **Sprint 6 status** | 🟩 Complete (PR pending) |
 | **Sprint 4 status** | 🟩 Complete |
 | **Sprint 1 status** | 🟩 Complete |
 | **Last updated** | 2026-07-07 |

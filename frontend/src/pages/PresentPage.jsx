@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { askQuestion, checkHealth, fetchQuestions } from "../api";
+import { DemoQuestionPicker } from "../components/DemoQuestionPicker";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const EXAMPLE = "How do we solve school dropout in São Paulo?";
 
@@ -24,7 +26,9 @@ function AgentCard({ agent }) {
 }
 
 export default function PresentPage() {
+  const { t, lang } = useLanguage();
   const [question, setQuestion] = useState(EXAMPLE);
+  const [demoQuestions, setDemoQuestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
@@ -34,12 +38,13 @@ export default function PresentPage() {
     checkHealth()
       .then((data) => setApiReady(data.llm_configured ?? data.openai_configured))
       .catch(() => setApiReady(false));
-    fetchQuestions()
+    fetchQuestions(lang)
       .then((data) => {
         if (data.main_question) setQuestion(data.main_question);
+        setDemoQuestions(data.questions || []);
       })
       .catch(() => {});
-  }, []);
+  }, [lang]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -67,6 +72,12 @@ export default function PresentPage() {
       <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
         <h2 className="font-display text-2xl font-bold text-stone-900">Question</h2>
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          <DemoQuestionPicker
+            questions={demoQuestions}
+            onSelect={setQuestion}
+            t={t}
+            disabled={loading}
+          />
           <textarea
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
