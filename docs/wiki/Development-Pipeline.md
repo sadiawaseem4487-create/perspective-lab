@@ -9,8 +9,8 @@
 |----------|--------|
 | Pipeline scope | **CI only** (tests + frontend build + Docker build) |
 | Deploy target (later) | **PaaS** (Railway / Fly / Render) |
-| Sprint model | **One sprint per PR** — you approve each merge |
-| GitHub | **Not yet** — see [GitHub Setup](GitHub-Setup.md) |
+| Sprint model | **One sprint per PR** — auto-merge when CI green |
+| GitHub | [perspective-lab](https://github.com/sadiawaseem4487-create/perspective-lab) |
 
 ---
 
@@ -19,8 +19,8 @@
 One repeatable loop from **Sprint 2 → Sprint 8** with:
 
 1. Automated quality gates (tests, build, Docker)
-2. Clear **approval checkpoints** (you say go before merge/deploy)
-3. Agent continues the next sprint only after the previous is signed off
+2. **Auto-merge** sprint PRs when CI passes (branch `sprint/*`)
+3. Agent starts next sprint after merge; you can pause anytime
 
 ---
 
@@ -31,16 +31,11 @@ flowchart LR
   A[Pick sprint tasks] --> B[Implement on branch]
   B --> C[make test + build]
   C --> D[Update wiki + Progress Log]
-  D --> E[Open PR / summary for you]
-  E --> F{You approve?}
-  F -->|Yes| G[Merge to main]
+  D --> E[Open PR]
+  E --> F{CI green?}
+  F -->|Yes| G[Auto-merge to main]
   F -->|No| B
-  G --> H[CI deploys staging]
-  H --> I[You smoke-test staging]
-  I --> J{Promote to prod?}
-  J -->|Yes| K[Deploy production]
-  J -->|No| L[Next sprint]
-  K --> L
+  G --> L[Next sprint]
 ```
 
 ### Agent rules (after your approval)
@@ -50,12 +45,9 @@ flowchart LR
 | Start sprint | Read sprint wiki, create branch `sprint/N-short-name` | — |
 | Implement | Code + tests + wiki checkboxes | — |
 | Gate | Run `make test`, `make build`, Docker build | — |
-| Review | Post PR summary: what changed, how to test | **Approve PR** or request changes |
-| Staging | Auto-deploy on merge (if CD enabled) | Quick smoke on staging URL |
-| Production | Wait for explicit **“deploy prod”** from you | **Approve prod deploy** |
-| Close sprint | Mark sprint complete in wiki | Confirm or reject |
-
-**Hard stop:** Agent never merges or deploys to production without your explicit approval.
+| PR | Push `sprint/N-*` branch, open PR | — |
+| Merge | **Auto** when CI green (`.github/workflows/auto-merge-sprint.yml`) | Pause anytime if needed |
+| Next sprint | Start after merge to `main` | Optional smoke-test |
 
 ---
 

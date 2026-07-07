@@ -4,7 +4,8 @@ Newest entries at the top.
 
 | Date | Sprint | Event |
 |------|--------|-------|
-| 2026-07-07 | 3 | Theory-native outputs, self-check metadata, comparison matrix API. |
+| 2026-07-07 | — | Auto-merge workflow for `sprint/*` PRs when CI passes. |
+| 2026-07-07 | 3 | Merged PR #2 — theory-native outputs, comparison matrix API. |
 | 2026-07-07 | 2 | Merged PR #1 — LangGraph parallel workflow. |
 | 2026-07-07 | — | CI pipeline approved (CI-only); GitHub Actions workflow added. |
 | 2026-07-07 | 1 | Sprint 1 closed: docs updated, E2E workflow verified (session 17), `make test` 27/27. |

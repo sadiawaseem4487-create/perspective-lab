@@ -38,6 +38,16 @@ Routes (main.py) → application/ → infrastructure/ → cases/
 | Parallel | Phase 1 | Sprint 2–3 (LangGraph fan-out) |
 | Sequential | Phase 2 | Sprint 4–5 (Vaihe 1–4 chain) |
 
+## Sprint workflow
+
+After completing a sprint:
+
+1. Branch `sprint/N-short-name` → implement → `make test`
+2. Open PR → wait for CI green → **auto-merge** (or agent runs `gh pr merge`)
+3. Pull `main` → start next sprint
+
+Production deploy still requires your explicit approval.
+
 ## After completing work
 
 1. Mark tasks in the relevant sprint wiki page
