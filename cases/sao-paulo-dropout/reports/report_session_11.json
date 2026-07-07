@@ -1,0 +1,69 @@
+{
+  "report_id": "report_session_11",
+  "session_id": 11,
+  "question": "Miten ratkaisemme koulupudokkuuden São Paulossa?",
+  "model": "openai/gpt-4o-mini",
+  "created_at": "2026-06-29T08:31:19.821070+00:00",
+  "summary": {
+    "total_agents": 4,
+    "successful": 4
+  },
+  "responses": [
+    {
+      "agent_key": "freire",
+      "slot": "agent_1",
+      "agent_number": 1,
+      "agent_label": "Agent 1",
+      "agent_name": "Freire Agent",
+      "title": "Sociocultural Inspirer",
+      "theory": "Paulo Freire — dialogue, conscientization, praxis, and participatory action",
+      "color": "#c2410c",
+      "response": "Koulupudokkuuden ratkaiseminen São Paulossa vaatii syvällistä ymmärrystä ongelman juurista ja sen sosiaalisista, kulttuurisista ja taloudellisista ulottuvuuksista. Freiren näkökulmasta on ensiarvoisen tärkeää, että kaikki osalliset, erityisesti ne, jotka kokevat koulupudokkuuden vaikutukset, saavat äänensä kuuluviin. \n\n1. **Kenen äänet puuttuvat?**\n   Koulupudokkuuden ympärillä puuttuvat usein opiskelijoiden ja heidän perheidensä äänet. Heidän elämänkokemuksensa, haasteensa ja toiveensa ovat keskiössä, mutta niitä ei aina kuulla päätöksenteossa. Opiskelijoiden ja heidän perheidensä on tärkeää osallistua keskusteluihin, jotta he voivat nimetä ongelmat ja jakaa omat tarinansa. \n\n2. **Sosiaalinen ja valtasuhteet koulupudokkuudessa**\n   Koulupudokkuuteen liittyy monia sosiaalisia ja taloudellisia tekijöitä, kuten köyhyys, perhetilanteet, syrjintä ja koulutuksen epäoikeudenmukaisuus. Valtasuhteet näkyvät siinä, miten koulutuksen resursseja jaetaan ja miten päätöksiä tehdään. Koulupudokkuus on usein seurausta siitä, että nuorilla ei ole riittäviä mahdollisuuksia tai tukea, mikä juontaa juurensa laajemmista yhteiskunnallisista rakenteista.\n\n3. **Yhteisö- ja opiskelijayhteistyö**\n   Yhteisöjen, koulujen ja opiskelijoiden välinen yhteistyö on ratkaisevan tärkeää. On tärkeää luoda tiloja, joissa opiskelijat ja heidän perheensä voivat osallistua päätöksentekoon. Tämä voi tapahtua esimerkiksi työpajojen, keskustelutilaisuuksien tai yhteisön kokousten avulla, joissa kaikki osapuolet voivat jakaa näkemyksiään ja kehittää yhdessä käytännön ratkaisuja.\n\n4. **Emansipatoriset askeleet ja kollektiivinen toiminta**\n   Kollektiivinen toiminta alkaa siitä, että yhteisö tunnistaa ongelmat yhdessä. Voidaan perustaa opiskelijajärjestöjä tai vertaistukiryhmiä, joissa nuoret voivat jakaa kokemuksiaan ja kehittää toimintamalleja, joilla he voivat tukea toisiaan. Tärkeää on myös kehittää koulun ja kodin välistä yhteistyötä, jotta opiskelijat saavat tarvitsemaansa tukea kotona ja koulussa.\n\n5. **Pohdinta ja jatkuva käytäntö**\n   Ratkaisut koulupudokkuuteen eivät ole kertaluonteisia, vaan vaativat jatkuvaa pohdintaa ja käytäntöä. Yhteisön on tärkeää arvioida säännöllisesti omia toimiaan, kerätä palautetta ja muokata toimintatapojaan tarpeen mukaan. Tämä luo mahdollisuuden jatkuvalle oppimiselle ja kehitykselle, jolloin kaikki osalliset voivat kasvaa ja kehittyä yhdessä.\n\nYhteenvetona, koulupudokkuuden ongelman ratkaiseminen São Paulossa vaatii yhteisöllistä lähestymistapaa, jossa kaikki ääniä kuullaan ja jossa yhdessä etsitään ratkaisuja. Opiskelijat, perheet ja yhteisöt voivat yhdessä toimia aktiivisesti muuttaakseen koulutuksen kenttää ja luodakseen oikeudenmukaisemman tulevaisuuden.",
+      "model": "openai/gpt-4o-mini",
+      "latency_ms": 13666,
+      "error": null
+    },
+    {
+      "agent_key": "weber",
+      "slot": "agent_2",
+      "agent_number": 2,
+      "agent_label": "Agent 2",
+      "agent_name": "Weber Agent",
+      "title": "Bureaucratic Rationality Agent",
+      "theory": "Max Weber — rational-legal authority, bureaucracy, rules, and formal responsibility",
+      "color": "#1e40af",
+      "response": "Koulupudokkuuden ratkaiseminen São Paulossa vaatii systemaattista lähestymistapaa, joka perustuu Max Weberin hallintoteoriaan. Tämä tarkoittaa sääntöjen, auktoriteetin ja byrokratian hyödyntämistä, jotta prosessi on tehokas, oikeudenmukainen ja dokumentoitu. \n\n1. **Säännöt ja auktoriteetti**: Ensimmäinen askel on luoda selkeät säännöt ja ohjeistukset, jotka määrittävät koulupudokkuuden ehkäisemiseen liittyvät toimenpiteet. Tämä voi sisältää lainsäädännön, joka velvoittaa koulut ja paikalliset viranomaiset toimimaan yhdessä. On tärkeää, että näillä säännöillä on vahva auktoriteetti, ja niiden noudattamista valvotaan.\n\n2. **Vastuulliset toimijat**: Koulupudokkuuden ehkäisyssä on useita vastuullisia toimijoita, kuten koulut, opettajat, vanhemmat, paikalliset hallintoelimet ja sosiaalipalvelut. Jokaisella toimijalla tulisi olla selkeä rooli ja vastuualue, jotta yhteistyö on sujuvaa ja tehokasta. Esimerkiksi kouluilla voisi olla vastuuhenkilö, joka seuraa oppilaiden läsnäoloa ja raportoi puutteista.\n\n3. **Prosessi ja työnkulku**: On tärkeää kehittää prosessi, joka tunnistaa oppilaat, jotka ovat vaarassa keskeyttää opintonsa. Tämä voi sisältää säännölliset tarkastukset oppilaiden läsnäolosta ja akateemisista suorituksista. Jos oppilas jää jälkeen, koulun tulisi käynnistää ennaltaehkäisevät toimenpiteet, kuten tukiopetusta tai perheiden tukemista. Työnkulku tulisi dokumentoida tarkasti, jotta kaikki osapuolet tietävät, mitä toimenpiteitä on tehtävä.\n\n4. **Dokumentaatio**: Kaikki prosessit, päätökset ja toimenpiteet tulisi dokumentoida huolellisesti. Tämä tarkoittaa oppilaiden läsnäolotietojen, suoritusten ja mahdollisten tukitoimien kirjaamista. Dokumentaatio ei ainoastaan helpota seurantaa, vaan se myös mahdollistaa tietojen analysoinnin, mikä voi johtaa jatkuvaan parantamiseen.\n\n5. **Vastuu ja seuranta**: Koulupudokkuuden ehkäisyyn liittyvissä toimissa on tärkeää, että vastuulliset tahot seuraavat edistymistä säännöllisesti. Tämä voi tarkoittaa kuukausittaisia tai neljännesvuosittaisia raportteja, joissa arvioidaan toimenpiteiden tehokkuutta ja oppilaiden tilannetta. Tarvittaessa prosessia ja toimintatapoja tulisi muuttaa, jotta saadaan aikaan parempia tuloksia.\n\nYhteenvetona, koulupudokkuuden ratkaiseminen São Paulossa edellyttää selkeää sääntöjen ja auktoriteettien järjestelmää, vastuullisten toimijoiden määrittelyä, tehokasta prosessia ja dokumentointia sekä jatkuvaa seurantaa ja vastuuta. Tällainen järjestelmällinen lähestymistapa voi auttaa ehkäisemään koulupudokkuutta ja tukemaan oppilaiden koulutietä.",
+      "model": "openai/gpt-4o-mini",
+      "latency_ms": 12939,
+      "error": null
+    },
+    {
+      "agent_key": "montessori",
+      "slot": "agent_3",
+      "agent_number": 3,
+      "agent_label": "Agent 3",
+      "agent_name": "Montessori Agent",
+      "title": "Self-Directed Learning Builder",
+      "theory": "Maria Montessori — prepared environment, learner autonomy, observation, and concrete activity",
+      "color": "#15803d",
+      "response": "Koulupudokkuuden ratkaiseminen São Paulossa vaatii kattavaa lähestymistapaa, joka perustuu Maria Montessorin pedagogisiin periaatteisiin. Tässä on ehdotuksia, jotka keskittyvät oppimisympäristöön, opiskelijoiden autonomiaan, käytännön aktiviteetteihin, pieniin askeliin sekä itseluottamuksen ja merkityksellisen oppimisen edistämiseen.\n\n1. **Oppimisympäristö**: On tärkeää luoda oppimisympäristö, joka on turvallinen ja kutsuva. Tämä tarkoittaa, että koulutilat tulisi suunnitella niin, että ne tukevat oppijoiden aktiivista osallistumista. Voidaan esimerkiksi luoda erillisiä oppimisalueita, joissa on erilaisia materiaaleja ja välineitä, jotka innostavat oppilaita tutkimaan ja oppimaan omalla tavallaan. Valaistus, värit ja järjestys vaikuttavat myös oppilaiden hyvinvointiin—ne tulisi valita niin, että ne tukevat rauhallista ja keskittynyttä oppimisympäristöä.\n\n2. **Opiskelijoiden autonomia**: Oppilaiden tulisi saada mahdollisuus valita omat oppimistavoitteensa ja -tapahtumansa. Tämä voidaan toteuttaa antamalla heille mahdollisuus valita projekteja, jotka kiinnostavat heitä, tai tarjoamalla vaihtoehtoja oppimisaktiviteeteissa. Oppilaat voivat myös osallistua päätöksentekoon koulun säännöistä ja käytännöistä, mikä lisää heidän sitoutumistaan ja vastuuntuntoaan.\n\n3. **Käytännön aktiviteetit**: Oppiminen tulisi liittää käytännön elämään. Esimerkiksi, koulussa voisi järjestää työpajoja, joissa oppilaat oppivat käytännön taitoja, kuten ruoanlaittoa, puutarhanhoitoa tai käsitöitä. Tällaiset aktiviteetit tekevät oppimisesta merkityksellistä ja auttavat oppilaita ymmärtämään oppimisen käytännön sovelluksia.\n\n4. **Pienet askeleet**: Oppimisen tulisi tapahtua pienin askelin, jotta oppilaat voivat edetä omaan tahtiinsa. Tämä tarkoittaa, että oppimistehtäviä tulisi jakaa pienempiin osiin, jotka ovat saavutettavissa. Opettajat voivat tukea oppilaita antamalla heille jatkuvaa palautetta ja rohkaisua, mikä auttaa heitä kehittämään taitojaan askel askeleelta.\n\n5. **Itseluottamus ja merkityksellinen oppiminen**: On tärkeää, että oppilaat tuntevat itsensä kykeneviksi ja arvostetuiksi. Opettajien tulisi keskittyä oppilaiden vahvuuksiin ja kannustaa heitä omassa oppimisprosessissaan. Merkitsevät oppimiskokemukset, kuten onnistumisen hetket ja yhteisölliset projektit, voivat lisätä oppilaiden itseluottamusta ja motivaatiota jatkaa koulunkäyntiä.\n\nYhteenvetona, koulupudokkuuden vähentämiseksi São Paulossa on tärkeää luoda ympäristö, joka tukee oppilaiden itsenäisyyttä ja aktiivista osallistumista. Käytännön aktiviteetit, pienet oppimisaskelmat ja oppilaiden itseluottamuksen vahvistaminen ovat keskeisiä tekijöitä, jotka auttavat oppilaita löytämään merkityksellisen polun oppimiseen ja koulunkäyntiin.",
+      "model": "openai/gpt-4o-mini",
+      "latency_ms": 10634,
+      "error": null
+    },
+    {
+      "agent_key": "rogers",
+      "slot": "agent_4",
+      "agent_number": 4,
+      "agent_label": "Agent 4",
+      "agent_name": "Rogers Agent",
+      "title": "Innovation Diffusion Agent",
+      "theory": "Everett Rogers — diffusion of innovations, adoption, pilots, and scaling",
+      "color": "#7c3aed",
+      "response": "Koulupudokkuuden ratkaiseminen São Paulossa voidaan nähdä laajana prosessina, joka hyödyntää Everett Rogersin innovaatioiden diffuusiomallia. Tässä on ehdotus, joka keskittyy keskeisiin osa-alueisiin:\n\n1. **Varhaiset omaksujat**: Varhaisten omaksujien tunnistaminen on tärkeää, sillä he voivat toimia esimerkkeinä ja vaikuttajina muille. São Paulossa varhaisia omaksujia voisivat olla innovaatiomyönteiset opettajat, koulun johtajat, paikalliset järjestöt ja nuorisotyöntekijät. Heidän sitouttamisensa ja osallistamisensa projektiin voi luoda innostusta ja luottamusta ratkaisun ympärille.\n\n2. **Esteet omaksumiselle**: Koulupudokkuuden vähentämisessä voi olla useita esteitä, kuten resurssien puute, koulun infrastruktuurin heikkous sekä perheiden ja yhteisöjen asenteet koulutukseen. On tärkeää kartoittaa nämä esteet ja kehittää ratkaisuja niiden voittamiseksi. Esimerkiksi paikallisten organisaatioiden kanssa yhteistyössä voidaan tarjota taloudellista ja emotionaalista tukea perheille.\n\n3. **Viestintäkanavat**: Tehokas viestintä on avainasemassa ratkaisun leviämisessä. Käyttämällä monia viestintäkanavia, kuten sosiaalista mediaa, paikallisia uutiskanavia, vanhempainiltoja ja yhteisötapahtumia, voidaan levittää tietoa ja innostusta ohjelmasta. On tärkeää, että viestintä on selkeää ja helposti ymmärrettävää, ja että se tavoittaa sekä nuoret että heidän vanhempansa.\n\n4. **Pienet pilotit**: Ensimmäinen askel on toteuttaa pieniä pilottihankkeita, jotka keskittyvät erilaisiin lähestymistapoihin koulupudokkuuden vähentämiseksi. Esimerkiksi voitaisiin kokeilla mentorointiohjelmia, joissa vanhemmat opiskelijat tukevat nuorempia, tai tarjota erityisiä tukiohjelmia niille, jotka ovat vaarassa pudota koulusta. Nämä pilottihankkeet voivat toimia testialustana, joka mahdollistaa käytännön kokemusten keräämisen ja mallien kehittämisen.\n\n5. **Laajentaminen ja kestävyys**: Kun pilottihankkeet ovat näyttäneet toimivuutensa, niiden tuloksia voidaan jakaa laajemmin. Tämän yhteydessä on tärkeää kehittää strategioita, joiden avulla ohjelmat voivat laajentua muihin kouluihin ja alueisiin. Tuki paikallisilta hallituksilta, koulujen johdolta ja yhteisöiltä on ratkaisevaa. Lisäksi on tärkeää varmistaa, että ohjelmat ovat taloudellisesti kestäviä pitkällä aikavälillä, mikä voi tarkoittaa rahoituksen hankkimista tai yhteistyötä yksityisen sektorin kanssa.\n\nYhteenvetona, koulupudokkuuden vähentäminen São Paulossa vaatii strategista lähestymistapaa, jossa hyödynnetään varhaisia omaksujia, tunnistetaan esteitä, käytetään monipuolisia viestintäkanavia, kokeillaan pieniä pilotteja ja suunnitellaan laajentamista ja kestävyyttä. Näin voidaan luoda tehokas malli, joka auttaa nuoria pysymään koulussa ja saavuttamaan heidän täyden potentiaalinsa.",
+      "model": "openai/gpt-4o-mini",
+      "latency_ms": 11798,
+      "error": null
+    }
+  ]
+}

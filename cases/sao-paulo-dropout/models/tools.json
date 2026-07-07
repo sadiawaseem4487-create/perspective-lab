@@ -1,0 +1,28 @@
+{
+  "description": "Tools and capabilities available in this system.",
+  "llm": {
+    "enabled": true,
+    "provider_setting": "LLM_PROVIDER in backend/.env (openrouter or openai)",
+    "api_key_setting": "OPENROUTER_API_KEY or OPENAI_API_KEY in backend/.env"
+  },
+  "database": {
+    "enabled": true,
+    "type": "sqlite",
+    "purpose": "Stores all questions and agent responses for research comparison"
+  },
+  "export": {
+    "enabled": true,
+    "formats": ["csv", "json"],
+    "purpose": "Download research data for comparison with human answers"
+  },
+  "rate_limiting": {
+    "enabled": true,
+    "default": "10 questions per minute",
+    "setting": "RATE_LIMIT_ASK in backend/.env"
+  },
+  "presentation_mode": {
+    "enabled": true,
+    "url": "/present",
+    "purpose": "Audience view — shows Agent 1, 2, 3, 4 without theory names"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "description": "Human answers to the same questions — for comparison with AI agent solutions.",
+  "instructions": "After agents answer in Stage 3, collect answers from people (experts, teachers, researchers) to the SAME question. Enter them in Stage 5 Compare.",
+  "respondents": []
+}

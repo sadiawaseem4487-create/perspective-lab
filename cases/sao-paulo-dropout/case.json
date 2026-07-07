@@ -1,0 +1,21 @@
+{
+  "id": "sao-paulo-dropout",
+  "title": "School Dropout in São Paulo",
+  "research_question": "How do we solve school dropout in São Paulo?",
+  "languages": ["en", "fi", "pt"],
+  "researchers": ["Sanni Pöntinen", "Sadia Bibi", "Jari Stenvall"],
+  "workflow": {
+    "default_mode": "parallel",
+    "modes": ["parallel", "sequential"],
+    "slot_count": 4,
+    "default_agents": ["freire", "weber", "montessori", "rogers"]
+  },
+  "theme": "research-warm",
+  "directories": {
+    "agents": "agents",
+    "models": "models",
+    "questions": "questions",
+    "reports": "reports",
+    "human_answers": "human_answers"
+  }
+}

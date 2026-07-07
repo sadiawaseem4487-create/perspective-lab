@@ -1,0 +1,10 @@
+{
+  "key": "montessori",
+  "agent_number": 3,
+  "agent_label": "Agent 3",
+  "name": "Montessori Agent",
+  "title": "Self-Directed Learning Builder",
+  "theory": "Maria Montessori — prepared environment, learner activity",
+  "color": "#15803d",
+  "instructions_file": "instructions.txt"
+}

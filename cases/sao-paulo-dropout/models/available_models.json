@@ -1,0 +1,42 @@
+{
+  "description": "Available LLM models for this project. Set OPENAI_MODEL in backend/.env to the model id you want to use.",
+  "default_model": "openai/gpt-4o-mini",
+  "provider": "openrouter",
+  "models": [
+    {
+      "id": "openai/gpt-4o-mini",
+      "name": "GPT-4o Mini",
+      "provider": "OpenAI via OpenRouter",
+      "recommended": true,
+      "notes": "Fast and cost-effective — good for presentations and research"
+    },
+    {
+      "id": "openai/gpt-4o",
+      "name": "GPT-4o",
+      "provider": "OpenAI via OpenRouter",
+      "recommended": false,
+      "notes": "Higher quality, higher cost"
+    },
+    {
+      "id": "anthropic/claude-3.5-sonnet",
+      "name": "Claude 3.5 Sonnet",
+      "provider": "Anthropic via OpenRouter",
+      "recommended": false,
+      "notes": "Strong reasoning for complex analysis"
+    },
+    {
+      "id": "google/gemini-2.0-flash-001",
+      "name": "Gemini 2.0 Flash",
+      "provider": "Google via OpenRouter",
+      "recommended": false,
+      "notes": "Fast alternative model"
+    },
+    {
+      "id": "meta-llama/llama-3.1-70b-instruct",
+      "name": "Llama 3.1 70B",
+      "provider": "Meta via OpenRouter",
+      "recommended": false,
+      "notes": "Open-weight model option"
+    }
+  ]
+}
