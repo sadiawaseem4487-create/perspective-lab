@@ -143,6 +143,27 @@ class AskResponse(BaseModel):
     workflow_mode: str
 
 
+class SequentialStartRequest(BaseModel):
+    question: str = Field(..., min_length=5, max_length=2000)
+    model: Optional[str] = None
+    language: Optional[str] = Field(default="en", pattern="^(en|pt|fi)$")
+
+
+class SequentialAdvanceRequest(BaseModel):
+    human_note: str = Field(default="", max_length=2000)
+    approved: bool = True
+
+
+def _question_with_language(question: str, lang: str) -> str:
+    lang_names = {"en": "English", "pt": "Brazilian Portuguese", "fi": "Finnish"}
+    lang_label = lang_names.get(lang, "English")
+    return (
+        f"{question}\n\n"
+        f"IMPORTANT: Respond entirely in {lang_label}. "
+        f"Do not mix languages. Use English section titles only as specified in your instructions."
+    )
+
+
 def require_export_key(x_export_key: str = Header(default="")) -> None:
     if not settings.export_api_key:
         return
@@ -323,6 +344,64 @@ async def save_human(session_id: int, body: HumanAnswersRequest):
     return saved
 
 
+@app.post("/api/sequential/start")
+@limiter.limit(settings.rate_limit_ask)
+async def sequential_start(request: Request, body: SequentialStartRequest):
+    if not settings.llm_configured:
+        raise HTTPException(status_code=503, detail="LLM API key not configured.")
+
+    from application.sequential_hitl import start_sequential_hitl
+
+    question = _question_with_language(body.question.strip(), body.language or "en")
+    model = body.model or get_selected_model()
+    try:
+        return await start_sequential_hitl(question, model=model, language=body.language or "en")
+    except Exception as exc:
+        logger.exception("Sequential start failed")
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.get("/api/sequential/{run_id}")
+async def sequential_status(run_id: int):
+    from application.sequential_hitl import serialize_run
+    from database import get_sequential_run
+
+    row = get_sequential_run(run_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Sequential run not found")
+    return serialize_run(row)
+
+
+@app.post("/api/sequential/{run_id}/advance")
+@limiter.limit(settings.rate_limit_ask)
+async def sequential_advance(request: Request, run_id: int, body: SequentialAdvanceRequest):
+    if not settings.llm_configured:
+        raise HTTPException(status_code=503, detail="LLM API key not configured.")
+
+    from application.sequential_hitl import advance_sequential_hitl
+
+    try:
+        return await advance_sequential_hitl(run_id, human_note=body.human_note, approved=body.approved)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.exception("Sequential advance failed for run %s", run_id)
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.post("/api/sequential/{run_id}/finalize")
+async def sequential_finalize(run_id: int, body: SequentialAdvanceRequest):
+    from application.sequential_hitl import finalize_sequential_hitl
+
+    try:
+        return await finalize_sequential_hitl(run_id, human_note=body.human_note, approved=body.approved)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.exception("Sequential finalize failed for run %s", run_id)
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
 @app.post("/api/ask", response_model=AskResponse)
 @limiter.limit(settings.rate_limit_ask)
 async def ask_question(
@@ -343,13 +422,7 @@ async def ask_question(
     question = body.question.strip()
     model = body.model or get_selected_model()
     lang = body.language or "en"
-    lang_names = {"en": "English", "pt": "Brazilian Portuguese", "fi": "Finnish"}
-    lang_label = lang_names.get(lang, "English")
-    question_with_lang = (
-        f"{question}\n\n"
-        f"IMPORTANT: Respond entirely in {lang_label}. "
-        f"Do not mix languages. Use English section titles only as specified in your instructions."
-    )
+    question_with_lang = _question_with_language(question, lang)
     logger.info(
         "New question received (%d chars) model=%s lang=%s mode=%s",
         len(question),

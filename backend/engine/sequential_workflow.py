@@ -99,3 +99,24 @@ async def run_sequential_workflow(question: str, model: Optional[str] = None) ->
         }
     )
     return list(result.get("responses", []))
+
+
+async def run_single_sequential_stage(
+    question: str,
+    vaihe: int,
+    stage_outputs: Optional[Dict[str, str]] = None,
+    model: Optional[str] = None,
+) -> dict:
+    """Run one Vaihe (1–4) for human-in-the-loop sequential mode."""
+    if vaihe < 1 or vaihe > len(SEQUENTIAL_STAGES):
+        raise ValueError(f"vaihe must be 1–{len(SEQUENTIAL_STAGES)}")
+
+    agent_id, slot_number, stage_role = SEQUENTIAL_STAGES[vaihe - 1]
+    state: SequentialState = {
+        "question": question,
+        "model": model,
+        "stage_outputs": stage_outputs or {},
+        "responses": [],
+    }
+    result = await _run_stage(state, agent_id, slot_number, stage_role)
+    return result["responses"][0]
