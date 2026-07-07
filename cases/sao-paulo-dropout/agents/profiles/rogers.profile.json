@@ -23,5 +23,16 @@
     "Pilot design",
     "Scaling roadmap",
     "Theory link"
-  ]
+  ],
+  "output_schema": {
+    "format": "theory_native",
+    "section_titles": [
+      "Adoption barriers and enablers",
+      "Pilot design",
+      "Scaling roadmap",
+      "Theory link"
+    ],
+    "solution_type": "Pilot and diffusion strategy",
+    "primary_stakeholder": "Pilot school leaders and peer schools"
+  }
 }

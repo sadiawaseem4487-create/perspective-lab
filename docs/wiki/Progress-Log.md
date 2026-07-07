@@ -4,7 +4,8 @@ Newest entries at the top.
 
 | Date | Sprint | Event |
 |------|--------|-------|
-| 2026-07-07 | 2 | LangGraph parallel workflow, theory profiles, `workflow_mode` in SQLite. |
+| 2026-07-07 | 3 | Theory-native outputs, self-check metadata, comparison matrix API. |
+| 2026-07-07 | 2 | Merged PR #1 — LangGraph parallel workflow. |
 | 2026-07-07 | — | CI pipeline approved (CI-only); GitHub Actions workflow added. |
 | 2026-07-07 | 1 | Sprint 1 closed: docs updated, E2E workflow verified (session 17), `make test` 27/27. |
 | 2026-07-07 | 1 | Test plan + pytest suite (`make test`); fixed `CaseRepository.clear_cache` write bug. |

@@ -5,10 +5,10 @@ from typing import Optional
 
 from openai import APITimeoutError, AsyncOpenAI, RateLimitError
 
-from agents.output_format import OUTPUT_FORMAT_INSTRUCTIONS
 from agents.prompts import AGENT_DEFINITIONS
 from config import get_settings
 from application import SLOT_ORDER, get_slot_assignments, load_agents_catalog
+from engine.output_formats import get_output_instructions_for_agent
 from engine.profiles import format_profile_instructions
 
 logger = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ async def ask_agent_slot(
     profile_block = format_profile_instructions(agent_id)
     if profile_block:
         prompt = f"{prompt}\n\n{profile_block}"
-    full_prompt = f"{prompt}\n\n{OUTPUT_FORMAT_INSTRUCTIONS}"
+    full_prompt = f"{prompt}\n\n{get_output_instructions_for_agent(agent_id)}"
 
     for attempt in range(settings.openai_max_retries + 1):
         try:
