@@ -120,6 +120,11 @@ export async function fetchComparison(sessionId) {
   return parseResponse(res);
 }
 
+export async function fetchComparisonMatrix(sessionId) {
+  const res = await fetch(`${API}/comparison/${sessionId}/matrix`);
+  return parseResponse(res);
+}
+
 export async function saveHumanAnswers(sessionId, respondents) {
   const res = await fetch(`${API}/comparison/${sessionId}/human`, {
     method: "POST",

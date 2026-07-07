@@ -4,6 +4,7 @@ Newest entries at the top.
 
 | Date | Sprint | Event |
 |------|--------|-------|
+| 2026-07-07 | 6 | Sprint 6 started: shadcn shell, PerspectiveLab sidebar, comparison matrix page. |
 | 2026-07-07 | 5 | Sequential UI + HITL: workflow toggle, timeline, `/api/sequential/*` endpoints. |
 | 2026-07-07 | 4 | Sequential LangGraph chain (Vaihe 1–4), `/api/ask?mode=sequential`. |
 | 2026-07-07 | 3 | Merged PR #2 — theory-native outputs, comparison matrix API. |

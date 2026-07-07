@@ -1,5 +1,5 @@
 {
-  "description": "Research questions in multiple languages.",
+  "description": "Research and demo questions in multiple languages.",
   "main_question": {
     "en": "How do we solve school dropout in São Paulo?",
     "pt": "Como resolvemos a evasão escolar em São Paulo?",
@@ -8,6 +8,7 @@
   "questions": [
     {
       "id": "q1",
+      "category": "problem_solving",
       "label": { "en": "Main research question", "pt": "Pergunta principal", "fi": "Pääkysymys" },
       "text": {
         "en": "How do we solve school dropout in São Paulo?",
@@ -17,11 +18,62 @@
     },
     {
       "id": "q2",
-      "label": { "en": "Understanding causes", "pt": "Entender causas", "fi": "Syiden ymmärtäminen" },
+      "category": "diagnosis",
+      "label": { "en": "Root causes", "pt": "Causas principais", "fi": "Juurisyyt" },
       "text": {
         "en": "What are the main reasons young people drop out of school in São Paulo?",
         "pt": "Quais são as principais razões para jovens abandonarem a escola em São Paulo?",
         "fi": "Mitkä ovat tärkeimmät syyt nuorten koulupudokkuuteen São Paulossa?"
+      }
+    },
+    {
+      "id": "q3",
+      "category": "policy",
+      "label": { "en": "Municipal coordination", "pt": "Coordenação municipal", "fi": "Kunnallinen koordinointi" },
+      "text": {
+        "en": "How should São Paulo's municipal education department coordinate schools, families, and social services to reduce dropout?",
+        "pt": "Como a secretaria municipal de educação de São Paulo deve coordenar escolas, famílias e serviços sociais para reduzir a evasão?",
+        "fi": "Miten São Paulon koulutusviraston tulisi koordinoida kouluja, perheitä ja sosiaalipalveluja pudokkuuden vähentämiseksi?"
+      }
+    },
+    {
+      "id": "q4",
+      "category": "pedagogy",
+      "label": { "en": "School-day redesign", "pt": "Redesenho do dia escolar", "fi": "Koulupäivän uudistus" },
+      "text": {
+        "en": "How can a typical public school in São Paulo redesign the school day so students at risk of dropping out stay engaged?",
+        "pt": "Como uma escola pública típica em São Paulo pode redesenhar o dia escolar para manter engajados os alunos em risco de evasão?",
+        "fi": "Miten tavallinen São Paulon julkinen koulu voi uudistaa koulupäivän niin, että pudokkuusuhan alaiset oppilaat pysyvät mukana?"
+      }
+    },
+    {
+      "id": "q5",
+      "category": "scaling",
+      "label": { "en": "Scale a pilot", "pt": "Escalar um piloto", "fi": "Pilottihankkeen laajennus" },
+      "text": {
+        "en": "A pilot program reduced dropout in 12 São Paulo schools. How should the city scale it to 500 schools without losing quality?",
+        "pt": "Um programa piloto reduziu a evasão em 12 escolas de São Paulo. Como a cidade deve escalá-lo para 500 escolas sem perder qualidade?",
+        "fi": "Pilottiohjelma vähensi pudokkuutta 12 São Paulon koulussa. Miten kaupunki voi laajentaa sen 500 kouluun laadusta tinkimättä?"
+      }
+    },
+    {
+      "id": "q6",
+      "category": "stakeholders",
+      "label": { "en": "Student voice", "pt": "Voz dos estudantes", "fi": "Opiskelijoiden ääni" },
+      "text": {
+        "en": "How do we bring students and families into dropout prevention decisions in São Paulo's public schools?",
+        "pt": "Como incluímos estudantes e famílias nas decisões de prevenção à evasão nas escolas públicas de São Paulo?",
+        "fi": "Miten saamme oppilaat ja perheet mukaan pudokkuuden ehkäisyä koskeviin päätöksiin São Paulon julkisissa kouluissa?"
+      }
+    },
+    {
+      "id": "q7",
+      "category": "quick_test",
+      "label": { "en": "One-semester action", "pt": "Ação em um semestre", "fi": "Toimenpide yhdeksi lukukaudeksi" },
+      "text": {
+        "en": "What is one actionable step to reduce school dropout in São Paulo this semester?",
+        "pt": "Qual é uma ação prática para reduzir a evasão escolar em São Paulo neste semestre?",
+        "fi": "Mikä on yksi konkreettinen askel koulupudokkuuden vähentämiseksi São Paulossa tällä lukukaudella?"
       }
     }
   ]
