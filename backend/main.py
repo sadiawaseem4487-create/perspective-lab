@@ -110,6 +110,7 @@ class AskRequest(BaseModel):
     question: str = Field(..., min_length=5, max_length=2000)
     model: Optional[str] = None
     language: Optional[str] = Field(default="en", pattern="^(en|pt|fi)$")
+    mode: Optional[str] = Field(default="parallel", pattern="^(parallel|sequential)$")
 
 
 class ModelSelectRequest(BaseModel):
@@ -138,6 +139,7 @@ class AskResponse(BaseModel):
     session_id: int
     question: str
     responses: list
+    workflow_mode: str
 
 
 def require_export_key(x_export_key: str = Header(default="")) -> None:
@@ -304,11 +306,24 @@ async def save_human(session_id: int, body: HumanAnswersRequest):
 
 @app.post("/api/ask", response_model=AskResponse)
 @limiter.limit(settings.rate_limit_ask)
-async def ask_question(request: Request, body: AskRequest):
+async def ask_question(
+    request: Request,
+    body: AskRequest,
+    mode: Optional[str] = None,
+):
     if not settings.llm_configured:
         raise HTTPException(
             status_code=503,
             detail="LLM API key not configured. Add OPENROUTER_API_KEY or OPENAI_API_KEY to backend/.env",
+        )
+
+    workflow_mode = (mode or body.mode or "parallel").strip().lower()
+    if workflow_mode not in ("parallel", "sequential"):
+        raise HTTPException(status_code=422, detail="mode must be parallel or sequential")
+    if workflow_mode == "sequential":
+        raise HTTPException(
+            status_code=501,
+            detail="Sequential workflow is not implemented yet (Sprint 4).",
         )
 
     question = body.question.strip()
@@ -321,8 +336,14 @@ async def ask_question(request: Request, body: AskRequest):
         f"IMPORTANT: Respond entirely in {lang_label}. "
         f"Do not mix languages. Use English section titles only as specified in your instructions."
     )
-    logger.info("New question received (%d chars) model=%s lang=%s", len(question), model, lang)
-    responses = await ask_all_agents(question_with_lang, model=model)
+    logger.info(
+        "New question received (%d chars) model=%s lang=%s mode=%s",
+        len(question),
+        model,
+        lang,
+        workflow_mode,
+    )
+    responses = await ask_all_agents(question_with_lang, model=model, mode=workflow_mode)
 
     failed = [r for r in responses if r.get("error")]
     if len(failed) == len(responses):
@@ -331,7 +352,7 @@ async def ask_question(request: Request, body: AskRequest):
             detail="All agents failed to respond. Check logs and OpenAI configuration.",
         )
 
-    session_id = save_session(question, responses)
+    session_id = save_session(question, responses, workflow_mode=workflow_mode)
     session = get_session(session_id)
     save_report(
         {
@@ -339,11 +360,22 @@ async def ask_question(request: Request, body: AskRequest):
             "question": question,
             "created_at": session["created_at"],
             "model": model,
+            "workflow_mode": workflow_mode,
             "responses": responses,
         }
     )
-    logger.info("Session %s saved with %d agent responses", session_id, len(responses))
-    return AskResponse(session_id=session_id, question=question, responses=responses)
+    logger.info(
+        "Session %s saved with %d agent responses (mode=%s)",
+        session_id,
+        len(responses),
+        workflow_mode,
+    )
+    return AskResponse(
+        session_id=session_id,
+        question=question,
+        responses=responses,
+        workflow_mode=workflow_mode,
+    )
 
 
 @app.get("/api/sessions")

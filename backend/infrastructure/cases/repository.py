@@ -302,6 +302,7 @@ class CaseRepository:
             "case_id": self.case_id,
             "question": session["question"],
             "model": session.get("model", self.get_selected_model()),
+            "workflow_mode": session.get("workflow_mode", "parallel"),
             "created_at": session.get("created_at") or datetime.now(timezone.utc).isoformat(),
             "summary": {
                 "total_agents": len(session.get("responses", [])),
@@ -379,6 +380,20 @@ class CaseRepository:
         if self.paths.tools_config.is_file():
             return _read_json(self.paths.tools_config)
         return {}
+
+    def load_theory_profile(self, agent_id: str) -> Optional[dict]:
+        path = self.paths.profiles_dir / f"{agent_id}.profile.json"
+        if path.is_file():
+            return _read_json(path)
+        return None
+
+    def list_theory_profiles(self) -> List[dict]:
+        if not self.paths.profiles_dir.is_dir():
+            return []
+        profiles = []
+        for path in sorted(self.paths.profiles_dir.glob("*.profile.json")):
+            profiles.append(_read_json(path))
+        return profiles
 
 
 _repo: Optional[CaseRepository] = None

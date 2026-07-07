@@ -28,7 +28,8 @@ Welcome to the project wiki. This is the single source of truth for architecture
 | Field | Value |
 |-------|-------|
 | **Product** | PerspectiveLab |
-| **Current sprint** | [Sprint 2 — LangGraph](Sprints/Sprint-02-LangGraph.md) |
+| **Current sprint** | [Sprint 3 — Outputs](Sprints/Sprint-03-Outputs.md) |
+| **Sprint 2 status** | 🟩 Complete (PR pending) |
 | **Sprint 1 status** | 🟩 Complete |
 | **Last updated** | 2026-07-07 |
 

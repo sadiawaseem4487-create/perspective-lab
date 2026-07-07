@@ -9,6 +9,7 @@ from agents.output_format import OUTPUT_FORMAT_INSTRUCTIONS
 from agents.prompts import AGENT_DEFINITIONS
 from config import get_settings
 from application import SLOT_ORDER, get_slot_assignments, load_agents_catalog
+from engine.profiles import format_profile_instructions
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +58,9 @@ async def ask_agent_slot(
     started = time.perf_counter()
     active_model = model or settings.llm_model
     prompt = agent.get("system_prompt") or agent.get("prompt", "")
+    profile_block = format_profile_instructions(agent_id)
+    if profile_block:
+        prompt = f"{prompt}\n\n{profile_block}"
     full_prompt = f"{prompt}\n\n{OUTPUT_FORMAT_INSTRUCTIONS}"
 
     for attempt in range(settings.openai_max_retries + 1):
@@ -110,10 +114,13 @@ def _error_response(
     }
 
 
-async def ask_all_agents(question: str, model: Optional[str] = None) -> list:
-    assignments = get_slot_assignments()
-    tasks = [
-        ask_agent_slot(index, assignments[slot], question, model)
-        for index, slot in enumerate(SLOT_ORDER, start=1)
-    ]
-    return list(await asyncio.gather(*tasks))
+async def ask_all_agents(
+    question: str,
+    model: Optional[str] = None,
+    mode: str = "parallel",
+) -> list:
+    if mode == "parallel":
+        from engine.parallel_workflow import run_parallel_workflow
+
+        return await run_parallel_workflow(question, model=model)
+    raise NotImplementedError("Sequential workflow is planned for Sprint 4.")
