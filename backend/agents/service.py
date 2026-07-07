@@ -123,4 +123,8 @@ async def ask_all_agents(
         from engine.parallel_workflow import run_parallel_workflow
 
         return await run_parallel_workflow(question, model=model)
-    raise NotImplementedError("Sequential workflow is planned for Sprint 4.")
+    if mode == "sequential":
+        from engine.sequential_workflow import run_sequential_workflow
+
+        return await run_sequential_workflow(question, model=model)
+    raise ValueError(f"Unknown workflow mode: {mode}")

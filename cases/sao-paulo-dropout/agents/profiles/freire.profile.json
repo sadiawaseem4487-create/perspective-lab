@@ -34,5 +34,11 @@
     ],
     "solution_type": "Participatory community action",
     "primary_stakeholder": "Students, families, and community groups"
+  },
+  "sequential_stage": {
+    "vaihe": 1,
+    "role": "problem_map",
+    "deliverable": "Problem map",
+    "task": "VAIHE 1 — Map missing voices, power relations, and participatory problem framing."
   }
 }

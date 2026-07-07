@@ -28,8 +28,8 @@ Welcome to the project wiki. This is the single source of truth for architecture
 | Field | Value |
 |-------|-------|
 | **Product** | PerspectiveLab |
-| **Current sprint** | [Sprint 4 — Sequential](Sprints/Sprint-04-Sequential.md) |
-| **Sprint 3 status** | 🟩 Complete (PR pending) |
+| **Current sprint** | [Sprint 5 — Sequential UI](Sprints/Sprint-05-Sequential-UI.md) |
+| **Sprint 4 status** | 🟩 Complete (PR pending) |
 | **Sprint 1 status** | 🟩 Complete |
 | **Last updated** | 2026-07-07 |
 

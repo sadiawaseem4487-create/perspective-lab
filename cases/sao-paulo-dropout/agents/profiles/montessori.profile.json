@@ -34,5 +34,11 @@
     ],
     "solution_type": "Learning environment redesign",
     "primary_stakeholder": "Teachers and students in the classroom"
+  },
+  "sequential_stage": {
+    "vaihe": 3,
+    "role": "school_day_redesign",
+    "deliverable": "School-day learning redesign",
+    "task": "VAIHE 3 — Redesign the school-day environment using insights from prior stages."
   }
 }

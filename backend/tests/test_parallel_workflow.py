@@ -151,17 +151,3 @@ def test_ask_parallel_mode_with_llm(client, monkeypatch):
     assert mock_ask.await_args.kwargs["mode"] == "parallel"
     assert response.json()["workflow_mode"] == "parallel"
 
-
-def test_ask_sequential_mode_not_implemented(client, monkeypatch):
-    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
-    from config import get_settings
-    import main
-
-    get_settings.cache_clear()
-    main.settings = get_settings()
-
-    response = client.post(
-        "/api/ask?mode=sequential",
-        json={"question": "How can we reduce school dropout in São Paulo?"},
-    )
-    assert response.status_code == 501
