@@ -28,6 +28,18 @@ export const translations = {
       session: "Session",
       openReport: "Open report",
     },
+    roundtable: {
+      questionLabel: "Research question",
+      run: "Ask agents",
+      running: "Agents thinking…",
+      insights: "Pinned insights",
+      demoPrompt: "Try a demo question…",
+      mode: {
+        parallel: "Parallel",
+        sequential: "Chain",
+        sequential_hitl: "Chain + review",
+      },
+    },
     nav: {
       agents: "Agents",
       models: "Models",
@@ -191,6 +203,18 @@ export const translations = {
       session: "Sessão",
       openReport: "Abrir relatório",
     },
+    roundtable: {
+      questionLabel: "Pergunta de pesquisa",
+      run: "Perguntar aos agentes",
+      running: "Agentes pensando…",
+      insights: "Insights fixados",
+      demoPrompt: "Experimente uma pergunta demo…",
+      mode: {
+        parallel: "Paralelo",
+        sequential: "Cadeia",
+        sequential_hitl: "Cadeia + revisão",
+      },
+    },
     nav: {
       agents: "Agentes",
       models: "Modelos",
@@ -353,6 +377,18 @@ export const translations = {
       matrixDesc: "Rakenteinen vertailu teoriadimensioittain tutkimusistunnolle.",
       session: "Istunto",
       openReport: "Avaa raportti",
+    },
+    roundtable: {
+      questionLabel: "Tutkimuskysymys",
+      run: "Kysy agenteilta",
+      running: "Agentit ajattelevat…",
+      insights: "Kiinnitetyt oivallukset",
+      demoPrompt: "Kokeile demokysymystä…",
+      mode: {
+        parallel: "Rinnakkain",
+        sequential: "Ketju",
+        sequential_hitl: "Ketju + tarkistus",
+      },
     },
     nav: {
       agents: "Agentit",

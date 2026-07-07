@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   Cpu,
   FileText,
@@ -39,6 +39,8 @@ function NavItem({ to, icon: Icon, label, end = false }) {
 
 export default function AppShell() {
   const { t } = useLanguage();
+  const location = useLocation();
+  const isWorkspace = location.pathname === "/question";
   const [caseInfo, setCaseInfo] = useState(null);
 
   useEffect(() => {
@@ -107,25 +109,27 @@ export default function AppShell() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="border-b bg-card px-6 py-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              {caseInfo && (
-                <Badge variant="secondary" className="mb-2 font-normal">
-                  {t("shell.case")}: {caseInfo.title || caseInfo.id}
-                </Badge>
+        {!isWorkspace && (
+          <header className="border-b bg-card px-6 py-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                {caseInfo && (
+                  <Badge variant="secondary" className="mb-2 font-normal">
+                    {t("shell.case")}: {caseInfo.title || caseInfo.id}
+                  </Badge>
+                )}
+                <p className="text-sm text-muted-foreground">{t("app.workflow")}</p>
+              </div>
+              {caseInfo?.id && (
+                <code className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
+                  cases/{caseInfo.id}
+                </code>
               )}
-              <p className="text-sm text-muted-foreground">{t("app.workflow")}</p>
             </div>
-            {caseInfo?.id && (
-              <code className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
-                cases/{caseInfo.id}
-              </code>
-            )}
-          </div>
-        </header>
+          </header>
+        )}
 
-        <main className="flex-1 px-6 py-8">
+        <main className={isWorkspace ? "flex-1 bg-muted/20" : "flex-1 px-6 py-8"}>
           <Outlet />
         </main>
       </div>

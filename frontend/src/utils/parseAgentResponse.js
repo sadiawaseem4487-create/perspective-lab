@@ -7,6 +7,16 @@ const SECTION_TITLES = [
   "Risks and Limitations",
   "Success Indicators",
   "Final Recommendation",
+  "Participatory action plan",
+  "Administrative model",
+  "Procedure and accountability plan",
+  "School-day learning plan",
+  "Autonomy and activity redesign",
+  "Pilot design",
+  "Scaling roadmap",
+  "Environment diagnosis",
+  "Theory link",
+  "Missing voices",
 ];
 
 const CANONICAL_TITLES = {

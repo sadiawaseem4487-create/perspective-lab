@@ -8,46 +8,29 @@ const CATEGORY_ORDER = [
   "stakeholders",
 ];
 
-function groupByCategory(questions) {
-  const grouped = {};
-  for (const item of questions || []) {
-    const category = item.category || "other";
-    if (!grouped[category]) grouped[category] = [];
-    grouped[category].push(item);
-  }
-  return grouped;
-}
-
 export function DemoQuestionPicker({ questions, onSelect, t, disabled = false }) {
-  const grouped = groupByCategory(questions);
-  const categories = CATEGORY_ORDER.filter((key) => grouped[key]?.length);
+  if (!questions?.length) return null;
 
-  if (!categories.length) return null;
+  const sorted = [...questions].sort(
+    (a, b) => CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category)
+  );
 
   return (
-    <div className="space-y-4 rounded-xl border border-dashed border-stone-300 bg-stone-50 p-4">
-      <p className="text-sm font-semibold text-stone-800">{t("stage3.demoQuestions")}</p>
-      {categories.map((category) => (
-        <div key={category}>
-          <p className="text-xs font-bold uppercase tracking-wide text-stone-500">
-            {t(`stage3.demoCategories.${category}`)}
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {grouped[category].map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                disabled={disabled}
-                onClick={() => onSelect(item.text)}
-                title={item.text}
-                className="rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-left text-sm text-stone-700 hover:border-orange-400 hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </div>
+    <select
+      disabled={disabled}
+      defaultValue=""
+      onChange={(e) => {
+        if (e.target.value) onSelect(e.target.value);
+        e.target.value = "";
+      }}
+      className="h-9 max-w-[220px] rounded-md border border-input bg-background px-2 text-sm text-foreground"
+    >
+      <option value="">{t("roundtable.demoPrompt")}</option>
+      {sorted.map((item) => (
+        <option key={item.id} value={item.text}>
+          {item.label}
+        </option>
       ))}
-    </div>
+    </select>
   );
 }

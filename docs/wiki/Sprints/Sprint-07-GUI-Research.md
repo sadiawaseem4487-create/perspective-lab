@@ -2,7 +2,7 @@
 
 | | |
 |--|--|
-| **Status** | ⬜ Not started |
+| **Status** | 🟨 In progress |
 | **Depends on** | Sprint 6 |
 
 ## Vision
@@ -13,10 +13,10 @@
 
 | ID | Task | Status |
 |----|------|--------|
-| 7.1.1 | `AgentPersona` — icon, color, theory, status (idle/thinking/done) | [ ] |
-| 7.1.2 | `TheoryRoundtable` workspace layout (question center, agent dock) | [ ] |
-| 7.1.3 | Staggered parallel reveal + insight cards on shared board | [ ] |
-| 7.1.4 | Theory-native parser alignment (Freire/Weber summary fields) | [ ] |
+| 7.1.1 | `AgentPersona` — icon, color, theory, status (idle/thinking/done) | [x] |
+| 7.1.2 | `TheoryRoundtable` workspace layout (question center, agent dock) | [x] |
+| 7.1.3 | Staggered parallel reveal + insight cards on shared board | [x] |
+| 7.1.4 | Theory-native parser alignment (Freire/Weber summary fields) | [x] |
 | 7.1.5 | Sequential `@xyflow/react` graph + HITL approval sheets | [ ] |
 | 7.1.6 | Presentation mode (fullscreen, keyboard step-through) | [ ] |
 | 7.1.7 | Human compare as “guest chairs” in roundtable | [ ] |
