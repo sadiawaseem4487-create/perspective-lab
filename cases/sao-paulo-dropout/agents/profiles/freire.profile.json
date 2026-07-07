@@ -23,5 +23,16 @@
     "Power and participation analysis",
     "Participatory action plan",
     "Theory link"
-  ]
+  ],
+  "output_schema": {
+    "format": "theory_native",
+    "section_titles": [
+      "Missing voices",
+      "Power and participation analysis",
+      "Participatory action plan",
+      "Theory link"
+    ],
+    "solution_type": "Participatory community action",
+    "primary_stakeholder": "Students, families, and community groups"
+  }
 }

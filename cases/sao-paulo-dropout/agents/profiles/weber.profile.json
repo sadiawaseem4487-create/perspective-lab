@@ -23,5 +23,16 @@
     "Administrative model",
     "Procedure and accountability plan",
     "Theory link"
-  ]
+  ],
+  "output_schema": {
+    "format": "theory_native",
+    "section_titles": [
+      "Authority and rule gaps",
+      "Administrative model",
+      "Procedure and accountability plan",
+      "Theory link"
+    ],
+    "solution_type": "Administrative governance system",
+    "primary_stakeholder": "Teachers, principals, and municipal office"
+  }
 }

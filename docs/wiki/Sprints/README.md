@@ -4,7 +4,7 @@
 |--------|-------|-------|--------|
 | [1](Sprint-01-Foundation.md) | 0 | Foundation & case packs | 🟩 Complete |
 | [2](Sprint-02-LangGraph.md) | 1a | LangGraph + theory profiles | 🟩 Complete (PR pending) |
-| [3](Sprint-03-Outputs.md) | 1b | Theory-native outputs | ⬜ Not started |
+| [3](Sprint-03-Outputs.md) | 1b | Theory-native outputs | 🟩 Complete (PR pending) |
 | [4](Sprint-04-Sequential.md) | 2a | Sequential pipeline | ⬜ Not started |
 | [5](Sprint-05-Sequential-UI.md) | 2b | Sequential UI + HITL | ⬜ Not started |
 | [6](Sprint-06-GUI-Shell.md) | 3a | Design system & shell | ⬜ Not started |

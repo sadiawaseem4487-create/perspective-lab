@@ -37,6 +37,7 @@ __all__ = [
     "load_case_manifest",
     "load_theory_profile",
     "list_theory_profiles",
+    "build_comparison_matrix",
 ]
 
 
@@ -146,3 +147,9 @@ def load_theory_profile(agent_id: str):
 
 def list_theory_profiles():
     return repo().list_theory_profiles()
+
+
+def build_comparison_matrix(report: dict):
+    from engine.comparison_matrix import build_comparison_matrix as _build
+
+    return _build(report)

@@ -23,5 +23,16 @@
     "Autonomy and activity redesign",
     "School-day learning plan",
     "Theory link"
-  ]
+  ],
+  "output_schema": {
+    "format": "theory_native",
+    "section_titles": [
+      "Environment diagnosis",
+      "Autonomy and activity redesign",
+      "School-day learning plan",
+      "Theory link"
+    ],
+    "solution_type": "Learning environment redesign",
+    "primary_stakeholder": "Teachers and students in the classroom"
+  }
 }

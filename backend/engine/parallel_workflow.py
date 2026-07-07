@@ -1,4 +1,4 @@
-"""LangGraph parallel fan-out: same question → 4 independent agents → merge."""
+"""LangGraph parallel fan-out: same question → 4 agents → self-check → merge."""
 
 from __future__ import annotations
 
@@ -24,8 +24,10 @@ class AgentTask(TypedDict):
     model: Optional[str]
 
 
-async def _ask_agent_node(task: AgentTask) -> dict:
+async def _agent_pipeline_node(task: AgentTask) -> dict:
+    """Ask one agent, then run theory-native self-check (two-step pipeline node)."""
     from agents.service import ask_agent_slot
+    from engine.self_check import enrich_with_self_check
 
     result = await ask_agent_slot(
         task["slot_number"],
@@ -33,14 +35,15 @@ async def _ask_agent_node(task: AgentTask) -> dict:
         task["question"],
         task.get("model"),
     )
-    return {"responses": [result]}
+    checked = enrich_with_self_check(task["agent_id"], result)
+    return {"responses": [checked]}
 
 
 def _fan_out_to_agents(state: ParallelState) -> List[Send]:
     assignments = get_slot_assignments()
     return [
         Send(
-            "ask_agent",
+            "agent_pipeline",
             {
                 "slot_number": index,
                 "agent_id": assignments[slot],
@@ -54,9 +57,9 @@ def _fan_out_to_agents(state: ParallelState) -> List[Send]:
 
 def _build_parallel_graph():
     builder = StateGraph(ParallelState)
-    builder.add_node("ask_agent", _ask_agent_node)
-    builder.add_conditional_edges(START, _fan_out_to_agents, ["ask_agent"])
-    builder.add_edge("ask_agent", END)
+    builder.add_node("agent_pipeline", _agent_pipeline_node)
+    builder.add_conditional_edges(START, _fan_out_to_agents, ["agent_pipeline"])
+    builder.add_edge("agent_pipeline", END)
     return builder.compile()
 
 
@@ -71,7 +74,7 @@ def get_parallel_graph():
 
 
 async def run_parallel_workflow(question: str, model: Optional[str] = None) -> List[dict]:
-    """Execute Phase 1 parallel workflow via LangGraph fan-out."""
+    """Execute Phase 1 parallel workflow via LangGraph fan-out + self-check."""
     graph = get_parallel_graph()
     result = await graph.ainvoke({"question": question, "model": model, "responses": []})
     responses = list(result.get("responses", []))

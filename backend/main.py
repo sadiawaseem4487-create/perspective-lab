@@ -23,6 +23,7 @@ from agents.service import ask_all_agents
 from config import get_settings
 from application import (
     build_comparison,
+    build_comparison_matrix,
     clear_case_cache,
     get_agents_by_category,
     get_custom_agents,
@@ -279,6 +280,24 @@ async def get_comparison(session_id: int):
             "responses": data["responses"],
         }
     return build_comparison(session_id, report)
+
+
+@app.get("/api/comparison/{session_id}/matrix")
+async def get_comparison_matrix(session_id: int):
+    report = get_report(session_id)
+    if not report:
+        data = get_session(session_id)
+        if not data:
+            raise HTTPException(status_code=404, detail="Session not found")
+        report = {
+            "session_id": data["id"],
+            "question": data["question"],
+            "created_at": data["created_at"],
+            "workflow_mode": data.get("workflow_mode", "parallel"),
+            "model": get_selected_model(),
+            "responses": data["responses"],
+        }
+    return build_comparison_matrix(report)
 
 
 @app.get("/api/comparison/{session_id}/human")
