@@ -26,8 +26,8 @@ function NavItem({ to, icon: Icon, label, end = false }) {
         cn(
           "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
           isActive
-            ? "bg-sidebar-accent text-white"
-            : "text-sidebar-foreground/80 hover:bg-white/10 hover:text-sidebar-foreground"
+            ? "bg-sidebar-accent font-semibold text-white shadow-sm"
+            : "text-sidebar-foreground hover:bg-white/10"
         )
       }
     >

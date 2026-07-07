@@ -1,4 +1,16 @@
-import { firstActionBlock, firstTextBullet, parseAgentResponse } from "./parseAgentResponse";
+import {
+  cleanAgentText,
+  firstActionBlock,
+  firstTextBullet,
+  parseAgentResponse,
+} from "./parseAgentResponse";
+
+function trimAtWord(text, max = 130) {
+  if (!text || text.length <= max) return text || "";
+  const slice = text.slice(0, max);
+  const lastSpace = slice.lastIndexOf(" ");
+  return `${(lastSpace > 50 ? slice.slice(0, lastSpace) : slice).trim()}…`;
+}
 
 const ACTION_SECTIONS = [
   "Priority Actions",
@@ -38,7 +50,7 @@ export function extractInsight(response) {
     agentKey: (response.agent_key || response.agent_id || "").toLowerCase(),
     agentLabel: response.agent_label || response.agent_name,
     color: response.color || "#78716c",
-    headline,
+    headline: trimAtWord(headline, 160),
   };
 }
 
