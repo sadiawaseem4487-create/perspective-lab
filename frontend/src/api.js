@@ -64,11 +64,43 @@ export async function fetchQuestions(lang = "en") {
   return parseResponse(res);
 }
 
-export async function askQuestion(question, model, language = "en") {
+export async function askQuestion(question, model, language = "en", mode = "parallel") {
   const res = await fetch(`${API}/ask`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question, model: model || undefined, language, mode }),
+  });
+  return parseResponse(res);
+}
+
+export async function startSequentialRun(question, model, language = "en") {
+  const res = await fetch(`${API}/sequential/start`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ question, model: model || undefined, language }),
+  });
+  return parseResponse(res);
+}
+
+export async function fetchSequentialRun(runId) {
+  const res = await fetch(`${API}/sequential/${runId}`);
+  return parseResponse(res);
+}
+
+export async function advanceSequentialRun(runId, humanNote = "") {
+  const res = await fetch(`${API}/sequential/${runId}/advance`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ human_note: humanNote, approved: true }),
+  });
+  return parseResponse(res);
+}
+
+export async function finalizeSequentialRun(runId, humanNote = "") {
+  const res = await fetch(`${API}/sequential/${runId}/finalize`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ human_note: humanNote, approved: true }),
   });
   return parseResponse(res);
 }

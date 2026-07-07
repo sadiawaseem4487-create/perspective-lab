@@ -48,6 +48,24 @@ def init_db() -> None:
         conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_sessions_created_at ON sessions(created_at DESC)"
         )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS sequential_runs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                question TEXT NOT NULL,
+                model TEXT,
+                language TEXT NOT NULL DEFAULT 'en',
+                current_vaihe INTEGER NOT NULL DEFAULT 0,
+                status TEXT NOT NULL DEFAULT 'awaiting_review',
+                stage_outputs TEXT NOT NULL DEFAULT '{}',
+                responses TEXT NOT NULL DEFAULT '[]',
+                human_checkpoints TEXT NOT NULL DEFAULT '[]',
+                session_id INTEGER,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )
+            """
+        )
         _migrate(conn)
         conn.commit()
 
@@ -181,3 +199,54 @@ def export_all() -> list:
                 }
             )
         return result
+
+
+def create_sequential_run(payload: dict) -> int:
+    with get_connection() as conn:
+        cursor = conn.execute(
+            """
+            INSERT INTO sequential_runs
+            (question, model, language, current_vaihe, status, stage_outputs, responses,
+             human_checkpoints, session_id, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                payload["question"],
+                payload.get("model"),
+                payload.get("language", "en"),
+                payload.get("current_vaihe", 0),
+                payload.get("status", "awaiting_review"),
+                payload.get("stage_outputs", "{}"),
+                payload.get("responses", "[]"),
+                payload.get("human_checkpoints", "[]"),
+                payload.get("session_id"),
+                payload["created_at"],
+                payload["updated_at"],
+            ),
+        )
+        conn.commit()
+        return cursor.lastrowid
+
+
+def get_sequential_run(run_id: int) -> Optional[dict]:
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT id, question, model, language, current_vaihe, status,
+                   stage_outputs, responses, human_checkpoints, session_id,
+                   created_at, updated_at
+            FROM sequential_runs WHERE id = ?
+            """,
+            (run_id,),
+        ).fetchone()
+        return dict(row) if row else None
+
+
+def update_sequential_run(run_id: int, fields: dict) -> None:
+    if not fields:
+        return
+    columns = ", ".join(f"{key} = ?" for key in fields)
+    values = list(fields.values()) + [run_id]
+    with get_connection() as conn:
+        conn.execute(f"UPDATE sequential_runs SET {columns} WHERE id = ?", values)
+        conn.commit()
