@@ -339,11 +339,6 @@ async def ask_question(
     workflow_mode = (mode or body.mode or "parallel").strip().lower()
     if workflow_mode not in ("parallel", "sequential"):
         raise HTTPException(status_code=422, detail="mode must be parallel or sequential")
-    if workflow_mode == "sequential":
-        raise HTTPException(
-            status_code=501,
-            detail="Sequential workflow is not implemented yet (Sprint 4).",
-        )
 
     question = body.question.strip()
     model = body.model or get_selected_model()

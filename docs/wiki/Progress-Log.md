@@ -4,7 +4,7 @@ Newest entries at the top.
 
 | Date | Sprint | Event |
 |------|--------|-------|
-| 2026-07-07 | — | Auto-merge workflow for `sprint/*` PRs when CI passes. |
+| 2026-07-07 | 4 | Sequential LangGraph chain (Vaihe 1–4), `/api/ask?mode=sequential`. |
 | 2026-07-07 | 3 | Merged PR #2 — theory-native outputs, comparison matrix API. |
 | 2026-07-07 | 2 | Merged PR #1 — LangGraph parallel workflow. |
 | 2026-07-07 | — | CI pipeline approved (CI-only); GitHub Actions workflow added. |

@@ -34,5 +34,11 @@
     ],
     "solution_type": "Pilot and diffusion strategy",
     "primary_stakeholder": "Pilot school leaders and peer schools"
+  },
+  "sequential_stage": {
+    "vaihe": 4,
+    "role": "scaling_roadmap",
+    "deliverable": "Scaling roadmap",
+    "task": "VAIHE 4 — Design pilots, adoption path, and scaling roadmap for the working model."
   }
 }

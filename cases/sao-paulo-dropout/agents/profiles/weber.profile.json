@@ -34,5 +34,11 @@
     ],
     "solution_type": "Administrative governance system",
     "primary_stakeholder": "Teachers, principals, and municipal office"
+  },
+  "sequential_stage": {
+    "vaihe": 2,
+    "role": "service_model",
+    "deliverable": "Administrative service model",
+    "task": "VAIHE 2 — Translate the problem map into rules, roles, procedures, and accountability."
   }
 }

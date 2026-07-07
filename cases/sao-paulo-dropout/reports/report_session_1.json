@@ -4,8 +4,8 @@
   "case_id": "sao-paulo-dropout",
   "question": "How can we reduce school dropout in São Paulo?",
   "model": "openai/gpt-4o-mini",
-  "workflow_mode": "parallel",
-  "created_at": "2026-07-07T14:18:17.401569+00:00",
+  "workflow_mode": "sequential",
+  "created_at": "2026-07-07T14:27:04.330506+00:00",
   "summary": {
     "total_agents": 4,
     "successful": 4
@@ -15,28 +15,44 @@
       "agent_key": "freire",
       "agent_number": 1,
       "agent_name": "Freire Agent",
-      "response": "ok",
+      "response": "Stage 1",
+      "sequential_stage": {
+        "vaihe": 1,
+        "role": "problem_map"
+      },
       "error": null
     },
     {
       "agent_key": "weber",
       "agent_number": 2,
       "agent_name": "Weber Agent",
-      "response": "ok",
+      "response": "Stage 2",
+      "sequential_stage": {
+        "vaihe": 2,
+        "role": "service_model"
+      },
       "error": null
     },
     {
       "agent_key": "montessori",
       "agent_number": 3,
       "agent_name": "Montessori Agent",
-      "response": "ok",
+      "response": "Stage 3",
+      "sequential_stage": {
+        "vaihe": 3,
+        "role": "school_day_redesign"
+      },
       "error": null
     },
     {
       "agent_key": "rogers",
       "agent_number": 4,
       "agent_name": "Rogers Agent",
-      "response": "ok",
+      "response": "Stage 4",
+      "sequential_stage": {
+        "vaihe": 4,
+        "role": "scaling_roadmap"
+      },
       "error": null
     }
   ]
