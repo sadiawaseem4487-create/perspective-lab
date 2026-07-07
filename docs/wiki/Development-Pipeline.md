@@ -143,10 +143,10 @@ After each sprint: PR → your approval → merge → (optional) staging deploy 
 ## Approval checklist (sign off here)
 
 - [x] **CI only first** — approved 2026-07-07
-- [ ] **PaaS staging** — add after GitHub + CI green
+- [ ] **PaaS staging** — add later
 - [x] **One sprint per PR** — approved
-- [ ] **Git remote** — [GitHub Setup](GitHub-Setup.md)
-- [ ] **Start Sprint 2** — after first push + CI green
+- [x] **Auto-merge sprint PRs** — approved 2026-07-07
+- [x] **Git remote** — connected
 
 ---
 
