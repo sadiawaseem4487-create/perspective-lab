@@ -11,6 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { fetchAgentsCatalog } from "@/api";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import ModeToggle from "@/components/ModeToggle";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -80,7 +81,9 @@ export default function AppShell() {
           <p className="mt-2 text-xs leading-relaxed text-sidebar-muted">{t("shell.tagline")}</p>
         </div>
 
-        <ScrollArea className="flex-1 px-3 py-4">
+        <ModeToggle />
+
+        <ScrollArea className="flex-1 px-3 py-2">
           <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-widest text-sidebar-muted">
             {t("shell.research")}
           </p>
@@ -129,7 +132,14 @@ export default function AppShell() {
           </header>
         )}
 
-        <main className={isWorkspace ? "flex-1 bg-muted/20" : "flex-1 px-6 py-8"}>
+        <main
+          className={cn(
+            "flex-1",
+            isWorkspace
+              ? "workspace-canvas min-h-[calc(100vh-0px)] text-white"
+              : "px-6 py-8"
+          )}
+        >
           <Outlet />
         </main>
       </div>

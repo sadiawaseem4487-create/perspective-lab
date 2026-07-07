@@ -12,12 +12,12 @@ import {
 } from "@/api";
 import { AgentDetailPanel } from "@/components/AgentDetailPanel";
 import { AgentPersona } from "@/components/AgentPersona";
-import { DemoQuestionPicker } from "@/components/DemoQuestionPicker";
+import { DemoQuestionPanel } from "@/components/DemoQuestionPicker";
 import { SequentialTimeline } from "@/components/SequentialTimeline";
-import { WorkspaceGuide } from "@/components/WorkspaceGuide";
 import { Button } from "@/components/ui/button";
+import { useAppMode } from "@/context/AppModeContext";
 import { cn } from "@/lib/utils";
-import { extractAllInsights, extractInsight } from "@/utils/extractInsights";
+import { extractInsight } from "@/utils/extractInsights";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 const WORKFLOW_MODES = ["parallel", "sequential", "sequential_hitl"];
@@ -32,6 +32,7 @@ function personaStatus(agentKey, { loading, revealed, responses, errors }) {
 
 export default function TheoryRoundtable() {
   const { t, lang } = useLanguage();
+  const { isDemo } = useAppMode();
   const navigate = useNavigate();
 
   const [agents, setAgents] = useState([]);
@@ -59,16 +60,28 @@ export default function TheoryRoundtable() {
       .catch(() => {});
 
     fetchQuestions(lang)
-      .then((d) => {
-        setQuestion(d.main_question || "");
-        setDemoQuestions(d.questions || []);
-      })
+      .then((d) => setDemoQuestions(d.questions || []))
       .catch(() => {});
 
     fetchSelectedModel()
       .then((d) => setModel(d.model || ""))
       .catch(() => {});
   }, [lang]);
+
+  useEffect(() => {
+    resetSession();
+    if (isDemo) {
+      if (demoQuestions.length > 0) setQuestion(demoQuestions[0].text);
+    } else {
+      setQuestion("");
+    }
+  }, [isDemo, lang]);
+
+  useEffect(() => {
+    if (isDemo && demoQuestions.length > 0 && !question) {
+      setQuestion(demoQuestions[0].text);
+    }
+  }, [demoQuestions, isDemo, question]);
 
   const responseMap = useMemo(() => {
     const map = {};
@@ -126,7 +139,6 @@ export default function TheoryRoundtable() {
   const selectedResponse = selectedKey ? responseMap[selectedKey] : null;
   const selectedAgent = agents.find((a) => a.id === selectedKey);
   const allDone = revealed.size >= 4 && result?.responses?.length >= 4;
-  const showGuide = !loading && !result && !sequentialRun;
 
   function resetSession() {
     setResult(null);
@@ -141,7 +153,10 @@ export default function TheoryRoundtable() {
     if (question.trim().length < 5) return;
     setLoading(true);
     setError("");
-    resetSession();
+    setResult(null);
+    setSequentialRun(null);
+    setRevealed(new Set());
+    setSelectedKey(null);
 
     try {
       if (workflowMode === "sequential_hitl") {
@@ -196,78 +211,72 @@ export default function TheoryRoundtable() {
       : AGENT_ORDER.map((id) => ({ id, title: id, color: "#78716c" }));
 
   return (
-    <div className="mx-auto max-w-5xl space-y-5 px-4 py-5">
-      {/* Toolbar */}
-      <div className="space-y-2">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="inline-flex rounded-lg border bg-card p-1 shadow-sm">
-            {WORKFLOW_MODES.map((mode) => (
-              <button
-                key={mode}
-                type="button"
-                onClick={() => {
-                  setWorkflowMode(mode);
-                  resetSession();
-                }}
-                className={cn(
-                  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-                  workflowMode === mode
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {t(`roundtable.mode.${mode}`)}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <DemoQuestionPicker
-              questions={demoQuestions}
-              onSelect={setQuestion}
-              t={t}
-              disabled={loading || Boolean(sequentialRun)}
-            />
-            <Button size="lg" onClick={handleRun} disabled={loading || question.trim().length < 5 || Boolean(sequentialRun)}>
-              {loading ? t("roundtable.running") : t("roundtable.run")}
-            </Button>
-          </div>
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="inline-flex rounded-full border border-white/10 bg-white/5 p-1 backdrop-blur-sm">
+          {WORKFLOW_MODES.map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => {
+                setWorkflowMode(mode);
+                resetSession();
+              }}
+              className={cn(
+                "rounded-full px-4 py-1.5 text-sm font-medium transition-all",
+                workflowMode === mode
+                  ? "bg-white text-slate-900 shadow"
+                  : "text-slate-400 hover:text-white"
+              )}
+            >
+              {t(`roundtable.mode.${mode}`)}
+            </button>
+          ))}
         </div>
-        <p className="text-sm text-muted-foreground">{t(`roundtable.modeHint.${workflowMode}`)}</p>
+        <Button
+          size="lg"
+          onClick={handleRun}
+          disabled={loading || question.trim().length < 5 || Boolean(sequentialRun)}
+          className="rounded-full bg-white px-8 text-slate-900 hover:bg-slate-200"
+        >
+          {loading ? t("roundtable.running") : t("roundtable.run")}
+        </Button>
       </div>
 
       {apiReady === false && (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
           {t("stage3.apiMissing")} <code>backend/.env</code>
         </p>
       )}
 
-      {/* Question */}
-      <div className="rounded-2xl border bg-card p-5 shadow-sm">
-        <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground" htmlFor="research-question">
-          {t("roundtable.questionLabel")}
-        </label>
+      {isDemo && (
+        <DemoQuestionPanel
+          questions={demoQuestions}
+          activeText={question}
+          onSelect={setQuestion}
+          t={t}
+        />
+      )}
+
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md">
         <textarea
           id="research-question"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          rows={2}
+          rows={isDemo ? 2 : 3}
           disabled={Boolean(sequentialRun && sequentialRun.status !== "completed")}
-          className="mt-2 w-full resize-none border-0 bg-transparent text-xl font-semibold leading-snug text-foreground focus:outline-none"
-          placeholder={t("stage3.placeholder")}
+          className="w-full resize-none border-0 bg-transparent text-2xl font-medium leading-snug text-white placeholder:text-slate-500 focus:outline-none"
+          placeholder={t("roundtable.questionPlaceholder")}
         />
       </div>
 
-      {loading && (
-        <p className="text-center text-sm font-medium text-primary">
-          {result?.responses?.length
-            ? t("roundtable.progress").replace("{count}", String(revealed.size)).replace("{total}", "4")
-            : t("roundtable.running")}
+      {loading && result?.responses?.length > 0 && (
+        <p className="text-center text-sm text-slate-400">
+          {t("roundtable.progress").replace("{count}", String(revealed.size)).replace("{total}", "4")}
         </p>
       )}
 
-      {/* Personas — one row, each shows takeaway when done */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {orderedAgents.map((agent) => {
           const key = agent.id;
           const status = personaStatus(key, {
@@ -286,17 +295,14 @@ export default function TheoryRoundtable() {
               selected={selectedKey === key}
               lang={lang}
               takeaway={insightMap[key] || ""}
-              t={t}
               onClick={() => setSelectedKey(key)}
             />
           );
         })}
       </div>
 
-      {showGuide && <WorkspaceGuide t={t} lang={lang} workflowMode={workflowMode} />}
-
       {sequentialRun && (
-        <div className="space-y-4 rounded-2xl border bg-card p-5">
+        <div className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
           <SequentialTimeline
             stages={sequentialRun.stages}
             currentVaihe={sequentialRun.current_vaihe}
@@ -304,15 +310,15 @@ export default function TheoryRoundtable() {
             t={t}
           />
           {sequentialRun.status === "awaiting_review" && (
-            <div className="space-y-3 rounded-xl bg-muted/50 p-4">
+            <div className="space-y-3">
               <textarea
                 value={checkpointNote}
                 onChange={(e) => setCheckpointNote(e.target.value)}
                 rows={2}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-white/15 bg-slate-900 px-3 py-2 text-sm text-white"
                 placeholder={t("stage3.checkpointPlaceholder")}
               />
-              <Button onClick={handleAdvance} disabled={loading}>
+              <Button onClick={handleAdvance} disabled={loading} className="rounded-full">
                 {sequentialRun.current_vaihe >= 4 ? t("stage3.completeWorkflow") : t("stage3.approveContinue")}
               </Button>
             </div>
@@ -320,7 +326,7 @@ export default function TheoryRoundtable() {
         </div>
       )}
 
-      {error && <p className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</p>}
+      {error && <p className="rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</p>}
 
       {selectedResponse && !selectedResponse.error && (
         <AgentDetailPanel
@@ -336,14 +342,13 @@ export default function TheoryRoundtable() {
       )}
 
       {allDone && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3">
-          <p className="text-sm font-medium text-foreground">{t("roundtable.allReady")}</p>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" asChild>
-              <Link to="/matrix">{t("shell.matrix")}</Link>
-            </Button>
-            <Button onClick={() => navigate("/report")}>{t("stage3.viewReport")}</Button>
-          </div>
+        <div className="flex flex-wrap items-center justify-end gap-2 border-t border-white/10 pt-4">
+          <Button variant="outline" asChild className="rounded-full border-white/20 bg-transparent text-white hover:bg-white/10">
+            <Link to="/matrix">{t("shell.matrix")}</Link>
+          </Button>
+          <Button onClick={() => navigate("/report")} className="rounded-full bg-white text-slate-900 hover:bg-slate-200">
+            {t("stage3.viewReport")}
+          </Button>
         </div>
       )}
     </div>
