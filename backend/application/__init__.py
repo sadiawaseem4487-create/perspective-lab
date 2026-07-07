@@ -35,6 +35,8 @@ __all__ = [
     "get_agent_order",
     "load_agent_definitions",
     "load_case_manifest",
+    "load_theory_profile",
+    "list_theory_profiles",
 ]
 
 
@@ -136,3 +138,11 @@ def load_tools_config():
 
 def load_perspective_types():
     return repo().load_perspective_types()
+
+
+def load_theory_profile(agent_id: str):
+    return repo().load_theory_profile(agent_id)
+
+
+def list_theory_profiles():
+    return repo().list_theory_profiles()

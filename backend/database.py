@@ -21,7 +21,8 @@ def init_db() -> None:
             CREATE TABLE IF NOT EXISTS sessions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 question TEXT NOT NULL,
-                created_at TEXT NOT NULL
+                created_at TEXT NOT NULL,
+                workflow_mode TEXT NOT NULL DEFAULT 'parallel'
             )
             """
         )
@@ -52,6 +53,12 @@ def init_db() -> None:
 
 
 def _migrate(conn) -> None:
+    session_columns = {row[1] for row in conn.execute("PRAGMA table_info(sessions)")}
+    if "workflow_mode" not in session_columns:
+        conn.execute(
+            "ALTER TABLE sessions ADD COLUMN workflow_mode TEXT NOT NULL DEFAULT 'parallel'"
+        )
+
     columns = {row[1] for row in conn.execute("PRAGMA table_info(responses)")}
     if "latency_ms" not in columns:
         conn.execute("ALTER TABLE responses ADD COLUMN latency_ms INTEGER")
@@ -78,12 +85,12 @@ def get_connection():
         conn.close()
 
 
-def save_session(question: str, responses: list) -> int:
+def save_session(question: str, responses: list, workflow_mode: str = "parallel") -> int:
     now = datetime.now(timezone.utc).isoformat()
     with get_connection() as conn:
         cursor = conn.execute(
-            "INSERT INTO sessions (question, created_at) VALUES (?, ?)",
-            (question, now),
+            "INSERT INTO sessions (question, created_at, workflow_mode) VALUES (?, ?, ?)",
+            (question, now, workflow_mode),
         )
         session_id = cursor.lastrowid
         for item in responses:
@@ -113,7 +120,7 @@ def list_sessions(limit: int = 50) -> list:
     with get_connection() as conn:
         rows = conn.execute(
             """
-            SELECT s.id, s.question, s.created_at,
+            SELECT s.id, s.question, s.created_at, s.workflow_mode,
                    COUNT(r.id) AS response_count
             FROM sessions s
             LEFT JOIN responses r ON r.session_id = s.id
@@ -129,7 +136,7 @@ def list_sessions(limit: int = 50) -> list:
 def get_session(session_id: int) -> Optional[dict]:
     with get_connection() as conn:
         session = conn.execute(
-            "SELECT id, question, created_at FROM sessions WHERE id = ?",
+            "SELECT id, question, created_at, workflow_mode FROM sessions WHERE id = ?",
             (session_id,),
         ).fetchone()
         if not session:
@@ -152,7 +159,7 @@ def get_session(session_id: int) -> Optional[dict]:
 def export_all() -> list:
     with get_connection() as conn:
         sessions = conn.execute(
-            "SELECT id, question, created_at FROM sessions ORDER BY id"
+            "SELECT id, question, created_at, workflow_mode FROM sessions ORDER BY id"
         ).fetchall()
         result = []
         for session in sessions:
@@ -169,6 +176,7 @@ def export_all() -> list:
                     "session_id": session["id"],
                     "question": session["question"],
                     "created_at": session["created_at"],
+                    "workflow_mode": session["workflow_mode"],
                     "responses": [dict(r) for r in responses],
                 }
             )

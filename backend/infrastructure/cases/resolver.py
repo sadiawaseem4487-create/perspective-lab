@@ -23,6 +23,7 @@ class CasePaths:
 
         self.agents_config = self.agents_dir / "agents.json"
         self.slot_assignments = self.agents_dir / "slot_assignments.json"
+        self.profiles_dir = self.agents_dir / "profiles"
         self.questions_file = self.questions_dir / "questions.json"
         self.main_question_file = self.questions_dir / "main_question.txt"
         self.available_models = self.models_dir / "available_models.json"

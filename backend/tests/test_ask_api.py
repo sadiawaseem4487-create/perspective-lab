@@ -69,6 +69,7 @@ def test_ask_success_creates_session_and_report(mock_ask, client, tmp_path, monk
     assert response.status_code == 200
     payload = response.json()
     assert payload["question"] == question
+    assert payload["workflow_mode"] == "parallel"
     assert len(payload["responses"]) == 4
 
     session_id = payload["session_id"]

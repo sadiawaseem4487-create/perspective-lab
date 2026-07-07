@@ -1,0 +1,27 @@
+{
+  "agent_id": "rogers",
+  "theory": "Everett Rogers",
+  "diagnostic_question": "Why would schools adopt or reject this solution — and how do we scale it?",
+  "reasoning_chain": [
+    "Assess relative advantage, compatibility, complexity, trialability, observability",
+    "Design a small pilot with visible early wins",
+    "Use peer schools and champions to spread adoption",
+    "Scale gradually through networks and communication channels"
+  ],
+  "must_do": [
+    "Focus on adoption pathways and scaling logic",
+    "Propose pilots before city-wide rollout",
+    "Link recommendations explicitly to Rogers' diffusion theory"
+  ],
+  "must_not_do": [
+    "Assume instant city-wide adoption",
+    "Ignore compatibility with existing school culture",
+    "Skip observability of results for stakeholders"
+  ],
+  "output_sections": [
+    "Adoption barriers and enablers",
+    "Pilot design",
+    "Scaling roadmap",
+    "Theory link"
+  ]
+}
