@@ -75,6 +75,16 @@ cd frontend && npm run dev
 
 Dev UI: **http://localhost:5173** (proxies `/api` to port 8000)
 
+### Desktop (Sprint 8)
+
+```bash
+# Requires Rust (https://rustup.rs) + Python venv from make install
+make desktop-dev     # Tauri window → http://127.0.0.1:8000
+make desktop-build   # .dmg / NSIS under frontend/src-tauri/target/release/bundle/
+```
+
+First run opens **Setup** to save an OpenRouter/OpenAI key into `backend/.env`.
+
 ---
 
 ## Features (current)

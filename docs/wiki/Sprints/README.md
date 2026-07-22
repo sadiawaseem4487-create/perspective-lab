@@ -10,7 +10,7 @@
 | [6](Sprint-06-GUI-Shell.md) | 3a | Design system & shell | 🟩 Complete |
 | [7](Sprint-07-GUI-Research.md) | 3b | Interactive research workspace | 🟩 Complete |
 | [9](Sprint-09-Research-Integrity.md) | 3c | Research integrity (parsers, fidelity, comparison honesty) | 🟩 Complete |
-| [8](Sprint-08-Desktop.md) | 4 | Tauri desktop | ⬜ **Next major** |
+| [8](Sprint-08-Desktop.md) | 4 | Tauri desktop | 🟨 **In progress** |
 
 **Order:** 1 → 2 → 3 → 4 → 5 → 6 → 7 → 9 → **Present polish (P1)** → **8**
 

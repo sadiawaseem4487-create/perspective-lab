@@ -1,4 +1,4 @@
-.PHONY: dev build docker-up docker-down docker-logs install test test-health
+.PHONY: dev build docker-up docker-down docker-logs install test test-health desktop-dev desktop-build
 
 install:
 	cd backend && python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt
@@ -9,6 +9,13 @@ build:
 
 dev:
 	cd backend && . .venv/bin/activate && uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
+desktop-dev:
+	chmod +x desktop/start-backend.sh 2>/dev/null || true
+	cd frontend && npm run desktop:dev
+
+desktop-build:
+	cd frontend && npm run build && npm run desktop:build
 
 docker-up:
 	cp -n .env.example .env || true

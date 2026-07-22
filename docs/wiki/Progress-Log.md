@@ -4,6 +4,7 @@ Newest entries at the top.
 
 | Date | Sprint | Event |
 |------|--------|-------|
+| 2026-07-22 | 8 | Desktop sprint started: Tauri 2 shell, FastAPI sidecar scripts, API key Setup wizard (`/setup`), `make desktop-dev`. |
 | 2026-07-22 | P2 | Study readiness: Overview/rubric wiki sync, in-app Guide (`/guide`), `GET /api/export/rubric.csv` + Export center button. |
 | 2026-07-22 | P1 | Academic Present deck: Topic → Introduction → Key concepts → Case study → Synthesis → Conclusion → Sources (`presentation.json` + `/api/presentation`). |
 | 2026-07-22 | 7+9 | **P0 done:** merged [PR #6](https://github.com/sadiawaseem4487-create/perspective-lab/pull/6) (Sprint 7 GUI finish + Sprint 9 research integrity). Next: P1 academic Present. |

@@ -1,10 +1,11 @@
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   ClipboardList,
   Cpu,
   Download,
   FileText,
   GitCompare,
+  KeyRound,
   LayoutDashboard,
   MessageSquare,
   Presentation,
@@ -12,7 +13,7 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { fetchAgentsCatalog } from "@/api";
+import { checkHealth, fetchAgentsCatalog } from "@/api";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ModeToggle from "@/components/ModeToggle";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -43,14 +44,28 @@ function NavItem({ to, icon: Icon, label, end = false }) {
 export default function AppShell() {
   const { t } = useLanguage();
   const location = useLocation();
+  const navigate = useNavigate();
   const isWorkspace = location.pathname === "/question";
   const [caseInfo, setCaseInfo] = useState(null);
+  const [needsSetup, setNeedsSetup] = useState(false);
 
   useEffect(() => {
     fetchAgentsCatalog()
       .then((data) => setCaseInfo(data.case || null))
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    checkHealth()
+      .then((h) => {
+        const missing = !h.llm_configured && h.setup_allowed !== false;
+        setNeedsSetup(missing);
+        if (missing && location.pathname !== "/setup") {
+          navigate("/setup", { replace: true });
+        }
+      })
+      .catch(() => {});
+  }, [location.pathname, navigate]);
 
   const nav = {
     research: [
@@ -63,6 +78,7 @@ export default function AppShell() {
       { to: "/export", icon: Download, label: t("nav.export") },
     ],
     configure: [
+      { to: "/setup", icon: KeyRound, label: t("nav.setup") },
       { to: "/agents", icon: Users, label: t("nav.agents") },
       { to: "/models", icon: Cpu, label: t("nav.models") },
     ],
@@ -130,6 +146,9 @@ export default function AppShell() {
                     {caseInfo.title || caseInfo.id}
                   </span>
                 </p>
+              )}
+              {needsSetup && (
+                <p className="mt-1 text-xs text-amber-300">{t("setup.banner")}</p>
               )}
               <p className="mt-1 text-xs text-slate-400">{t("shell.flowHint")}</p>
             </div>
