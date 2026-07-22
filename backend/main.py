@@ -468,6 +468,7 @@ async def get_rubric(session_id: int):
             "coder_count": 0,
             "exact_agreement": None,
             "mean_abs_diff": None,
+            "cohens_kappa": None,
             "pairwise_comparisons": 0,
         },
     }
@@ -733,6 +734,7 @@ async def export_rubric_csv(_: None = Depends(require_export_key)):
             "coder_count",
             "exact_agreement",
             "mean_abs_diff",
+            "cohens_kappa",
             "updated_at",
         ]
     )
@@ -763,6 +765,7 @@ async def export_rubric_csv(_: None = Depends(require_export_key)):
                     inter.get("coder_count", ""),
                     inter.get("exact_agreement", ""),
                     inter.get("mean_abs_diff", ""),
+                    inter.get("cohens_kappa", ""),
                     record.get("updated_at", ""),
                 ]
             )

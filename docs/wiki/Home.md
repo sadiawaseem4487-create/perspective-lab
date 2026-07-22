@@ -12,6 +12,7 @@ Welcome to the project wiki. This is the single source of truth for architecture
 |------|-------------|
 | [Overview](Overview.md) | Vision, goals, and capability roadmap |
 | [Facilitator Checklist](Facilitator-Checklist.md) | Pilot session path (also in-app `/guide`) |
+| [Client handover](../../CLIENT_HANDOVER.md) | Give this to your client: install + API key only |
 | [Architecture](Architecture.md) | System layers and folder layout |
 | [Design Patterns](Design-Patterns.md) | Hexagonal architecture, case packs, workflows |
 | [Code Standards](Code-Standards.md) | Clean code rules, smells to avoid |

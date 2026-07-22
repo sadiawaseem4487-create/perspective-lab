@@ -39,7 +39,8 @@ The first **case pack** is school dropout in São Paulo (`cases/sao-paulo-dropou
 2. **Mac:** double-click **`Start App.command`**
 3. Browser opens at **http://localhost:8000**
 
-Plain-language guide: **[USER_GUIDE.md](./USER_GUIDE.md)**
+Plain-language guide: **[USER_GUIDE.md](./USER_GUIDE.md)**  
+**Client handover (install + API key only):** **[CLIENT_HANDOVER.md](./CLIENT_HANDOVER.md)**
 
 ---
 

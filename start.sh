@@ -24,30 +24,30 @@ if [ ! -d .venv ]; then
   echo "[3/4] Installing backend..."
   python3 -m venv .venv
 fi
+# shellcheck disable=SC1091
 source .venv/bin/activate
 pip install -q -r requirements.txt
 
 if [ ! -f .env ] && [ ! -f "$ROOT/.env" ]; then
   cp .env.example .env
   echo ""
-  echo "IMPORTANT: Open backend/.env and add your OPENAI_API_KEY."
-  echo "Then run this script again."
+  echo "Created backend/.env — open the app and use Setup to paste your API key."
   echo ""
-  read -r -p "Press Enter to close..."
-  exit 1
 fi
 
 echo "[4/4] Starting server..."
 echo ""
 echo "  Open in browser:  http://localhost:8000"
+echo "  First time? Use the Setup page to add your OpenRouter or OpenAI key."
 echo ""
 echo "  Keep this window OPEN while using the app."
 echo "  Press Ctrl+C to stop."
 echo ""
 
 sleep 2
-open "http://localhost:8000" 2>/dev/null || true
+open "http://localhost:8000/setup" 2>/dev/null || open "http://localhost:8000" 2>/dev/null || true
 
 cd "$ROOT/backend"
+# shellcheck disable=SC1091
 source .venv/bin/activate
 exec uvicorn main:app --host 127.0.0.1 --port 8000

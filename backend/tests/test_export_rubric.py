@@ -10,6 +10,7 @@ def test_export_rubric_csv_empty(client):
     assert "session_id" in header
     assert "PS1" in header
     assert "exact_agreement" in header
+    assert "cohens_kappa" in header
 
 
 def test_export_rubric_csv_with_scores(client, sample_session_id, case_pack_root):
