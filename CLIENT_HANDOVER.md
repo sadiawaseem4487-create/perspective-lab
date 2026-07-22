@@ -127,6 +127,29 @@ To go back: `CASE_ID=sao-paulo-dropout` or remove the line.
 
 ---
 
+## Optional: Mac installer (.dmg) — like downloading from the web
+
+On your Desktop (after build): **`PerspectiveLab-Installer.dmg`**
+
+1. Double-click the **.dmg**
+2. Drag **PerspectiveLab** into **Applications**
+3. Open **Applications → PerspectiveLab**
+4. If macOS blocks it: **right-click → Open → Open** (once)
+5. Click **Continue** on the setup dialog  
+   - If Node.js is missing, it can **download a private copy** for this app (one-time, needs internet)
+6. A Terminal window shows install progress — **keep it open**
+7. Browser opens → **Setup** → paste your API key
+
+Rebuild the DMG on a Mac anytime:
+
+```bash
+make desktop-dmg
+```
+
+**Note:** Apple notarization (no right-click Open) needs an Apple Developer account. Unsigned DMGs still work with right-click Open.
+
+---
+
 ## Optional: desktop window (all OS with Rust)
 
 ```bash
