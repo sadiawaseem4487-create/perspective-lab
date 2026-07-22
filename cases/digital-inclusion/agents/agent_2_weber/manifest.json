@@ -1,0 +1,10 @@
+{
+  "key": "weber",
+  "agent_number": 2,
+  "agent_label": "Agent 2",
+  "name": "Weber Agent",
+  "title": "Bureaucratic Rationality Agent",
+  "theory": "Max Weber — rational-legal authority, bureaucracy",
+  "color": "#1e40af",
+  "instructions_file": "instructions.txt"
+}

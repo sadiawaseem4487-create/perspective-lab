@@ -1,0 +1,80 @@
+{
+  "description": "Research and demo questions in multiple languages.",
+  "main_question": {
+    "en": "How do we reduce unequal access to digital learning tools in schools?",
+    "pt": "Como reduzimos o acesso desigual a ferramentas digitais de aprendizagem nas escolas?",
+    "fi": "Miten vähennämme digitaalisten oppimisvälineiden epätasaista saatavuutta kouluissa?"
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "category": "problem_solving",
+      "label": { "en": "Main research question", "pt": "Pergunta principal", "fi": "Pääkysymys" },
+      "text": {
+        "en": "How do we reduce unequal access to digital learning tools in schools?",
+        "pt": "Como reduzimos o acesso desigual a ferramentas digitais de aprendizagem nas escolas?",
+        "fi": "Miten vähennämme digitaalisten oppimisvälineiden epätasaista saatavuutta kouluissa?"
+      }
+    },
+    {
+      "id": "q2",
+      "category": "diagnosis",
+      "label": { "en": "Root causes", "pt": "Causas principais", "fi": "Juurisyyt" },
+      "text": {
+        "en": "What are the main reasons some students and schools lack reliable access to digital learning tools?",
+        "pt": "Quais são as principais razões para alguns estudantes e escolas não terem acesso confiável a ferramentas digitais de aprendizagem?",
+        "fi": "Mitkä ovat tärkeimmät syyt siihen, että osalla oppilaista ja kouluista ei ole luotettavaa pääsyä digitaalisiin oppimisvälineisiin?"
+      }
+    },
+    {
+      "id": "q3",
+      "category": "policy",
+      "label": { "en": "System coordination", "pt": "Coordenação do sistema", "fi": "Järjestelmän koordinointi" },
+      "text": {
+        "en": "How should education authorities coordinate schools, families, and internet providers to close digital access gaps?",
+        "pt": "Como as autoridades educacionais devem coordenar escolas, famílias e provedores de internet para reduzir lacunas de acesso digital?",
+        "fi": "Miten koulutusviranomaisten tulisi koordinoida kouluja, perheitä ja internet-palveluntarjoajia digitaalisten saatavuuserojen kaventamiseksi?"
+      }
+    },
+    {
+      "id": "q4",
+      "category": "pedagogy",
+      "label": { "en": "Classroom integration", "pt": "Integração em sala de aula", "fi": "Luokkahuoneen integraatio" },
+      "text": {
+        "en": "How can a typical public school redesign teaching so students with uneven device and connectivity access still learn effectively?",
+        "pt": "Como uma escola pública típica pode redesenhar o ensino para que estudantes com acesso desigual a dispositivos e conectividade ainda aprendam de forma eficaz?",
+        "fi": "Miten tavallinen julkinen koulu voi uudistaa opetusta niin, että oppilaat, joilla on epätasaista pääsyä laitteisiin ja yhteyksiin, oppivat silti tehokkaasti?"
+      }
+    },
+    {
+      "id": "q5",
+      "category": "scaling",
+      "label": { "en": "Scale a pilot", "pt": "Escalar um piloto", "fi": "Pilottihankkeen laajennus" },
+      "text": {
+        "en": "A pilot program improved digital access in 12 schools. How should it be scaled to 500 schools without leaving the least connected behind?",
+        "pt": "Um programa piloto melhorou o acesso digital em 12 escolas. Como escalá-lo para 500 escolas sem deixar para trás as menos conectadas?",
+        "fi": "Pilottiohjelma paransi digitaalista saatavuutta 12 koulussa. Miten se voidaan laajentaa 500 kouluun jättämättä heikoimmin yhteydessä olevia jälkeen?"
+      }
+    },
+    {
+      "id": "q6",
+      "category": "stakeholders",
+      "label": { "en": "Student and family voice", "pt": "Voz de estudantes e famílias", "fi": "Opiskelijoiden ja perheiden ääni" },
+      "text": {
+        "en": "How do we bring students and families into decisions about digital learning access and use in public schools?",
+        "pt": "Como incluímos estudantes e famílias nas decisões sobre acesso e uso de ferramentas digitais de aprendizagem nas escolas públicas?",
+        "fi": "Miten saamme oppilaat ja perheet mukaan digitaalisen oppimisen saatavuutta ja käyttöä koskeviin päätöksiin julkisissa kouluissa?"
+      }
+    },
+    {
+      "id": "q7",
+      "category": "quick_test",
+      "label": { "en": "One-semester action", "pt": "Ação em um semestre", "fi": "Toimenpide yhdeksi lukukaudeksi" },
+      "text": {
+        "en": "What is one actionable step to improve digital inclusion in schools this semester?",
+        "pt": "Qual é uma ação prática para melhorar a inclusão digital nas escolas neste semestre?",
+        "fi": "Mikä on yksi konkreettinen askel digitaalisen osallisuuden parantamiseksi kouluissa tällä lukukaudella?"
+      }
+    }
+  ]
+}

@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-# Double-click on macOS.
+# Linux / generic Unix double-click friendly starter.
 cd "$(dirname "$0")"
 exec ./start.sh

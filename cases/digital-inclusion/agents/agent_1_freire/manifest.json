@@ -1,0 +1,10 @@
+{
+  "key": "freire",
+  "agent_number": 1,
+  "agent_label": "Agent 1",
+  "name": "Freire Agent",
+  "title": "Sociocultural Inspirer",
+  "theory": "Paulo Freire — dialogue, conscientization, praxis",
+  "color": "#c2410c",
+  "instructions_file": "instructions.txt"
+}

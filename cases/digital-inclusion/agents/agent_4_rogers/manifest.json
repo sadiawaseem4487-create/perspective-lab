@@ -1,0 +1,10 @@
+{
+  "key": "rogers",
+  "agent_number": 4,
+  "agent_label": "Agent 4",
+  "name": "Rogers Agent",
+  "title": "Innovation Diffusion Agent",
+  "theory": "Everett Rogers — diffusion of innovations",
+  "color": "#7c3aed",
+  "instructions_file": "instructions.txt"
+}

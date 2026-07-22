@@ -33,14 +33,20 @@ The first **case pack** is school dropout in São Paulo (`cases/sao-paulo-dropou
 
 ## Quick start (professor / non-technical)
 
-**No Docker needed.** Run on a laptop:
+**No Docker needed.** Works on **macOS**, **Windows**, and **Linux**:
 
-1. Add your OpenRouter or OpenAI key to **`backend/.env`**
-2. **Mac:** double-click **`Start App.command`**
-3. Browser opens at **http://localhost:8000**
+| OS | Start |
+|----|--------|
+| Mac | Double-click **`Start App.command`** |
+| Windows | Double-click **`Start App.bat`** |
+| Linux | Run **`./start.sh`** or **`Start App.sh`** |
 
-Plain-language guide: **[USER_GUIDE.md](./USER_GUIDE.md)**  
-**Client handover (install + API key only):** **[CLIENT_HANDOVER.md](./CLIENT_HANDOVER.md)**
+1. Browser opens at **http://localhost:8000**
+2. Use **Setup** to paste an OpenRouter/OpenAI key
+3. Ask agents
+
+Hand this to your client: **[CLIENT_HANDOVER.md](./CLIENT_HANDOVER.md)**  
+Also: **[USER_GUIDE.md](./USER_GUIDE.md)**
 
 ---
 

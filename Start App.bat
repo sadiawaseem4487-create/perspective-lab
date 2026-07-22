@@ -1,4 +1,5 @@
 @echo off
+REM Windows CMD starter — works on Windows 10/11
 title PerspectiveLab
 cd /d "%~dp0"
 
@@ -8,6 +9,23 @@ echo   PerspectiveLab
 echo   Starting... (first run may take 2-5 min)
 echo ==========================================
 echo.
+
+where npm >nul 2>&1
+if errorlevel 1 (
+  echo ERROR: Node.js / npm not found. Install LTS from https://nodejs.org
+  pause
+  exit /b 1
+)
+
+set PY=
+where python >nul 2>&1 && set PY=python
+if "%PY%"=="" where py >nul 2>&1 && set PY=py
+if "%PY%"=="" where python3 >nul 2>&1 && set PY=python3
+if "%PY%"=="" (
+  echo ERROR: Python not found. Install from https://www.python.org ^(Add to PATH^).
+  pause
+  exit /b 1
+)
 
 cd frontend
 if not exist node_modules (
@@ -23,7 +41,7 @@ if errorlevel 1 goto :fail
 cd ..\backend
 if not exist .venv (
   echo [3/4] Installing backend...
-  python -m venv .venv
+  %PY% -m venv .venv
 )
 call .venv\Scripts\activate.bat
 pip install -q -r requirements.txt
