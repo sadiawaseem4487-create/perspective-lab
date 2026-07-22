@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=PerspectiveLab
+Comment=Start PerspectiveLab research app
+Exec=bash -c 'cd "$(dirname "%k")" && ./start.sh'
+Path=
+Terminal=true
+Icon=utilities-terminal
+Categories=Education;Science;
+StartupNotify=true

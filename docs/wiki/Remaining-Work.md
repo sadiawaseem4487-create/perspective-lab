@@ -118,17 +118,17 @@ See [Sprint-08-Desktop.md](Sprints/Sprint-08-Desktop.md).
 
 ## P4 — Optional research depth
 
-**Status:** Partial — study protocol + Cohen’s κ shipped; second case pack / repo rename deferred
+**Status:** ✅ Shipped (CI LLM judge + repo rename still optional)
 
 | ID | Task | Status |
 |----|------|--------|
 | P4.1 | Study protocol wizard (`/study`) | [x] |
-| P4.2 | Auto LLM judge in CI sample set | [ ] optional / costly |
-| P4.3 | Second case pack | [ ] deferred |
+| P4.2 | Auto LLM judge in CI sample set | [ ] deferred (cost/flakiness) |
+| P4.3 | Second case pack `digital-inclusion` | [x] |
 | P4.4 | Cohen’s kappa in inter-rater stats + CSV | [x] |
-| P4.5 | Repo rename `perspective-lab` | [ ] cosmetic |
+| P4.5 | Repo rename `perspective-lab` | [ ] cosmetic / optional |
 
-**Client handover:** [CLIENT_HANDOVER.md](../../CLIENT_HANDOVER.md) — install Start App → Setup API key → run.
+**Cross-OS client run:** macOS / Windows / Linux starters + [CLIENT_HANDOVER.md](../../CLIENT_HANDOVER.md).
 
 ---
 
@@ -142,7 +142,7 @@ See [Sprint-08-Desktop.md](Sprints/Sprint-08-Desktop.md).
 
 ## Suggested next action
 
-1. Hand client **[CLIENT_HANDOVER.md](../../CLIENT_HANDOVER.md)** + project zip  
-2. Optional later: second case pack, signed installers, repo rename  
+1. Zip the repo + send **[CLIENT_HANDOVER.md](../../CLIENT_HANDOVER.md)** to the client  
+2. Optional: signed store installers, `CASE_ID` UI switcher, repo rename  
 
 [← Home](Home.md) · [Sprint plan](Sprints/README.md) · [Sprint 8](Sprints/Sprint-08-Desktop.md)

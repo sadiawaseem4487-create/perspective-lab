@@ -1,0 +1,23 @@
+{
+  "id": "digital-inclusion",
+  "title": "Digital Inclusion in Schools",
+  "research_question": "How do we reduce unequal access to digital learning tools in schools?",
+  "languages": ["en", "fi", "pt"],
+  "researchers": ["Sanni Pöntinen", "Sadia Bibi", "Jari Stenvall"],
+  "workflow": {
+    "default_mode": "parallel",
+    "modes": ["parallel", "sequential"],
+    "slot_count": 4,
+    "default_agents": ["freire", "weber", "montessori", "rogers"]
+  },
+  "theme": "research-warm",
+  "directories": {
+    "agents": "agents",
+    "models": "models",
+    "questions": "questions",
+    "reports": "reports",
+    "human_answers": "human_answers",
+    "rubric_scores": "rubric_scores",
+    "presentation": "presentation.json"
+  }
+}

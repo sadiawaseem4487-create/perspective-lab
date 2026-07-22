@@ -1,126 +1,174 @@
 # PerspectiveLab — Client Handover Guide
 
-**Who this is for:** your client (researcher / professor) who should run the app herself.  
-**What she needs:** a laptop + an AI API key. No Docker. No coding.
+**Who this is for:** your client (researcher / professor).  
+**What she needs:** a laptop + an AI API key. **No Docker. No coding.**
+
+Works on **macOS**, **Windows 10/11**, and **Linux**.
 
 ---
 
 ## What you give her
 
-1. This project folder (or a zip of the repo)
+1. This project folder (zip is fine)
 2. This guide
-3. Optionally: help once with installing **Node.js** (Mac/Windows) if she does not have it
+3. Help once installing **Node.js** (and **Python** on Windows/Linux if missing)
 
-She does **not** need to edit config files. She enters her API key in the app’s **Setup** screen.
+She enters her API key in the app **Setup** screen — she does **not** edit config files.
 
 ---
 
-## One-time install (15–30 minutes first time)
+## Pick the starter for her OS
 
-### Mac
+| Operating system | Double-click / run |
+|------------------|--------------------|
+| **macOS** | `Start App.command` |
+| **Windows** | `Start App.bat` (or `Start App.ps1` in PowerShell) |
+| **Linux** | `Start App.sh` or `./start.sh` in a terminal |
+| **Any (terminal)** | `./start.sh` |
 
-1. Install **Node.js LTS** from https://nodejs.org (if not already installed)
-2. Unzip / open the **PerspectiveLab** project folder
-3. **Double-click** `Start App.command`
-4. If macOS says the file cannot be opened: right-click → **Open** → confirm
-5. Wait for the terminal to finish installing (first run is slow)
-6. Browser opens at **http://localhost:8000**
+All of these start the same app at **http://localhost:8000**.
 
-### Windows
+---
 
-1. Install **Node.js LTS** from https://nodejs.org  
-2. Install **Python 3** from https://www.python.org (check “Add Python to PATH”)
-3. Double-click **`Start App.bat`**
-4. Wait for install + build
-5. Browser opens at **http://localhost:8000**
+## One-time install
+
+### Prerequisites (all OS)
+
+| Tool | Why | Where |
+|------|-----|--------|
+| **Node.js LTS** | Builds the interface | https://nodejs.org |
+| **Python 3.10+** | Runs the research server | https://www.python.org — on Linux: `sudo apt install python3 python3-venv python3-pip` |
+
+macOS usually already has Python 3.
+
+### macOS
+
+1. Install Node.js LTS  
+2. Open the project folder  
+3. Double-click **`Start App.command`**  
+4. If blocked: right-click → **Open** → confirm  
+5. Wait (first run 2–5 minutes) → browser opens  
+
+### Windows 10 / 11
+
+1. Install Node.js LTS  
+2. Install Python 3 — **check “Add python.exe to PATH”**  
+3. Double-click **`Start App.bat`**  
+4. If SmartScreen warns: More info → Run anyway  
+5. Browser opens at localhost:8000  
+
+PowerShell alternative:  
+`powershell -ExecutionPolicy Bypass -File ".\Start App.ps1"`
+
+### Linux (Ubuntu/Debian and similar)
+
+```bash
+sudo apt update
+sudo apt install -y python3 python3-venv python3-pip
+# Install Node.js LTS from https://nodejs.org (or your distro’s nodejs package)
+cd /path/to/perspective-lab
+chmod +x start.sh "Start App.sh"
+./start.sh
+```
+
+Optional: mark `Start App.desktop` as trusted and use it from the file manager (varies by desktop).
 
 ---
 
 ## First launch — only her API key
 
-1. The app opens the **Setup** page automatically if no key is saved yet  
-2. Choose provider:
-   - **OpenRouter** (recommended) — get a key at https://openrouter.ai/keys  
-   - **or OpenAI** — https://platform.openai.com/api-keys  
-3. Paste the key → **Save and continue**  
-4. She is taken to the Workspace and can ask the agents
+1. App opens **Setup** if no key is saved  
+2. Choose **OpenRouter** (recommended) or **OpenAI**  
+3. Paste key → **Save and continue**  
+4. Ask agents in **Workspace**
 
-Keys are stored only on **her computer** in `backend/.env`. They are not uploaded to your GitHub.
+Key file (local only): `backend/.env`  
+Get a key: https://openrouter.ai/keys
 
 ---
 
 ## Every later session
 
-1. Double-click `Start App.command` (Mac) or `Start App.bat` (Windows)  
-2. Keep the black/terminal window **open** while using the app  
-3. Use the browser at **http://localhost:8000**  
-4. When done: close the terminal or press **Ctrl+C**
+1. Run the starter for her OS (table above)  
+2. Keep the terminal/console **open**  
+3. Use **http://localhost:8000**  
+4. Stop with **Ctrl+C** or by closing the window  
 
 ---
 
-## How she uses the product (research flow)
+## Research flow (same on every OS)
 
-| Step | Where | What to do |
-|------|--------|------------|
-| 1 | **Setup** (once) | Paste API key |
-| 2 | **Workspace** | Type a research question → Ask agents |
-| 3 | **Report** | Read Freire / Weber / Montessori / Rogers answers |
-| 4 | **Compare** | Optional: add human answers + score the rubric |
-| 5 | **Study** | Optional: guided baseline → agents → post protocol |
-| 6 | **Presentation** | Show the academic deck to an audience |
-| 7 | **Export** | Download CSV/JSON / rubric CSV for analysis |
-| 8 | **Guide** | In-app checklist if she forgets the order |
+| Step | Page | Action |
+|------|------|--------|
+| 1 | Setup | API key (once) |
+| 2 | Workspace | Ask agents |
+| 3 | Report | Read four theory answers |
+| 4 | Compare / Study | Humans + rubric / protocol |
+| 5 | Presentation | Academic deck |
+| 6 | Export | JSON / CSV / rubric CSV |
+| 7 | Guide | In-app checklist |
 
-Language: EN / PT / FI in the sidebar.
-
----
-
-## What she must keep private
-
-- Her **OpenRouter / OpenAI API key** (costs money if shared or leaked)
-- Do not commit `backend/.env` to email/GitHub
-- Export files may contain research answers — handle per her ethics protocol
+Languages: EN / PT / FI.
 
 ---
 
-## Troubleshooting (give her this table)
+## Optional: second research case
 
-| Problem | Fix |
-|---------|-----|
-| Browser cannot connect | Keep the start window open; wait until it says the server started |
-| “API key” / agents fail | Open **Setup** in the sidebar and save the key again |
-| First start takes forever | Normal once — Node packages + Python venv |
-| Mac blocks `Start App.command` | Right-click → Open |
-| Windows: `python` not found | Reinstall Python with “Add to PATH”, then run `Start App.bat` again |
-| Needs a model change | **Models** page in the sidebar |
+Default case is **São Paulo school dropout**.  
+A second pack **Digital inclusion in schools** is included.
+
+To switch (advanced / helper):
+
+1. Open `backend/.env`  
+2. Add: `CASE_ID=digital-inclusion`  
+3. Restart the app  
+
+To go back: `CASE_ID=sao-paulo-dropout` or remove the line.
 
 ---
 
-## Optional: desktop window (advanced)
-
-If Rust is installed (`https://rustup.rs`), a technical helper can run:
+## Optional: desktop window (all OS with Rust)
 
 ```bash
+# Install Rust: https://rustup.rs
 make install && make build
 make desktop-dev
 ```
 
-For most clients, **browser + Start App** is enough.
+Installers: `make desktop-build`  
+→ macOS `.dmg` · Windows NSIS · Linux AppImage/deb (when targets enabled)
+
+Most clients only need **browser + Start App**.
 
 ---
 
-## Your handover checklist (you)
+## Troubleshooting
 
-- [ ] Client has Node.js (and Python on Windows)
-- [ ] Client can double-click Start App and reach localhost:8000
-- [ ] Client pastes her own API key in **Setup**
-- [ ] Client asks one demo question and sees 4 answers
-- [ ] Client knows: keep terminal open; key stays local; Export for data
+| Problem | Fix |
+|---------|-----|
+| Cannot connect | Keep start window open |
+| Agents fail / no key | **Setup** → save key again |
+| First start slow | Normal once |
+| Mac blocks app | Right-click → Open |
+| Windows: python not found | Reinstall Python with PATH checked |
+| Linux: `python3-venv` missing | `sudo apt install python3-venv` |
+| `npm` not found | Install Node.js LTS |
+| Port 8000 in use | Close other PerspectiveLab windows; or reboot |
 
 ---
 
-## More detail (optional)
+## Your handover checklist
 
-- In-app: **Guide** (`/guide`)
-- Researcher wiki: [docs/wiki/Home.md](docs/wiki/Home.md)
-- Facilitator path: [docs/wiki/Facilitator-Checklist.md](docs/wiki/Facilitator-Checklist.md)
+- [ ] Correct starter for her OS works  
+- [ ] localhost:8000 opens  
+- [ ] She pastes **her own** API key in Setup  
+- [ ] One demo question → 4 answers  
+- [ ] She knows: keep window open; key stays local; Export for data  
+
+---
+
+## More detail
+
+- [USER_GUIDE.md](./USER_GUIDE.md)  
+- In-app **Guide** (`/guide`)  
+- Wiki: [docs/wiki/Home.md](docs/wiki/Home.md)
