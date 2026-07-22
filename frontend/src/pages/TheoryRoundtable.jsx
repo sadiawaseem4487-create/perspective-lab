@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   advanceSequentialRun,
   askQuestion,
   checkHealth,
   fetchAgentsCatalog,
+  fetchComparison,
   fetchQuestions,
   fetchSelectedModel,
   finalizeSequentialRun,
@@ -13,7 +15,9 @@ import {
 import { AgentDetailPanel } from "@/components/AgentDetailPanel";
 import { AgentPersona } from "@/components/AgentPersona";
 import { DemoQuestionPanel } from "@/components/DemoQuestionPicker";
-import { SequentialTimeline } from "@/components/SequentialTimeline";
+import { GuestChairs } from "@/components/GuestChairs";
+import { RunMetadataBar } from "@/components/RunMetadataBar";
+import { SequentialFlowGraph } from "@/components/SequentialFlowGraph";
 import { Button } from "@/components/ui/button";
 import { useAppMode } from "@/context/AppModeContext";
 import { cn } from "@/lib/utils";
@@ -46,6 +50,7 @@ export default function TheoryRoundtable() {
 
   const [result, setResult] = useState(null);
   const [sequentialRun, setSequentialRun] = useState(null);
+  const [guestHumans, setGuestHumans] = useState([]);
   const [checkpointNote, setCheckpointNote] = useState("");
   const [revealed, setRevealed] = useState(new Set());
   const [selectedKey, setSelectedKey] = useState(null);
@@ -100,6 +105,17 @@ export default function TheoryRoundtable() {
     }
     return map;
   }, [responseMap]);
+
+  useEffect(() => {
+    const sessionId = result?.session_id || Number(sessionStorage.getItem("last_session_id"));
+    if (!sessionId) {
+      setGuestHumans([]);
+      return;
+    }
+    fetchComparison(sessionId)
+      .then((data) => setGuestHumans(data.human_answers || []))
+      .catch(() => setGuestHumans([]));
+  }, [result?.session_id]);
 
   useEffect(() => {
     if (!result?.responses?.length) return;
@@ -210,6 +226,8 @@ export default function TheoryRoundtable() {
       ? AGENT_ORDER.map((id) => agents.find((a) => a.id === id)).filter(Boolean)
       : AGENT_ORDER.map((id) => ({ id, title: id, color: "#78716c" }));
 
+  const sessionActive = loading || Boolean(result) || Boolean(sequentialRun);
+
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -270,61 +288,84 @@ export default function TheoryRoundtable() {
         />
       </div>
 
+      <RunMetadataBar result={result} loading={loading} isDemo={isDemo} t={t} />
+
       {loading && result?.responses?.length > 0 && (
         <p className="text-center text-sm text-slate-400">
           {t("roundtable.progress").replace("{count}", String(revealed.size)).replace("{total}", "4")}
         </p>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {orderedAgents.map((agent) => {
-          const key = agent.id;
-          const status = personaStatus(key, {
-            loading,
-            revealed,
-            responses: responseMap,
-            errors: errorMap,
-          });
-          return (
-            <AgentPersona
-              key={key}
-              agentKey={key}
-              label={agent.title || agent.id}
-              color={agent.color}
-              status={status}
-              selected={selectedKey === key}
-              lang={lang}
-              takeaway={insightMap[key] || ""}
-              onClick={() => setSelectedKey(key)}
-            />
-          );
-        })}
-      </div>
+      <AnimatePresence mode="wait">
+        {sessionActive ? (
+          <motion.div
+            key={result?.session_id || sequentialRun?.run_id || "loading"}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          >
+            {orderedAgents.map((agent, index) => {
+              const key = agent.id;
+              const status = personaStatus(key, {
+                loading,
+                revealed,
+                responses: responseMap,
+                errors: errorMap,
+              });
+              return (
+                <AgentPersona
+                  key={key}
+                  index={index}
+                  agentKey={key}
+                  label={agent.title || agent.id}
+                  color={agent.color}
+                  status={status}
+                  selected={selectedKey === key}
+                  lang={lang}
+                  takeaway={insightMap[key] || ""}
+                  readLabel={t("roundtable.tapToRead")}
+                  onClick={() => setSelectedKey(key)}
+                />
+              );
+            })}
+          </motion.div>
+        ) : (
+          <motion.div
+            key="waiting"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="rounded-2xl border border-dashed border-white/15 bg-slate-900/30 px-6 py-14 text-center"
+          >
+            <p className="text-sm font-medium text-slate-400">{t("roundtable.waiting")}</p>
+            <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-slate-500">
+              {t("roundtable.summonAgents")}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {sequentialRun && (
         <div className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
-          <SequentialTimeline
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
+            {t("stage3.sequentialTimeline")}
+          </p>
+          <SequentialFlowGraph
             stages={sequentialRun.stages}
             currentVaihe={sequentialRun.current_vaihe}
             responses={sequentialRun.responses}
+            status={sequentialRun.status}
+            checkpointNote={checkpointNote}
+            onCheckpointNoteChange={setCheckpointNote}
+            onAdvance={handleAdvance}
+            loading={loading}
             t={t}
           />
-          {sequentialRun.status === "awaiting_review" && (
-            <div className="space-y-3">
-              <textarea
-                value={checkpointNote}
-                onChange={(e) => setCheckpointNote(e.target.value)}
-                rows={2}
-                className="w-full rounded-lg border border-white/15 bg-slate-900 px-3 py-2 text-sm text-white"
-                placeholder={t("stage3.checkpointPlaceholder")}
-              />
-              <Button onClick={handleAdvance} disabled={loading} className="rounded-full">
-                {sequentialRun.current_vaihe >= 4 ? t("stage3.completeWorkflow") : t("stage3.approveContinue")}
-              </Button>
-            </div>
-          )}
         </div>
       )}
+
+      {sessionActive && <GuestChairs humans={guestHumans} showLink />}
 
       {error && <p className="rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</p>}
 
@@ -336,6 +377,9 @@ export default function TheoryRoundtable() {
           lang={lang}
           response={selectedResponse.response}
           takeaway={insightMap[selectedKey]}
+          diagnosticQuestion={selectedAgent?.diagnostic_question || ""}
+          reasoningChain={selectedAgent?.reasoning_chain || []}
+          selfCheck={selectedResponse.self_check || null}
           onClose={() => setSelectedKey(null)}
           t={t}
         />

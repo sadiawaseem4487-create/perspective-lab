@@ -16,9 +16,11 @@ Welcome to the project wiki. This is the single source of truth for architecture
 | [Code Standards](Code-Standards.md) | Clean code rules, smells to avoid |
 | [Research Alignment](Research-Alignment.md) | Parallel vs sequential agents (document spec) |
 | [Test Plan](Test-Plan.md) | Manual + automated test cases for current sprint |
+| [Problem-Solving Rubric](Problem-Solving-Rubric.md) | Sprint 9 scaffold for measuring “better problem solvers” |
 | [Development Pipeline](Development-Pipeline.md) | CI/CD + sprint approval workflow |
 | [GitHub Setup](GitHub-Setup.md) | First-time repo + push instructions |
 | [Sprint Plan](Sprints/README.md) | All sprints, tasks, exit criteria |
+| [Remaining Work](Remaining-Work.md) | Prioritized backlog after Sprints 7 + 9 |
 | [Progress Log](Progress-Log.md) | Dated implementation history |
 
 ---
@@ -28,11 +30,12 @@ Welcome to the project wiki. This is the single source of truth for architecture
 | Field | Value |
 |-------|-------|
 | **Product** | PerspectiveLab |
-| **Current sprint** | [Sprint 7 — GUI Research](Sprints/Sprint-07-GUI-Research.md) |
-| **Sprint 6 status** | 🟩 Complete (PR pending) |
-| **Sprint 4 status** | 🟩 Complete |
+| **Current sprint** | [Sprint 8 — Desktop](Sprints/Sprint-08-Desktop.md) (next) |
+| **Sprint 9 status** | 🟩 Complete (research integrity) |
+| **Sprint 7 status** | 🟩 Complete (GUI research workspace) |
+| **Sprint 6 status** | 🟩 Complete |
 | **Sprint 1 status** | 🟩 Complete |
-| **Last updated** | 2026-07-07 |
+| **Last updated** | 2026-07-22 |
 
 ---
 

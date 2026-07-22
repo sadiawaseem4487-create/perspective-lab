@@ -6,21 +6,22 @@ import { useLanguage } from "@/i18n/LanguageContext";
 export default function ModeToggle() {
   const { mode, setMode } = useAppMode();
   const { t } = useLanguage();
+  const isDemo = mode === APP_MODES.demo;
 
   return (
-    <div className="px-3 pb-3">
-      <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-widest text-sidebar-muted">
+    <div className="border-b border-slate-800 px-3 py-3">
+      <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
         {t("shell.appMode")}
       </p>
-      <div className="grid grid-cols-2 gap-1 rounded-lg bg-black/25 p-1">
+      <div className="grid grid-cols-2 gap-1 rounded-xl bg-slate-900 p-1">
         <button
           type="button"
           onClick={() => setMode(APP_MODES.live)}
           className={cn(
-            "flex items-center justify-center gap-1.5 rounded-md px-2 py-2 text-xs font-semibold transition-all",
-            mode === APP_MODES.live
+            "flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-xs font-semibold transition-all",
+            !isDemo
               ? "bg-white text-slate-900 shadow-sm"
-              : "text-sidebar-foreground/80 hover:bg-white/10"
+              : "text-slate-400 hover:bg-slate-800 hover:text-white"
           )}
         >
           <Zap className="h-3.5 w-3.5" />
@@ -30,14 +31,25 @@ export default function ModeToggle() {
           type="button"
           onClick={() => setMode(APP_MODES.demo)}
           className={cn(
-            "flex items-center justify-center gap-1.5 rounded-md px-2 py-2 text-xs font-semibold transition-all",
-            mode === APP_MODES.demo
+            "flex flex-col items-center justify-center gap-0.5 rounded-lg px-2 py-2 text-xs font-semibold transition-all",
+            isDemo
               ? "bg-amber-400 text-slate-900 shadow-sm"
-              : "text-sidebar-foreground/80 hover:bg-white/10"
+              : "text-slate-400 hover:bg-slate-800 hover:text-white"
           )}
+          aria-pressed={isDemo}
         >
-          <FlaskConical className="h-3.5 w-3.5" />
-          {t("shell.modeDemo")}
+          <span className="flex items-center gap-1.5">
+            <FlaskConical className="h-3.5 w-3.5" />
+            {t("shell.modeDemo")}
+          </span>
+          <span
+            className={cn(
+              "text-[9px] font-medium uppercase tracking-wide",
+              isDemo ? "text-slate-800/70" : "text-slate-500"
+            )}
+          >
+            {t("shell.modeDemoSub")}
+          </span>
         </button>
       </div>
     </div>

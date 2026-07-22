@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { ChevronRight, Loader2 } from "lucide-react";
-import { getAgentIcon, getAgentLens, getAgentTheorist } from "@/lib/agentIcons";
+import { ChevronRight } from "lucide-react";
+import { AgentAvatar } from "@/components/AgentAvatar";
+import { getAgentLens, getAgentTheorist } from "@/lib/agentIcons";
 import { cn } from "@/lib/utils";
 
 function hexToRgb(hex) {
@@ -22,8 +23,9 @@ export function AgentPersona({
   lang = "en",
   takeaway = "",
   onClick,
+  index = 0,
+  readLabel = "Read answer",
 }) {
-  const Icon = getAgentIcon(agentKey);
   const lens = getAgentLens(agentKey, lang);
   const theorist = getAgentTheorist(agentKey);
   const canOpen = status === "done" && onClick;
@@ -35,9 +37,10 @@ export function AgentPersona({
       type="button"
       onClick={canOpen ? onClick : undefined}
       layout
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: 1 }}
-      whileHover={canOpen ? { y: -2 } : undefined}
+      initial={{ opacity: 0, y: 28, scale: 0.88 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay: index * 0.18, type: "spring", stiffness: 260, damping: 22 }}
+      whileHover={canOpen ? { y: -4 } : undefined}
       className={cn(
         "group relative w-full overflow-hidden rounded-2xl p-[1px] text-left transition-all",
         canOpen ? "cursor-pointer" : "cursor-default",
@@ -57,40 +60,23 @@ export function AgentPersona({
         />
       )}
 
-      <div className="relative flex h-full flex-col rounded-[15px] bg-slate-950/85 p-4 backdrop-blur-md">
-        <div className="flex items-start gap-3">
-          <div className="relative">
-            <div
-              className="absolute -inset-1 rounded-full opacity-60 blur-md"
-              style={{ backgroundColor: color }}
-            />
-            <div
-              className="relative flex h-12 w-12 items-center justify-center rounded-full border border-white/20 text-white shadow-lg"
-              style={{ background: `linear-gradient(135deg, ${color}, rgba(${rgb.r},${rgb.g},${rgb.b},0.5))` }}
-            >
-              {status === "thinking" ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Icon className="h-5 w-5" />
-              )}
-            </div>
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold leading-tight text-white">{label}</p>
-            <p className="mt-0.5 text-[11px] font-medium" style={{ color }}>
-              {theorist}
-            </p>
-            <p className="mt-1 text-[11px] text-slate-400">{lens}</p>
-          </div>
-          {canOpen && <ChevronRight className="mt-1 h-4 w-4 text-slate-500 group-hover:text-white" />}
+      <div className="relative flex h-full flex-col items-center rounded-[15px] bg-slate-950/90 px-4 pb-4 pt-5 text-center backdrop-blur-md">
+        <AgentAvatar agentKey={agentKey} color={color} status={status} className="h-20 w-16" />
+
+        <div className="mt-3 w-full min-w-0">
+          <p className="text-sm font-semibold leading-tight text-white">{label}</p>
+          <p className="mt-1 text-xs font-medium text-slate-200">{theorist}</p>
+          <p className="mt-1 text-[11px] leading-snug text-slate-400">{lens}</p>
         </div>
 
         {status === "done" && takeaway && (
-          <p className="mt-3 border-t border-white/10 pt-3 text-sm leading-snug text-slate-200">{takeaway}</p>
+          <p className="mt-3 w-full border-t border-white/10 pt-3 text-left text-sm leading-snug text-slate-200">
+            {takeaway}
+          </p>
         )}
 
         {status === "thinking" && (
-          <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/10">
+          <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-white/10">
             <motion.div
               className="h-full rounded-full"
               style={{ backgroundColor: color }}
@@ -98,6 +84,13 @@ export function AgentPersona({
               transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
             />
           </div>
+        )}
+
+        {canOpen && (
+          <span className="mt-2 inline-flex items-center gap-1 text-[11px] text-slate-500 group-hover:text-white">
+            {readLabel}
+            <ChevronRight className="h-3 w-3" />
+          </span>
         )}
       </div>
     </motion.button>

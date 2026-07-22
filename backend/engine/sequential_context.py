@@ -38,7 +38,12 @@ def _stage_deliverable(agent_id: str) -> str:
     return stage.get("deliverable", "Stage output")
 
 
-def build_stage_question(original_question: str, stage_outputs: Dict[str, str], agent_id: str) -> str:
+def build_stage_question(
+    original_question: str,
+    stage_outputs: Dict[str, str],
+    agent_id: str,
+    human_note: str = "",
+) -> str:
     """Compose user message for one sequential stage with prior context."""
     parts = [
         "RESEARCH QUESTION:",
@@ -53,10 +58,16 @@ def build_stage_question(original_question: str, stage_outputs: Dict[str, str], 
             if prior_id in stage_outputs and stage_outputs[prior_id]:
                 parts.append(f"\n[{prior_id.upper()} — {_stage_deliverable(prior_id)}]\n{stage_outputs[prior_id]}")
 
+    note = (human_note or "").strip()
+    if note:
+        parts.append("\nHUMAN REVIEWER NOTE (must address in this stage):")
+        parts.append(note)
+
     parts.append(f"\nYOUR TASK — {_stage_deliverable(agent_id)}:")
     parts.append(_stage_task(agent_id))
     parts.append(
         "\nRespond only for your stage. Reference prior stages where relevant. "
+        "If a human reviewer note is present, incorporate it explicitly. "
         "Keep output structured per your theory profile."
     )
     return "\n".join(parts)

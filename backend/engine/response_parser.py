@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set
 
 SECTION_TITLES = [
     "Problem Diagnosis",
@@ -27,7 +27,44 @@ SECTION_TITLES = [
     "Adoption barriers and enablers",
     "Pilot design",
     "Scaling roadmap",
+    # Sprint 9 — reasoning process + scientific honesty
+    "Lived experience",
+    "Naming the problem",
+    "Critical question",
+    "Collective action",
+    "Reflection",
+    "Authority map",
+    "Responsibility",
+    "Process design",
+    "Documentation",
+    "Accountability",
+    "Legitimacy",
+    "Observation",
+    "Prepared environment",
+    "Learner choice",
+    "Concrete activity",
+    "Teacher as guide",
+    "Independent learning",
+    "Innovation framing",
+    "Adopter analysis",
+    "Communication channels",
+    "Assumptions",
+    "Uncertainty",
 ]
+
+ACTION_SECTIONS: Set[str] = {
+    "Priority Actions",
+    "Pilot design",
+    "Scaling roadmap",
+    "Participatory action plan",
+    "Procedure and accountability plan",
+    "School-day learning plan",
+    "Administrative model",
+    "Implementation Steps",
+    "Collective action",
+    "Process design",
+    "Concrete activity",
+}
 
 CANONICAL_TITLES = {
     "action plan": "Priority Actions",
@@ -40,12 +77,20 @@ CANONICAL_TITLES = {
     "final recommendation": "Final Recommendation",
 }
 
+_TITLE_ALT = "|".join(re.escape(title) for title in SECTION_TITLES)
+
 SECTION_PATTERN = re.compile(
-    r"^\s*(?:#{1,6}\s*)?(?:\d+\.\s*)?(?:\*\*)?("
-    + "|".join(re.escape(title) for title in SECTION_TITLES)
-    + r")(?:\*\*)?\s*:?\s*$",
+    rf"^\s*(?:#{{1,6}}\s*)?(?:\d+\.\s*)?(?:\*\*)?({_TITLE_ALT})(?:\*\*)?\s*:?\s*$",
     re.IGNORECASE | re.MULTILINE,
 )
+
+# Models often emit section titles as bullets: "- Missing voices"
+BULLET_SECTION_PATTERN = re.compile(
+    rf"^-\s+({_TITLE_ALT})\s*$",
+    re.IGNORECASE | re.MULTILINE,
+)
+
+SECTION_TITLE_SET = {title.lower() for title in SECTION_TITLES}
 
 
 def clean_agent_text(text: str) -> str:
@@ -65,6 +110,10 @@ def _canonical_title(title: str) -> str:
     return CANONICAL_TITLES.get(title.lower(), title)
 
 
+def _is_section_title(text: str) -> bool:
+    return _canonical_title(text).lower() in SECTION_TITLE_SET
+
+
 def _parse_action_block(text: str) -> Optional[Dict[str, str]]:
     block = {"action": "", "owner": "", "timeline": "", "measure": ""}
     has_field = False
@@ -72,45 +121,72 @@ def _parse_action_block(text: str) -> Optional[Dict[str, str]]:
         line = line.strip()
         if not line:
             continue
-        match = re.match(r"^(Action|Owner|Timeline|Measure)\s*:\s*(.+)$", line, re.IGNORECASE)
+        normalized = re.sub(r"^[-•*]\s+", "", line)
+        match = re.match(r"^(Action|Owner|Timeline|Measure)\s*:\s*(.+)$", normalized, re.IGNORECASE)
         if match:
             block[match.group(1).lower()] = match.group(2).strip()
             has_field = True
     return block if has_field else None
 
 
-def _extract_bullets(body: str, section_title: str) -> List[Dict[str, Any]]:
+def _leftover_bullets(chunk: str) -> List[Dict[str, Any]]:
     items: List[Dict[str, Any]] = []
+    for line in chunk.split("\n"):
+        trimmed = line.strip()
+        if not trimmed:
+            continue
+        normalized = re.sub(r"^[-•*]\s+", "", trimmed)
+        if re.match(r"^(Action|Owner|Timeline|Measure)\s*:", normalized, re.IGNORECASE):
+            continue
+        text = re.sub(r"^\d+\.\s+", "", normalized).strip()
+        if not text or _is_section_title(text):
+            continue
+        items.append({"type": "bullet", "text": text})
+    return items
 
-    if section_title == "Priority Actions":
-        chunks = [chunk.strip() for chunk in re.split(r"\n(?=Action\s*:)", body, flags=re.IGNORECASE) if chunk.strip()]
-        for chunk in chunks:
-            action_block = _parse_action_block(chunk)
-            if action_block:
-                items.append({"type": "action", **action_block})
-        if items:
-            return items[:4]
 
+def _extract_action_items(body: str) -> List[Dict[str, Any]]:
+    normalized = re.sub(r"^-\s*(Action\s*:)", r"\1", body, flags=re.IGNORECASE | re.MULTILINE)
+    chunks = [chunk.strip() for chunk in re.split(r"\n(?=Action\s*:)", normalized, flags=re.IGNORECASE) if chunk.strip()]
+    items: List[Dict[str, Any]] = []
+    for chunk in chunks:
+        action_block = _parse_action_block(chunk)
+        if action_block:
+            items.append({"type": "action", **action_block})
+            items.extend(_leftover_bullets(chunk))
+    return items
+
+
+def _extract_bullets(body: str, section_title: str) -> List[Dict[str, Any]]:
+    if section_title in ACTION_SECTIONS:
+        action_items = _extract_action_items(body)
+        if action_items:
+            return action_items[:8]
+
+    items: List[Dict[str, Any]] = []
     for line in body.split("\n"):
         line = line.strip()
         if not line:
             continue
         bullet = re.sub(r"^[-•*]\s+", "", line)
         bullet = re.sub(r"^\d+\.\s+", "", bullet).strip()
-        if not bullet:
+        if not bullet or _is_section_title(bullet):
             continue
-        if bullet.lower() in {title.lower() for title in SECTION_TITLES}:
-            continue
-        action_block = _parse_action_block(bullet)
-        if action_block and section_title == "Priority Actions":
-            items.append({"type": "action", **action_block})
-        else:
-            items.append({"type": "bullet", "text": bullet})
+        items.append({"type": "bullet", "text": bullet})
 
     if not items and body.strip():
         return [{"type": "bullet", "text": body.strip()}]
-    limit = 4 if section_title == "Priority Actions" else 5
+    limit = 8 if section_title in ACTION_SECTIONS else 6
     return items[:limit]
+
+
+def _dedupe_matches(matches: List[re.Match[str]]) -> List[re.Match[str]]:
+    sorted_matches = sorted(matches, key=lambda match: match.start())
+    result: List[re.Match[str]] = []
+    for match in sorted_matches:
+        if not result or match.start() >= result[-1].start() + len(result[-1].group(0)):
+            result.append(match)
+    return result
 
 
 def parse_agent_response(text: str) -> Dict[str, Any]:
@@ -118,7 +194,9 @@ def parse_agent_response(text: str) -> Dict[str, Any]:
     if not cleaned:
         return {"sections": [], "fallback": ""}
 
-    matches = list(SECTION_PATTERN.finditer(cleaned))
+    line_matches = list(SECTION_PATTERN.finditer(cleaned))
+    bullet_matches = list(BULLET_SECTION_PATTERN.finditer(cleaned))
+    matches = _dedupe_matches(line_matches + bullet_matches)
     if not matches:
         return {"sections": [], "fallback": cleaned}
 
@@ -149,12 +227,10 @@ def first_text_bullet(sections: List[Dict[str, Any]], title: str) -> str:
 
 
 def first_action_block(sections: List[Dict[str, Any]]) -> Optional[Dict[str, str]]:
-    section = next((item for item in sections if item["title"] == "Priority Actions"), None)
-    if not section:
-        return None
-    for bullet in section.get("bullets", []):
-        if bullet.get("type") == "action":
-            return bullet
+    for section in sections:
+        for bullet in section.get("bullets", []):
+            if bullet.get("type") == "action":
+                return bullet
     return None
 
 

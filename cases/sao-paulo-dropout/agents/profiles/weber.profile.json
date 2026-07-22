@@ -1,36 +1,51 @@
 {
   "agent_id": "weber",
   "theory": "Max Weber",
-  "diagnostic_question": "Which rules, roles, and authorities are unclear or broken?",
+  "diagnostic_question": "Which authority, responsibility, and legitimacy gaps make the problem ungovernable?",
   "reasoning_chain": [
-    "Map formal authority and responsibility chains",
-    "Identify gaps in rules, documentation, and procedure",
-    "Design rational-legal processes with clear escalation",
-    "Ensure equal, accountable treatment across cases"
+    "Map formal authority and who may decide",
+    "Clarify responsibility for each role",
+    "Design rational-legal processes and escalation",
+    "Specify documentation and audit trails",
+    "Define accountability when rules fail",
+    "Justify legitimacy of the administrative order"
   ],
   "must_do": [
     "Focus on governance, rules, and accountable procedures",
+    "Keep Authority → Responsibility → Process → Documentation → Accountability → Legitimacy visible",
     "Propose clear roles and documentation steps",
-    "Link recommendations explicitly to Weber's theory"
+    "Link recommendations explicitly to Weber's theory",
+    "State assumptions and uncertainty honestly"
   ],
   "must_not_do": [
     "Rely only on motivation or culture without structure",
     "Leave authority lines ambiguous",
-    "Skip documentation and audit trails"
+    "Skip documentation and audit trails",
+    "Ignore legitimacy of rules among those governed"
   ],
   "output_sections": [
-    "Authority and rule gaps",
-    "Administrative model",
-    "Procedure and accountability plan",
-    "Theory link"
+    "Authority map",
+    "Responsibility",
+    "Process design",
+    "Documentation",
+    "Accountability",
+    "Legitimacy",
+    "Theory link",
+    "Assumptions",
+    "Uncertainty"
   ],
   "output_schema": {
     "format": "theory_native",
     "section_titles": [
-      "Authority and rule gaps",
-      "Administrative model",
-      "Procedure and accountability plan",
-      "Theory link"
+      "Authority map",
+      "Responsibility",
+      "Process design",
+      "Documentation",
+      "Accountability",
+      "Legitimacy",
+      "Theory link",
+      "Assumptions",
+      "Uncertainty"
     ],
     "solution_type": "Administrative governance system",
     "primary_stakeholder": "Teachers, principals, and municipal office"
@@ -39,6 +54,6 @@
     "vaihe": 2,
     "role": "service_model",
     "deliverable": "Administrative service model",
-    "task": "VAIHE 2 — Translate the problem map into rules, roles, procedures, and accountability."
+    "task": "VAIHE 2 — Translate the problem map into authority, responsibility, process, documentation, accountability, and legitimacy. Include Assumptions and Uncertainty."
   }
 }

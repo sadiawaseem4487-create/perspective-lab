@@ -1,13 +1,25 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Presentation, Users } from "lucide-react";
 import { fetchComparison, fetchReports, saveHumanAnswers } from "../api";
+import { AgentAvatar } from "../components/AgentAvatar";
 import { AgentResponse } from "../components/AgentResponse";
+import { GuestChairs } from "../components/GuestChairs";
+import { PageAlert, PageHero, PagePanel } from "../components/PageChrome";
+import { RubricScorePanel } from "../components/RubricScorePanel";
+import { SessionQuestionPicker } from "../components/SessionQuestionPicker";
 import { useLanguage } from "../i18n/LanguageContext";
+import { getAgentLens, getAgentTheorist } from "@/lib/agentIcons";
+import {
+  displayQuestion,
+  resolvePreferredSessionId,
+  uniqueReportsByQuestion,
+} from "@/utils/uniqueReports";
 
 const emptyPerson = () => ({ name: "", role: "", answer: "" });
 
 export default function Stage5Compare() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [reports, setReports] = useState([]);
   const [sessionId, setSessionId] = useState(null);
   const [comparison, setComparison] = useState(null);
@@ -20,8 +32,9 @@ export default function Stage5Compare() {
     const lastId = sessionStorage.getItem("last_session_id");
     fetchReports()
       .then((list) => {
-        setReports(list);
-        const id = lastId ? Number(lastId) : list[0]?.session_id;
+        const unique = uniqueReportsByQuestion(list);
+        setReports(unique);
+        const id = resolvePreferredSessionId(list, lastId);
         if (id) loadComparison(id);
       })
       .catch((err) => setError(err.message));
@@ -32,7 +45,10 @@ export default function Stage5Compare() {
     setSaved(false);
     try {
       const data = await fetchComparison(id);
-      setComparison(data);
+      setComparison({
+        ...data,
+        question: displayQuestion(data.question),
+      });
       setPeople(data.human_answers?.length ? data.human_answers : [emptyPerson()]);
       setError("");
     } catch (err) {
@@ -61,59 +77,70 @@ export default function Stage5Compare() {
   }
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-wide text-orange-700">{t("stage5.badge")}</p>
-        <h2 className="font-display text-3xl font-bold text-stone-900">{t("stage5.title")}</h2>
-        <p className="mt-2 text-stone-600">
-          {t("stage5.desc")}{" "}
-          <code className="rounded bg-stone-100 px-1">cases/&lt;case&gt;/human_answers/</code>.
-        </p>
-      </section>
+    <div className="mx-auto max-w-6xl space-y-8">
+      <PageHero
+        badge={t("stage5.badge")}
+        title={t("stage5.title")}
+        description={<p className="max-w-2xl text-slate-400">{t("stage5.desc")}</p>}
+      />
 
-      {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-      {saved && <p className="rounded-lg bg-green-50 p-3 text-sm text-green-800">{t("stage5.saved")}</p>}
+      {error && <PageAlert>{error}</PageAlert>}
+      {saved && <PageAlert variant="success">{t("stage5.saved")}</PageAlert>}
 
-      <div className="flex flex-wrap gap-2">
-        {reports.map((r) => (
-          <button
-            key={r.session_id}
-            type="button"
-            onClick={() => loadComparison(r.session_id)}
-            className={`rounded-lg border px-3 py-2 text-sm ${
-              sessionId === r.session_id ? "border-orange-400 bg-orange-50" : "border-stone-200"
-            }`}
-          >
-            #{r.session_id}
-          </button>
-        ))}
-      </div>
+      <PagePanel className="!py-4">
+        <SessionQuestionPicker
+          reports={reports}
+          sessionId={sessionId}
+          onSelect={loadComparison}
+          label={t("stage5.pickSession")}
+          showingLabel={t("stage5.showingSession")}
+          runsLabel={t("stage5.runs")}
+        />
+        <p className="mt-2 text-xs text-slate-500">{t("stage5.uniqueHint")}</p>
+      </PagePanel>
 
       {comparison && (
         <>
-          <section className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
-            <p className="text-sm font-semibold text-blue-900">{t("stage5.researchQuestion")}</p>
-            <p className="mt-1 text-blue-950">{comparison.question}</p>
+          <section className="relative overflow-hidden rounded-2xl border border-sky-500/20 bg-sky-500/10 px-6 py-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-300/90">
+              {t("stage5.researchQuestion")}
+            </p>
+            <p className="mt-2 font-display text-xl font-semibold leading-snug text-white sm:text-2xl">
+              {comparison.question}
+            </p>
           </section>
 
-          <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-stone-900">{t("stage5.addHuman")}</h3>
-            <p className="mt-1 text-sm text-stone-500">{t("stage5.addHumanDesc")}</p>
-            <div className="mt-4 space-y-4">
+          <PagePanel>
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-300">
+                <Users className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-display text-xl font-semibold text-white">
+                  {t("stage5.addHuman")}
+                </h3>
+                <p className="mt-1 text-sm text-slate-400">{t("stage5.addHumanDesc")}</p>
+              </div>
+            </div>
+
+            <div className="mt-5 space-y-4">
               {people.map((person, index) => (
-                <div key={index} className="rounded-xl border border-stone-200 p-4">
+                <div
+                  key={index}
+                  className="rounded-2xl border border-white/10 bg-slate-950/40 p-4 sm:p-5"
+                >
                   <div className="grid gap-3 sm:grid-cols-2">
                     <input
                       value={person.name}
                       onChange={(e) => updatePerson(index, "name", e.target.value)}
                       placeholder={t("stage5.namePh")}
-                      className="rounded-lg border border-stone-300 px-3 py-2 text-sm"
+                      className="page-input"
                     />
                     <input
                       value={person.role}
                       onChange={(e) => updatePerson(index, "role", e.target.value)}
                       placeholder={t("stage5.rolePh")}
-                      className="rounded-lg border border-stone-300 px-3 py-2 text-sm"
+                      className="page-input"
                     />
                   </div>
                   <textarea
@@ -121,64 +148,94 @@ export default function Stage5Compare() {
                     onChange={(e) => updatePerson(index, "answer", e.target.value)}
                     rows={4}
                     placeholder={t("stage5.answerPh")}
-                    className="mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
+                    className="page-input mt-3 w-full"
                   />
                   {people.length > 1 && (
-                    <button type="button" onClick={() => setPeople((p) => p.filter((_, i) => i !== index))} className="mt-2 text-sm text-red-600">
+                    <button
+                      type="button"
+                      onClick={() => setPeople((p) => p.filter((_, i) => i !== index))}
+                      className="mt-2 text-sm text-red-400 hover:text-red-300"
+                    >
                       {t("stage5.remove")}
                     </button>
                   )}
                 </div>
               ))}
             </div>
-            <div className="mt-4 flex flex-wrap gap-3">
-              <button type="button" onClick={() => setPeople((p) => [...p, emptyPerson()])} className="rounded-lg border border-stone-300 px-4 py-2 text-sm">
+
+            <div className="mt-5 flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => setPeople((p) => [...p, emptyPerson()])}
+                className="page-btn-secondary px-4 py-2 text-sm"
+              >
                 {t("stage5.addPerson")}
               </button>
-              <button type="button" onClick={handleSaveHuman} disabled={saving} className="rounded-lg bg-orange-800 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+              <button
+                type="button"
+                onClick={handleSaveHuman}
+                disabled={saving}
+                className="page-btn-primary px-4 py-2 text-sm"
+              >
                 {saving ? t("common.saving") : t("stage5.saveHuman")}
               </button>
             </div>
-          </section>
+          </PagePanel>
 
           <section className="space-y-4">
-            <h3 className="text-lg font-bold text-stone-900">{t("stage5.aiSolutions")}</h3>
+            <h3 className="font-display text-xl font-semibold text-white">
+              {t("stage5.aiSolutions")}
+            </h3>
             <div className="grid gap-4 lg:grid-cols-2">
-              {comparison.agent_solutions.map((a) => (
-                <article key={a.agent_label} className="rounded-xl border border-orange-200 bg-orange-50/50 p-4">
-                  <h4 className="font-bold text-orange-900">
-                    {a.agent_label} — {t("stage5.aiLabel")}
-                  </h4>
-                  <div className="mt-3 max-h-80 overflow-y-auto">
-                    <AgentResponse text={a.solution} compact />
-                  </div>
-                </article>
-              ))}
+              {comparison.agent_solutions.map((a) => {
+                const key = a.agent_key || "";
+                const theorist = getAgentTheorist(key) || a.title || a.agent_label;
+                const lens = getAgentLens(key, lang);
+                return (
+                  <article
+                    key={`${key}-${a.agent_number}`}
+                    className="overflow-hidden rounded-2xl border border-orange-500/25 bg-orange-500/[0.07]"
+                  >
+                    <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
+                      <AgentAvatar
+                        agentKey={key || "freire"}
+                        color={a.color || "#c2410c"}
+                        status="done"
+                        className="h-14 w-12 shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-orange-300/80">
+                          {t("stage5.aiLabel")}
+                        </p>
+                        <h4 className="truncate font-semibold text-white">{theorist}</h4>
+                        {lens && <p className="truncate text-xs text-slate-400">{lens}</p>}
+                      </div>
+                    </div>
+                    <div className="max-h-72 overflow-y-auto p-4">
+                      <AgentResponse text={a.solution} compact polished dark />
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </section>
 
-          {comparison.human_answers?.length > 0 && (
-            <section className="space-y-4">
-              <h3 className="text-lg font-bold text-stone-900">{t("stage5.humanSolutions")}</h3>
-              <div className="grid gap-4 lg:grid-cols-2">
-                {comparison.human_answers.map((h, i) => (
-                  <article key={i} className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4">
-                    <h4 className="font-bold text-emerald-900">
-                      {h.name}
-                      {h.role ? ` — ${h.role}` : ""} — {t("stage5.humanLabel")}
-                    </h4>
-                    <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-stone-700">{h.answer}</p>
-                  </article>
-                ))}
-              </div>
-            </section>
-          )}
+          <GuestChairs humans={comparison.human_answers || []} />
         </>
       )}
 
-      <div className="flex justify-between">
-        <Link to="/report" className="rounded-xl border border-stone-300 px-6 py-3 font-semibold text-stone-700">
+      {sessionId && <RubricScorePanel sessionId={sessionId} t={t} />}
+
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-6">
+        <Link to="/report" className="page-btn-secondary px-5 py-2.5 text-sm">
           {t("stage5.back")}
+        </Link>
+        <Link
+          to="/present"
+          className="page-btn-primary inline-flex items-center gap-2 px-5 py-2.5 text-sm"
+        >
+          <Presentation className="h-4 w-4" />
+          {t("nav.present")}
         </Link>
       </div>
     </div>

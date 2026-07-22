@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     rate_limit_ask: str = "10/minute"
     export_api_key: str = ""
 
+    # Optional semantic theory judge (extra LLM call per agent when true)
+    theory_judge_llm: bool = False
+
     log_level: str = "INFO"
 
     frontend_dist: Path = Path(__file__).parent.parent / "frontend" / "dist"

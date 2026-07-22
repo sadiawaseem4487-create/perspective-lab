@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchAgentsCatalog, fetchAssignments, saveAssignments } from "../api";
+import { PageHero, PagePanel } from "../components/PageChrome";
 import { useLanguage } from "../i18n/LanguageContext";
 
 const EMPTY_CUSTOM = { name: "", theory: "", role: "", prompt: "" };
@@ -9,30 +10,36 @@ const CUSTOM_VALUE = "__custom__";
 function AgentPromptPanel({ agent, slotLabel, t, isOverride }) {
   if (!agent) return null;
   return (
-    <div className="mt-4 space-y-4 rounded-xl border border-stone-200 bg-stone-50 p-5">
+    <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-slate-900/40 p-5">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
           {slotLabel} — {isOverride ? t("stage1.activeAgent") : t("stage1.selection")}
         </p>
-        <h3 className="mt-1 text-xl font-bold text-stone-900">{agent.name}</h3>
-        {agent.title && <p className="text-sm font-medium text-stone-600">{agent.title}</p>}
+        <h3 className="mt-1 text-xl font-bold text-white">{agent.name}</h3>
+        {agent.title && <p className="text-sm font-medium text-slate-400">{agent.title}</p>}
       </div>
       {agent.theory && (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">{t("stage1.theory")}</p>
-          <p className="mt-1 text-sm leading-relaxed text-stone-700">{agent.theory}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            {t("stage1.theory")}
+          </p>
+          <p className="mt-1 text-sm leading-relaxed text-slate-300">{agent.theory}</p>
         </div>
       )}
       {agent.role && (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">{t("stage1.role")}</p>
-          <p className="mt-1 text-sm leading-relaxed text-stone-700">{agent.role}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            {t("stage1.role")}
+          </p>
+          <p className="mt-1 text-sm leading-relaxed text-slate-300">{agent.role}</p>
         </div>
       )}
       {agent.prompt && (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">{t("stage1.prompt")}</p>
-          <pre className="mt-2 max-h-80 overflow-auto whitespace-pre-wrap rounded-lg border border-stone-200 bg-white p-4 text-sm leading-relaxed text-stone-800">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            {t("stage1.prompt")}
+          </p>
+          <pre className="mt-2 max-h-80 overflow-auto whitespace-pre-wrap rounded-lg border border-white/10 bg-slate-950/80 p-4 text-sm leading-relaxed text-slate-300">
             {agent.prompt}
           </pre>
         </div>
@@ -221,12 +228,8 @@ export default function Stage1Agents() {
   }
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-wide text-orange-700">{t("stage1.badge")}</p>
-        <h2 className="font-display text-3xl font-bold text-stone-900">{t("stage1.title")}</h2>
-        <p className="mt-2 text-stone-600">{t("stage1.desc")}</p>
-      </section>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <PageHero badge={t("stage1.badge")} title={t("stage1.title")} description={t("stage1.desc")} />
 
       <div className="space-y-6">
         {SLOTS.map((slot) => {
@@ -236,39 +239,37 @@ export default function Stage1Agents() {
           const borderColor = defaultAgent?.color || "#e7e5e4";
 
           return (
-            <section
+            <PagePanel
               key={slot.key}
-              className="rounded-2xl border bg-white p-6 shadow-sm"
-              style={{ borderLeftWidth: 4, borderLeftColor: borderColor }}
+              className="border-l-4"
+              style={{ borderLeftColor: borderColor }}
             >
-              <p className="text-sm font-semibold text-stone-800">{slot.label}</p>
+              <p className="text-sm font-semibold text-slate-200">{slot.label}</p>
 
               {defaultAgent && (
                 <article
-                  className="mt-3 rounded-xl border border-stone-200 bg-stone-50 p-4"
+                  className="mt-3 rounded-xl border border-white/10 bg-slate-900/40 p-4"
                   style={{ borderTopWidth: 4, borderTopColor: defaultAgent.color }}
                 >
-                  <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                     {t("stage1.defaultAgent")}
                   </p>
-                  <h3 className="mt-1 text-lg font-bold text-stone-900">{defaultAgent.name}</h3>
-                  <p className="mt-1 text-xs font-medium text-stone-500">{defaultAgent.title}</p>
-                  <p className="mt-2 text-sm leading-relaxed text-stone-600">{defaultAgent.theory}</p>
+                  <h3 className="mt-1 text-lg font-bold text-white">{defaultAgent.name}</h3>
+                  <p className="mt-1 text-xs font-medium text-slate-400">{defaultAgent.title}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-300">{defaultAgent.theory}</p>
                 </article>
               )}
 
               <div className="mt-4">
-                <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
                   {t("stage1.optionalAgent")}
                 </label>
                 <select
                   value={dropdownValues[slot.key]}
                   onChange={(e) => handleDropdownChange(slot.key, e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-stone-300 px-4 py-3 text-stone-900 md:max-w-xl"
+                  className="page-select mt-1 w-full md:max-w-xl"
                 >
-                  <option value="">
-                    {t("stage1.keepDefaultShort")}
-                  </option>
+                  <option value="">{t("stage1.keepDefaultShort")}</option>
                   {Object.entries(optionalByCategory).map(([category, agents]) =>
                     agents.length > 0 ? (
                       <optgroup key={category} label={perspectiveLabels[category] || category}>
@@ -285,31 +286,31 @@ export default function Stage1Agents() {
               </div>
 
               {dropdownValues[slot.key] === CUSTOM_VALUE && (
-                <div className="mt-4 grid gap-3 rounded-xl border border-dashed border-stone-300 bg-stone-50 p-4">
+                <div className="mt-4 grid gap-3 rounded-xl border border-dashed border-white/20 bg-slate-900/30 p-4">
                   <input
                     value={customAgents[slot.key].name}
                     onChange={(e) => handleCustomChange(slot.key, "name", e.target.value)}
                     placeholder={t("stage1.customName")}
-                    className="rounded-lg border border-stone-300 px-3 py-2 text-sm"
+                    className="page-input"
                   />
                   <input
                     value={customAgents[slot.key].theory}
                     onChange={(e) => handleCustomChange(slot.key, "theory", e.target.value)}
                     placeholder={t("stage1.customTheory")}
-                    className="rounded-lg border border-stone-300 px-3 py-2 text-sm"
+                    className="page-input"
                   />
                   <input
                     value={customAgents[slot.key].role}
                     onChange={(e) => handleCustomChange(slot.key, "role", e.target.value)}
                     placeholder={t("stage1.customRole")}
-                    className="rounded-lg border border-stone-300 px-3 py-2 text-sm"
+                    className="page-input"
                   />
                   <textarea
                     value={customAgents[slot.key].prompt}
                     onChange={(e) => handleCustomChange(slot.key, "prompt", e.target.value)}
                     placeholder={t("stage1.customPrompt")}
                     rows={6}
-                    className="rounded-lg border border-stone-300 px-3 py-2 text-sm"
+                    className="page-input"
                   />
                 </div>
               )}
@@ -326,25 +327,20 @@ export default function Stage1Agents() {
               {!isOverride && defaultAgent && (
                 <AgentPromptPanel agent={defaultAgent} slotLabel={slot.label} t={t} isOverride={false} />
               )}
-            </section>
+            </PagePanel>
           );
         })}
       </div>
 
       <div className="flex flex-wrap items-center gap-4">
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={saving}
-          className="rounded-xl bg-orange-800 px-6 py-3 font-semibold text-white hover:bg-orange-900 disabled:opacity-50"
-        >
+        <button type="button" onClick={handleSave} disabled={saving} className="page-btn-primary">
           {saving ? t("common.saving") : t("stage1.saveAssignments")}
         </button>
-        {message && <p className="text-sm text-stone-600">{message}</p>}
+        {message && <p className="text-sm text-slate-400">{message}</p>}
       </div>
 
       <div className="flex justify-end">
-        <Link to="/models" className="rounded-xl bg-orange-800 px-6 py-3 font-semibold text-white hover:bg-orange-900">
+        <Link to="/models" className="page-btn-primary">
           {t("stage1.next")}
         </Link>
       </div>

@@ -134,6 +134,29 @@ export async function saveHumanAnswers(sessionId, respondents) {
   return parseResponse(res);
 }
 
+export async function fetchRubricScores(sessionId) {
+  const res = await fetch(`${API}/comparison/${sessionId}/rubric`);
+  return parseResponse(res);
+}
+
+export async function saveRubricScores(sessionId, payload) {
+  const res = await fetch(`${API}/comparison/${sessionId}/rubric`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return parseResponse(res);
+}
+
+export async function runTheoryJudge(agentId, text, model) {
+  const res = await fetch(`${API}/theory-judge`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ agent_id: agentId, text, model: model || undefined }),
+  });
+  return parseResponse(res);
+}
+
 export async function checkHealth() {
   const res = await fetch(`${API}/health`);
   return parseResponse(res);

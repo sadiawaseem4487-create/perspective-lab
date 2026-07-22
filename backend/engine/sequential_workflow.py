@@ -24,14 +24,21 @@ class SequentialState(TypedDict):
     responses: Annotated[List[dict], operator.add]
 
 
-async def _run_stage(state: SequentialState, agent_id: str, slot_number: int, stage_role: str) -> dict:
+async def _run_stage(
+    state: SequentialState,
+    agent_id: str,
+    slot_number: int,
+    stage_role: str,
+    human_note: str = "",
+) -> dict:
     from agents.service import ask_agent_slot
-    from engine.self_check import enrich_with_self_check
+    from engine.self_check import enrich_with_self_check_async
 
     stage_question = build_stage_question(
         state["question"],
         state.get("stage_outputs", {}),
         agent_id,
+        human_note=human_note,
     )
     result = await ask_agent_slot(
         slot_number,
@@ -39,12 +46,14 @@ async def _run_stage(state: SequentialState, agent_id: str, slot_number: int, st
         stage_question,
         state.get("model"),
     )
-    checked = enrich_with_self_check(agent_id, result)
+    checked = await enrich_with_self_check_async(agent_id, result)
     checked["sequential_stage"] = {
         "vaihe": slot_number,
         "role": stage_role,
         "agent_id": agent_id,
     }
+    if human_note.strip():
+        checked["human_note_applied"] = human_note.strip()
     if not checked.get("error"):
         return {
             "responses": [checked],
@@ -106,6 +115,7 @@ async def run_single_sequential_stage(
     vaihe: int,
     stage_outputs: Optional[Dict[str, str]] = None,
     model: Optional[str] = None,
+    human_note: str = "",
 ) -> dict:
     """Run one Vaihe (1–4) for human-in-the-loop sequential mode."""
     if vaihe < 1 or vaihe > len(SEQUENTIAL_STAGES):
@@ -118,5 +128,5 @@ async def run_single_sequential_stage(
         "stage_outputs": stage_outputs or {},
         "responses": [],
     }
-    result = await _run_stage(state, agent_id, slot_number, stage_role)
+    result = await _run_stage(state, agent_id, slot_number, stage_role, human_note=human_note)
     return result["responses"][0]

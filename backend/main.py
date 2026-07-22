@@ -5,7 +5,7 @@ import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -28,6 +28,7 @@ from application import (
     get_agents_by_category,
     get_custom_agents,
     get_human_answers,
+    get_rubric_scores,
     get_main_agents,
     get_optional_agents_by_category,
     get_report,
@@ -41,8 +42,10 @@ from application import (
     load_models_config,
     load_perspective_types,
     load_questions,
+    load_theory_profile,
     load_tools_config,
     save_human_answers,
+    save_rubric_scores,
     save_report,
     set_selected_model,
     set_slot_assignments,
@@ -126,6 +129,25 @@ class HumanRespondent(BaseModel):
 
 class HumanAnswersRequest(BaseModel):
     respondents: List[HumanRespondent] = Field(..., min_length=1, max_length=20)
+
+
+class RubricScoresRequest(BaseModel):
+    participant_id: str = Field(default="", max_length=100)
+    condition: str = Field(
+        default="parallel",
+        pattern="^(baseline|single|parallel|sequential)$",
+    )
+    coder_id: str = Field(default="", max_length=100)
+    pre_solution: str = Field(default="", max_length=12000)
+    post_solution: str = Field(default="", max_length=12000)
+    scores: Dict[str, int] = Field(default_factory=dict)
+    notes: str = Field(default="", max_length=4000)
+
+
+class TheoryJudgeRequest(BaseModel):
+    agent_id: str = Field(..., min_length=2, max_length=40)
+    text: str = Field(..., min_length=20, max_length=12000)
+    model: Optional[str] = None
 
 
 class SlotAssignmentsRequest(BaseModel):
@@ -219,9 +241,20 @@ async def get_agents_catalog():
         for perspective in perspectives
         if perspective["id"] != "custom"
     }
+    main_agents = []
+    for agent in get_main_agents():
+        profile = load_theory_profile(agent.get("id", "")) or {}
+        main_agents.append(
+            {
+                **agent,
+                "diagnostic_question": profile.get("diagnostic_question"),
+                "reasoning_chain": profile.get("reasoning_chain", []),
+                "output_sections": profile.get("output_sections", []),
+            }
+        )
     return {
         "agents": list(catalog.values()),
-        "main_agents": get_main_agents(),
+        "main_agents": main_agents,
         "slot_defaults": get_slot_defaults(),
         "optional_agents_by_category": get_optional_agents_by_category(),
         "perspective_types": perspectives,
@@ -342,6 +375,96 @@ async def save_human(session_id: int, body: HumanAnswersRequest):
     respondents = [r.model_dump() for r in body.respondents]
     saved = save_human_answers(session_id, question, respondents)
     return saved
+
+
+RUBRIC_DIMENSIONS = [
+    {"id": "PS1", "label": "Problem framing", "min": 1, "max": 5},
+    {"id": "PS2", "label": "Perspective diversity", "min": 1, "max": 5},
+    {"id": "PS3", "label": "Actionability", "min": 1, "max": 5},
+    {"id": "PS4", "label": "Assumptions", "min": 1, "max": 5},
+    {"id": "PS5", "label": "Uncertainty", "min": 1, "max": 5},
+    {"id": "PS6", "label": "Theory fidelity", "min": 1, "max": 5},
+]
+
+
+@app.get("/api/comparison/{session_id}/rubric")
+async def get_rubric(session_id: int):
+    report = get_report(session_id)
+    session = get_session(session_id) if not report else None
+    if not report and not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    data = get_rubric_scores(session_id) or {
+        "session_id": session_id,
+        "scores": {},
+        "condition": "parallel",
+        "participant_id": "",
+        "coder_id": "",
+        "pre_solution": "",
+        "post_solution": "",
+        "notes": "",
+        "ratings": [],
+        "inter_rater": {
+            "coder_count": 0,
+            "exact_agreement": None,
+            "mean_abs_diff": None,
+            "pairwise_comparisons": 0,
+        },
+    }
+    data["dimensions"] = RUBRIC_DIMENSIONS
+    data["question"] = (report or session or {}).get("question", "")
+    return data
+
+
+@app.post("/api/comparison/{session_id}/rubric")
+async def save_rubric(session_id: int, body: RubricScoresRequest):
+    report = get_report(session_id)
+    if not report and not get_session(session_id):
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    scores = {}
+    for dim in RUBRIC_DIMENSIONS:
+        value = body.scores.get(dim["id"])
+        if value is None:
+            continue
+        if not isinstance(value, int) or value < dim["min"] or value > dim["max"]:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Score {dim['id']} must be an integer {dim['min']}-{dim['max']}",
+            )
+        scores[dim["id"]] = value
+
+    saved = save_rubric_scores(
+        session_id,
+        {
+            "participant_id": body.participant_id,
+            "condition": body.condition,
+            "coder_id": body.coder_id,
+            "pre_solution": body.pre_solution,
+            "post_solution": body.post_solution,
+            "scores": scores,
+            "notes": body.notes,
+        },
+    )
+    saved["dimensions"] = RUBRIC_DIMENSIONS
+    return saved
+
+
+@app.post("/api/theory-judge")
+@limiter.limit(settings.rate_limit_ask)
+async def theory_judge(request: Request, body: TheoryJudgeRequest):
+    """On-demand LLM theory fidelity check (does not mutate stored reports)."""
+    if not settings.llm_configured:
+        raise HTTPException(status_code=503, detail="LLM API key not configured.")
+    from engine.llm_theory_judge import llm_theory_fidelity_check
+
+    profile = load_theory_profile(body.agent_id) or {}
+    result = await llm_theory_fidelity_check(
+        body.agent_id,
+        body.text,
+        profile=profile,
+        model=body.model,
+    )
+    return {"agent_id": body.agent_id, "judge": result}
 
 
 @app.post("/api/sequential/start")

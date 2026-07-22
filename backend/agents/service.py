@@ -62,6 +62,11 @@ async def ask_agent_slot(
     if profile_block:
         prompt = f"{prompt}\n\n{profile_block}"
     full_prompt = f"{prompt}\n\n{get_output_instructions_for_agent(agent_id)}"
+    user_content = (
+        f"Research question:\n{question}\n\n"
+        "Answer this exact question. Tailor every section to what was asked — "
+        "do not repeat a generic template from your examples."
+    )
 
     for attempt in range(settings.openai_max_retries + 1):
         try:
@@ -70,7 +75,7 @@ async def ask_agent_slot(
                 model=active_model,
                 messages=[
                     {"role": "system", "content": full_prompt},
-                    {"role": "user", "content": question},
+                    {"role": "user", "content": user_content},
                 ],
                 temperature=0.55,
                 max_tokens=750,

@@ -27,7 +27,7 @@ class AgentTask(TypedDict):
 async def _agent_pipeline_node(task: AgentTask) -> dict:
     """Ask one agent, then run theory-native self-check (two-step pipeline node)."""
     from agents.service import ask_agent_slot
-    from engine.self_check import enrich_with_self_check
+    from engine.self_check import enrich_with_self_check_async
 
     result = await ask_agent_slot(
         task["slot_number"],
@@ -35,7 +35,7 @@ async def _agent_pipeline_node(task: AgentTask) -> dict:
         task["question"],
         task.get("model"),
     )
-    checked = enrich_with_self_check(task["agent_id"], result)
+    checked = await enrich_with_self_check_async(task["agent_id"], result)
     return {"responses": [checked]}
 
 

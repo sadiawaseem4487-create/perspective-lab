@@ -6,10 +6,13 @@ import Stage3Question from "./pages/Stage3Question";
 import Stage4Report from "./pages/Stage4Report";
 import Stage5Compare from "./pages/Stage5Compare";
 import ComparisonMatrixPage from "./pages/ComparisonMatrixPage";
+import PresentPage from "./pages/PresentPage";
+import ExportCenterPage from "./pages/ExportCenterPage";
 
 export default function App() {
   return (
     <Routes>
+      <Route path="/present" element={<PresentPage />} />
       <Route path="/" element={<AppShell />}>
         <Route index element={<Navigate to="/question" replace />} />
         <Route path="agents" element={<Stage1Agents />} />
@@ -18,6 +21,7 @@ export default function App() {
         <Route path="report" element={<Stage4Report />} />
         <Route path="compare" element={<Stage5Compare />} />
         <Route path="matrix" element={<ComparisonMatrixPage />} />
+        <Route path="export" element={<ExportCenterPage />} />
       </Route>
     </Routes>
   );
