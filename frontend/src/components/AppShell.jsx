@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import {
+  ClipboardList,
   Cpu,
   Download,
   FileText,
@@ -58,6 +59,7 @@ export default function AppShell() {
       { to: "/compare", icon: GitCompare, label: t("nav.compare") },
       { to: "/matrix", icon: Table2, label: t("shell.matrix") },
       { to: "/present", icon: Presentation, label: t("nav.present") },
+      { to: "/guide", icon: ClipboardList, label: t("nav.guide") },
       { to: "/export", icon: Download, label: t("nav.export") },
     ],
     configure: [

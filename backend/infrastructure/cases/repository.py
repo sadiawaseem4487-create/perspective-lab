@@ -424,6 +424,22 @@ class CaseRepository:
         data["inter_rater"] = inter_rater_agreement(ratings)
         return data
 
+    def list_rubric_scores(self) -> list[dict]:
+        """Return all rubric score files for the active case (for CSV export)."""
+        directory = self.paths.rubric_scores_dir
+        if not directory.is_dir():
+            return []
+        rows: list[dict] = []
+        for path in sorted(directory.glob("session_*.json")):
+            try:
+                session_id = int(path.stem.replace("session_", ""))
+            except ValueError:
+                continue
+            data = self.get_rubric_scores(session_id)
+            if data:
+                rows.append(data)
+        return rows
+
     def build_comparison(self, session_id: int, agent_report: dict) -> dict:
         human = self.get_human_answers(session_id) or {"respondents": []}
         return {
@@ -453,6 +469,12 @@ class CaseRepository:
     def load_tools_config(self) -> dict:
         if self.paths.tools_config.is_file():
             return _read_json(self.paths.tools_config)
+        return {}
+
+    def load_presentation_config(self) -> dict:
+        path = self.paths.presentation_file
+        if path.is_file():
+            return _read_json(path)
         return {}
 
     def load_theory_profile(self, agent_id: str) -> Optional[dict]:

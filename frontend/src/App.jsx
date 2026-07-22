@@ -8,6 +8,7 @@ import Stage5Compare from "./pages/Stage5Compare";
 import ComparisonMatrixPage from "./pages/ComparisonMatrixPage";
 import PresentPage from "./pages/PresentPage";
 import ExportCenterPage from "./pages/ExportCenterPage";
+import FacilitatorGuidePage from "./pages/FacilitatorGuidePage";
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="report" element={<Stage4Report />} />
         <Route path="compare" element={<Stage5Compare />} />
         <Route path="matrix" element={<ComparisonMatrixPage />} />
+        <Route path="guide" element={<FacilitatorGuidePage />} />
         <Route path="export" element={<ExportCenterPage />} />
       </Route>
     </Routes>

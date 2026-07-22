@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Presentation, X } from "lucide-react";
-import { fetchReport, fetchReports } from "@/api";
+import { ChevronLeft, ChevronRight, ExternalLink, Presentation, X } from "lucide-react";
+import { fetchPresentationConfig, fetchReport, fetchReports } from "@/api";
 import { AgentAvatar } from "@/components/AgentAvatar";
 import { buildPresentationSlides } from "@/utils/buildPresentationSlides";
 import {
@@ -81,29 +81,85 @@ function Eyebrow({ children, className }) {
   );
 }
 
-function TitleSlide({ slide }) {
+function BulletList({ items, numbered = true }) {
+  return (
+    <ul className="mt-6 space-y-2.5 text-left">
+      {(items || []).map((item, index) => (
+        <motion.li
+          key={`${index}-${String(item).slice(0, 24)}`}
+          variants={fadeUp}
+          className="flex items-start gap-3 rounded-xl border border-white/10 bg-slate-950/45 px-4 py-3"
+        >
+          {numbered ? (
+            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-orange-500/20 text-[11px] font-bold text-orange-300">
+              {index + 1}
+            </span>
+          ) : (
+            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-400" />
+          )}
+          <p className="min-w-0 flex-1 text-pretty text-base leading-relaxed text-slate-200">{item}</p>
+        </motion.li>
+      ))}
+    </ul>
+  );
+}
+
+function TopicSlide({ slide }) {
   return (
     <SlideFrame align="center">
       <motion.div variants={stagger} initial="hidden" animate="show" className="w-full max-w-3xl">
         <Eyebrow>{slide.eyebrow}</Eyebrow>
+        {slide.caseTitle && (
+          <motion.p variants={fadeUp} className="mt-4 text-sm font-medium uppercase tracking-wider text-slate-400">
+            {slide.caseTitle}
+          </motion.p>
+        )}
         <motion.h1
           variants={fadeUp}
-          className="font-display mt-6 text-balance text-3xl font-bold leading-[1.15] text-white sm:text-5xl"
+          className="font-display mt-4 text-balance text-3xl font-bold leading-[1.15] text-white sm:text-5xl"
         >
           {slide.title}
         </motion.h1>
         {slide.subtitle && (
           <motion.p
             variants={fadeUp}
-            className="mx-auto mt-6 max-w-xl text-pretty text-base leading-relaxed text-slate-400 sm:text-lg"
+            className="mx-auto mt-5 max-w-xl text-pretty text-base leading-relaxed text-slate-400 sm:text-lg"
           >
             {slide.subtitle}
           </motion.p>
+        )}
+        {slide.question && (
+          <motion.blockquote
+            variants={fadeUp}
+            className="mx-auto mt-8 max-w-2xl rounded-2xl border border-orange-500/25 bg-orange-500/10 px-5 py-4 text-left"
+          >
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-orange-300/90">
+              {slide.questionLabel || "Research question"}
+            </p>
+            <p className="mt-2 text-pretty text-lg leading-snug text-white sm:text-xl">{slide.question}</p>
+          </motion.blockquote>
         )}
         <motion.div
           variants={fadeUp}
           className="mx-auto mt-10 h-px w-24 bg-gradient-to-r from-transparent via-orange-400/70 to-transparent"
         />
+      </motion.div>
+    </SlideFrame>
+  );
+}
+
+function IntroductionSlide({ slide }) {
+  return (
+    <SlideFrame>
+      <motion.div variants={stagger} initial="hidden" animate="show" className="w-full">
+        <Eyebrow>{slide.eyebrow}</Eyebrow>
+        <motion.h2
+          variants={fadeUp}
+          className="font-display mt-3 text-balance text-3xl font-bold text-white sm:text-4xl"
+        >
+          {slide.title}
+        </motion.h2>
+        <BulletList items={slide.bullets} />
       </motion.div>
     </SlideFrame>
   );
@@ -204,6 +260,43 @@ function AgentSlide({ slide, keyPointsLabel }) {
   );
 }
 
+function CaseStudySlide({ slide }) {
+  return (
+    <SlideFrame>
+      <motion.div variants={stagger} initial="hidden" animate="show" className="w-full">
+        <Eyebrow>{slide.eyebrow}</Eyebrow>
+        <motion.h2
+          variants={fadeUp}
+          className="font-display mt-3 text-balance text-3xl font-bold text-white sm:text-4xl"
+        >
+          {slide.title}
+        </motion.h2>
+        <div className="mt-6 space-y-4">
+          {(slide.paragraphs || []).map((p) => (
+            <motion.p
+              key={p.slice(0, 40)}
+              variants={fadeUp}
+              className="text-pretty text-base leading-relaxed text-slate-300 sm:text-lg"
+            >
+              {p}
+            </motion.p>
+          ))}
+        </div>
+        {slide.question && (
+          <motion.p
+            variants={fadeUp}
+            className="mt-6 rounded-xl border border-sky-500/25 bg-sky-500/10 px-4 py-3 text-sm leading-relaxed text-sky-100"
+          >
+            <span className="font-semibold text-sky-300">Q: </span>
+            {slide.question}
+          </motion.p>
+        )}
+        {(slide.bullets || []).length > 0 && <BulletList items={slide.bullets} numbered={false} />}
+      </motion.div>
+    </SlideFrame>
+  );
+}
+
 function SynthesisSlide({ slide }) {
   return (
     <SlideFrame>
@@ -244,7 +337,7 @@ function SynthesisSlide({ slide }) {
   );
 }
 
-function CloseSlide({ slide }) {
+function ConclusionSlide({ slide }) {
   return (
     <SlideFrame align="center">
       <motion.div variants={stagger} initial="hidden" animate="show" className="w-full max-w-2xl">
@@ -274,16 +367,88 @@ function CloseSlide({ slide }) {
   );
 }
 
+function SourcesSlide({ slide }) {
+  return (
+    <SlideFrame>
+      <motion.div variants={stagger} initial="hidden" animate="show" className="w-full">
+        <Eyebrow>{slide.eyebrow}</Eyebrow>
+        <motion.h2
+          variants={fadeUp}
+          className="font-display mt-3 text-balance text-3xl font-bold text-white sm:text-4xl"
+        >
+          {slide.title}
+        </motion.h2>
+        <motion.ul variants={fadeUp} className="mt-8 space-y-3">
+          {(slide.sources || []).map((source) => (
+            <motion.li key={source.url} variants={fadeUp}>
+              <a
+                href={source.url}
+                target="_blank"
+                rel="noreferrer"
+                className="group flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3.5 transition-colors hover:border-orange-500/40 hover:bg-orange-500/5"
+              >
+                <ExternalLink className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" />
+                <div className="min-w-0">
+                  <p className="font-semibold text-white group-hover:text-orange-100">{source.label}</p>
+                  {source.note && <p className="mt-1 text-sm text-slate-400">{source.note}</p>}
+                  <p className="mt-1 truncate text-xs text-slate-500">{source.url}</p>
+                </div>
+              </a>
+            </motion.li>
+          ))}
+        </motion.ul>
+      </motion.div>
+    </SlideFrame>
+  );
+}
+
+function renderSlide(current, t) {
+  if (!current) {
+    return (
+      <SlideFrame align="center">
+        <p className="text-slate-400">{t("stage4.noReports")}</p>
+      </SlideFrame>
+    );
+  }
+  switch (current.kind) {
+    case "topic":
+      return <TopicSlide slide={current} />;
+    case "introduction":
+      return <IntroductionSlide slide={current} />;
+    case "agenda":
+      return <AgendaSlide slide={current} />;
+    case "agent":
+      return <AgentSlide slide={current} keyPointsLabel={t("present.keyPoints")} />;
+    case "case_study":
+      return <CaseStudySlide slide={current} />;
+    case "synthesis":
+      return <SynthesisSlide slide={current} />;
+    case "conclusion":
+      return <ConclusionSlide slide={current} />;
+    case "sources":
+      return <SourcesSlide slide={current} />;
+    default:
+      return <ConclusionSlide slide={current} />;
+  }
+}
+
 export default function PresentPage() {
   const { t, lang } = useLanguage();
   const [params] = useSearchParams();
   const [reports, setReports] = useState([]);
   const [sessionId, setSessionId] = useState(null);
   const [report, setReport] = useState(null);
+  const [presentation, setPresentation] = useState(null);
   const [slide, setSlide] = useState(0);
   const [direction, setDirection] = useState(1);
   const [error, setError] = useState("");
   const slideRef = useRef(0);
+
+  useEffect(() => {
+    fetchPresentationConfig()
+      .then(setPresentation)
+      .catch(() => setPresentation(null));
+  }, []);
 
   useEffect(() => {
     const fromQuery = Number(params.get("session"));
@@ -315,7 +480,10 @@ export default function PresentPage() {
       .catch((err) => setError(err.message));
   }, [sessionId]);
 
-  const slides = useMemo(() => buildPresentationSlides(report, t, lang), [report, t, lang]);
+  const slides = useMemo(
+    () => buildPresentationSlides(report, t, lang, presentation),
+    [report, t, lang, presentation]
+  );
   const current = slides[slide];
   const progress = slides.length ? ((slide + 1) / slides.length) * 100 : 0;
 
@@ -347,7 +515,6 @@ export default function PresentPage() {
 
   return (
     <div className="present-stage relative min-h-screen overflow-hidden text-white">
-      {/* Soft atmosphere */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(194,65,12,0.18),transparent_55%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_40%_40%_at_90%_80%,rgba(14,116,144,0.12),transparent_50%)]" />
 
@@ -405,7 +572,6 @@ export default function PresentPage() {
           </div>
         </header>
 
-        {/* Progress line */}
         <div className="mt-4 h-[2px] overflow-hidden rounded-full bg-white/10">
           <motion.div
             className="h-full origin-left rounded-full bg-gradient-to-r from-orange-500 to-amber-300"
@@ -428,21 +594,7 @@ export default function PresentPage() {
               exit="exit"
               className="absolute inset-x-0 top-0 bottom-0 flex items-center"
             >
-              {!current ? (
-                <SlideFrame align="center">
-                  <p className="text-slate-400">{t("stage4.noReports")}</p>
-                </SlideFrame>
-              ) : current.kind === "title" ? (
-                <TitleSlide slide={current} />
-              ) : current.kind === "agenda" ? (
-                <AgendaSlide slide={current} />
-              ) : current.kind === "agent" ? (
-                <AgentSlide slide={current} keyPointsLabel={t("present.keyPoints")} />
-              ) : current.kind === "synthesis" ? (
-                <SynthesisSlide slide={current} />
-              ) : (
-                <CloseSlide slide={current} />
-              )}
+              {renderSlide(current, t)}
             </motion.div>
           </AnimatePresence>
         </main>
