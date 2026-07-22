@@ -17,6 +17,10 @@ desktop-dev:
 desktop-build:
 	cd frontend && npm run build && npm run desktop:build
 
+desktop-dmg:
+	chmod +x desktop/macos/build-dmg.sh desktop/macos/PerspectiveLab-launcher.sh
+	./desktop/macos/build-dmg.sh
+
 docker-up:
 	cp -n .env.example .env || true
 	docker compose up -d --build
