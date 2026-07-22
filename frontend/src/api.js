@@ -26,6 +26,11 @@ export async function fetchAgentsCatalog() {
   return parseResponse(res);
 }
 
+export async function fetchPresentationConfig() {
+  const res = await fetch(`${API}/presentation`);
+  return parseResponse(res);
+}
+
 export async function fetchAssignments() {
   const res = await fetch(`${API}/agents/assignments`);
   return parseResponse(res);
@@ -175,7 +180,12 @@ export async function downloadExport(format) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = format === "csv" ? "case-responses.csv" : "case-responses.json";
+  const filenames = {
+    csv: "case-responses.csv",
+    json: "case-responses.json",
+    "rubric.csv": "case-rubric-scores.csv",
+  };
+  link.download = filenames[format] || `case-export.${format}`;
   document.body.appendChild(link);
   link.click();
   link.remove();

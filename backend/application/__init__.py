@@ -16,6 +16,7 @@ __all__ = [
     "get_custom_agents",
     "get_human_answers",
     "get_rubric_scores",
+    "list_rubric_scores",
     "get_main_agents",
     "get_optional_agents_by_category",
     "get_report",
@@ -29,6 +30,7 @@ __all__ = [
     "load_perspective_types",
     "load_questions",
     "load_tools_config",
+    "load_presentation_config",
     "save_human_answers",
     "save_rubric_scores",
     "save_report",
@@ -139,12 +141,20 @@ def get_rubric_scores(session_id: int):
     return repo().get_rubric_scores(session_id)
 
 
+def list_rubric_scores():
+    return repo().list_rubric_scores()
+
+
 def build_comparison(session_id: int, agent_report: dict):
     return repo().build_comparison(session_id, agent_report)
 
 
 def load_tools_config():
     return repo().load_tools_config()
+
+
+def load_presentation_config():
+    return repo().load_presentation_config()
 
 
 def load_perspective_types():

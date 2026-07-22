@@ -26,8 +26,8 @@ flowchart LR
 | Priority | Theme | Outcome | Effort |
 |----------|--------|---------|--------|
 | **P0** | Ship current work | ✅ Done — [PR #6](https://github.com/sadiawaseem4487-create/perspective-lab/pull/6) merged 2026-07-22 | Small |
-| **P1** | Academic Present structure | Topic → Intro → Key concepts → Case → Conclusion + sources | Medium |
-| **P2** | Study readiness | Rubric wiki sync, Overview matrix, facilitator checklist | Small–medium |
+| **P1** | Academic Present structure | ✅ Done — Topic → Intro → Key concepts → Case → Conclusion + sources | Medium |
+| **P2** | Study readiness | ✅ Done — Overview/rubric sync, Guide `/guide`, rubric CSV export | Small–medium |
 | **P3** | Sprint 8 Desktop | Tauri 2, installers, API key wizard | Large |
 | **P4** | Research depth (optional) | Causal protocol UI, stronger judge ops, multi-case packs | Large |
 
@@ -47,6 +47,8 @@ flowchart LR
 
 ## P1 — Presentation aligned to academic outline
 
+**Status:** ✅ Implemented (`sprint/10-presentation-academic`)
+
 Your reference structure:
 
 1. **TOPIC**
@@ -54,43 +56,45 @@ Your reference structure:
 3. **KEY CONCEPTS**
 4. **CASE STUDY**
 5. **CONCLUSION**
-6. **Sources** (e.g. infed.org, freire.org, HAMK Finna)
-
-Map to multi-theory Present (not Freire-only lecture):
+6. **Sources**
 
 | Slide | Content |
 |-------|---------|
-| Topic | Case title + research question |
+| Topic | Case title + platform topic + session research question |
 | Introduction | Why multi-theory agents; Live vs Demo honesty |
-| Key concepts | One slide per theorist (lens + 3–5 key points) — already mostly built |
-| Case study | São Paulo dropout context from case pack + question |
-| Synthesis | Four takeaways side by side — already built |
-| Conclusion | Discussion prompts + “what to try first” |
-| Sources | Optional curated links per theory / case (config in case pack) |
+| Key concepts | Overview + one slide per theorist with key points |
+| Case study | Context from `cases/{id}/presentation.json` + question |
+| Synthesis | Four takeaways side by side |
+| Conclusion | Discussion prompts |
+| Sources | Curated links from case pack (infed.org, freire.org, HAMK Finna, …) |
 
 ### Tasks
 
-| ID | Task |
-|----|------|
-| P1.1 | Extend `buildPresentationSlides` with Intro + Case Study + Conclusion kinds |
-| P1.2 | Add `cases/{id}/presentation.json` (topic blurb, case context, source links) |
-| P1.3 | Wire Present UI layouts + keep animations/alignment |
-| P1.4 | EN/PT/FI strings |
+| ID | Task | Status |
+|----|------|--------|
+| P1.1 | Extend `buildPresentationSlides` with academic kinds | [x] |
+| P1.2 | Add `cases/{id}/presentation.json` + `GET /api/presentation` | [x] |
+| P1.3 | Wire Present UI layouts + animations | [x] |
+| P1.4 | EN/PT/FI strings | [x] |
 
-**Exit:** Facilitator can run a full academic-style deck from one session without raw agent walls of text.
+**Exit:** Facilitator can run a full academic-style deck from one session without raw agent walls of text. ✅
 
 ---
 
 ## P2 — Study readiness (research ops)
 
-| ID | Task |
-|----|------|
-| P2.1 | Update [Overview.md](Overview.md) capability matrix (LangGraph, sequential, GUI = done) |
-| P2.2 | Update [Problem-Solving-Rubric.md](Problem-Solving-Rubric.md) — API/UI are live |
-| P2.3 | Facilitator checklist page (run parallel → compare humans → score rubric → present) |
-| P2.4 | Optional: export rubric + agreement CSV for analysis |
+**Status:** ✅ Implemented
 
-**Exit:** A new researcher can run a pilot session using only the wiki + UI.
+| ID | Task | Status |
+|----|------|--------|
+| P2.1 | Update [Overview.md](Overview.md) capability matrix | [x] |
+| P2.2 | Update [Problem-Solving-Rubric.md](Problem-Solving-Rubric.md) — API/UI live | [x] |
+| P2.3 | Facilitator checklist — wiki + in-app **Guide** (`/guide`) | [x] |
+| P2.4 | Export rubric + agreement CSV (`GET /api/export/rubric.csv`) | [x] |
+
+**Exit:** A new researcher can run a pilot session using only the wiki + UI. ✅
+
+**Next:** P3 Sprint 8 Desktop.
 
 ---
 
@@ -132,9 +136,7 @@ See [Sprint-08-Desktop.md](Sprints/Sprint-08-Desktop.md).
 
 ## Suggested next action
 
-1. You approve **P0** (commit/PR)  
-2. Then implement **P1** (academic Present) in a branch `sprint/10-presentation-academic`  
-3. Then **P2** wiki sync  
-4. Then **P3** Desktop  
+1. Commit/PR **P1 + P2** on `sprint/10-presentation-academic` (or split if preferred)  
+2. Then start **P3** Desktop (`sprint/8-desktop`)  
 
 [← Home](Home.md) · [Sprint plan](Sprints/README.md) · [Sprint 8](Sprints/Sprint-08-Desktop.md)

@@ -40,6 +40,23 @@ function bulletText(item) {
   return item.text || "";
 }
 
+function pickLocale(value, lang, fallback = "") {
+  if (value == null) return fallback;
+  if (typeof value === "string") return value;
+  if (typeof value === "object") {
+    return value[lang] || value.en || Object.values(value).find((v) => typeof v === "string") || fallback;
+  }
+  return fallback;
+}
+
+function pickLocalizedBlock(block, lang) {
+  if (!block || typeof block !== "object") return {};
+  if (block.en || block.pt || block.fi) {
+    return block[lang] || block.en || block.pt || block.fi || {};
+  }
+  return block;
+}
+
 /**
  * Pull 3–5 presentation-ready key points from an agent response.
  */
@@ -67,7 +84,6 @@ export function extractKeyPoints(responseText, limit = 4) {
     }
   }
 
-  // Fallback: first bullets from any section
   if (points.length < 2) {
     for (const section of sections) {
       for (const item of section.bullets || []) {
@@ -89,14 +105,16 @@ export function extractKeyPoints(responseText, limit = 4) {
   return points.slice(0, limit);
 }
 
-function agentDeck(response, lang) {
+function agentDeck(response, lang, presentation) {
   const key = (response.agent_key || "").toLowerCase();
   const insight = extractInsight(response);
   const points = extractKeyPoints(response.response, 4);
+  const blurbs = presentation?.lens_blurbs || {};
+  const lensBlurb = pickLocale(blurbs[key], lang, getAgentLens(key, lang));
   return {
     agentKey: key,
     theorist: getAgentTheorist(key) || response.title || response.agent_label,
-    lens: getAgentLens(key, lang),
+    lens: lensBlurb || getAgentLens(key, lang),
     color: response.color || "#c2410c",
     takeaway: insight?.headline || points[0] || "",
     points: points.length ? points : insight?.headline ? [insight.headline] : [],
@@ -104,28 +122,47 @@ function agentDeck(response, lang) {
 }
 
 /**
- * Build a facilitator-ready slide deck from a session report.
+ * Academic deck: Topic → Introduction → Key concepts → Case study → Synthesis → Conclusion → Sources
  */
-export function buildPresentationSlides(report, t, lang = "en") {
+export function buildPresentationSlides(report, t, lang = "en", presentation = null) {
   if (!report) return [];
 
   const question = displayQuestion(report.question);
+  const caseTitle = presentation?.case_title || "";
   const agents = (report.responses || [])
     .filter((r) => r.response && !r.error)
-    .map((r) => agentDeck(r, lang));
+    .map((r) => agentDeck(r, lang, presentation));
+
+  const intro = pickLocalizedBlock(presentation?.introduction, lang);
+  const caseStudy = pickLocalizedBlock(presentation?.case_study, lang);
+  const conclusion = pickLocalizedBlock(presentation?.conclusion, lang);
+  const topic = pickLocale(presentation?.topic, lang, t("present.topicDefault"));
+  const topicSub = pickLocale(presentation?.topic_subtitle, lang, t("present.titleSub"));
 
   const slides = [
     {
-      id: "title",
-      kind: "title",
-      eyebrow: t("present.questionSlide"),
-      title: question,
-      subtitle: t("present.titleSub"),
+      id: "topic",
+      kind: "topic",
+      eyebrow: t("present.sectionTopic"),
+      title: topic,
+      subtitle: topicSub,
+      caseTitle,
+      question,
+      questionLabel: t("present.questionSlide"),
     },
     {
-      id: "agenda",
+      id: "introduction",
+      kind: "introduction",
+      eyebrow: t("present.sectionIntro"),
+      title: intro.title || t("present.introTitle"),
+      bullets: intro.bullets?.length
+        ? intro.bullets
+        : [t("present.introBullet1"), t("present.introBullet2"), t("present.introBullet3")],
+    },
+    {
+      id: "key-concepts-overview",
       kind: "agenda",
-      eyebrow: t("present.agenda"),
+      eyebrow: t("present.sectionKeyConcepts"),
       title: t("present.agendaTitle"),
       items: agents.map((a) => ({
         agentKey: a.agentKey,
@@ -138,9 +175,9 @@ export function buildPresentationSlides(report, t, lang = "en") {
 
   for (const agent of agents) {
     slides.push({
-      id: `agent-${agent.agentKey}`,
+      id: `concept-${agent.agentKey}`,
       kind: "agent",
-      eyebrow: t("present.lensSlide"),
+      eyebrow: t("present.sectionKeyConcepts"),
       agentKey: agent.agentKey,
       theorist: agent.theorist,
       lens: agent.lens,
@@ -149,6 +186,16 @@ export function buildPresentationSlides(report, t, lang = "en") {
       points: agent.points,
     });
   }
+
+  slides.push({
+    id: "case-study",
+    kind: "case_study",
+    eyebrow: t("present.sectionCase"),
+    title: caseStudy.title || caseTitle || t("present.caseTitle"),
+    paragraphs: caseStudy.paragraphs || [],
+    bullets: caseStudy.bullets || [],
+    question,
+  });
 
   if (agents.length >= 2) {
     slides.push({
@@ -166,16 +213,30 @@ export function buildPresentationSlides(report, t, lang = "en") {
   }
 
   slides.push({
-    id: "close",
-    kind: "close",
-    eyebrow: t("present.closeSlide"),
-    title: t("present.closeBody"),
-    prompts: [
-      t("present.closePrompt1"),
-      t("present.closePrompt2"),
-      t("present.closePrompt3"),
-    ],
+    id: "conclusion",
+    kind: "conclusion",
+    eyebrow: t("present.sectionConclusion"),
+    title: conclusion.title || t("present.closeBody"),
+    prompts: conclusion.prompts?.length
+      ? conclusion.prompts
+      : [t("present.closePrompt1"), t("present.closePrompt2"), t("present.closePrompt3")],
   });
+
+  const sources = (presentation?.sources || []).map((source) => ({
+    label: source.label,
+    url: source.url,
+    note: pickLocale(source.note, lang, ""),
+  }));
+
+  if (sources.length) {
+    slides.push({
+      id: "sources",
+      kind: "sources",
+      eyebrow: t("present.sectionSources"),
+      title: t("present.sourcesTitle"),
+      sources,
+    });
+  }
 
   return slides;
 }

@@ -11,16 +11,17 @@ Welcome to the project wiki. This is the single source of truth for architecture
 | Page | Description |
 |------|-------------|
 | [Overview](Overview.md) | Vision, goals, and capability roadmap |
+| [Facilitator Checklist](Facilitator-Checklist.md) | Pilot session path (also in-app `/guide`) |
 | [Architecture](Architecture.md) | System layers and folder layout |
 | [Design Patterns](Design-Patterns.md) | Hexagonal architecture, case packs, workflows |
 | [Code Standards](Code-Standards.md) | Clean code rules, smells to avoid |
 | [Research Alignment](Research-Alignment.md) | Parallel vs sequential agents (document spec) |
 | [Test Plan](Test-Plan.md) | Manual + automated test cases for current sprint |
-| [Problem-Solving Rubric](Problem-Solving-Rubric.md) | Sprint 9 scaffold for measuring “better problem solvers” |
+| [Problem-Solving Rubric](Problem-Solving-Rubric.md) | Measuring “better problem solvers” (API + CSV export live) |
 | [Development Pipeline](Development-Pipeline.md) | CI/CD + sprint approval workflow |
 | [GitHub Setup](GitHub-Setup.md) | First-time repo + push instructions |
 | [Sprint Plan](Sprints/README.md) | All sprints, tasks, exit criteria |
-| [Remaining Work](Remaining-Work.md) | Prioritized backlog after Sprints 7 + 9 |
+| [Remaining Work](Remaining-Work.md) | Prioritized backlog — next: Sprint 8 Desktop |
 | [Progress Log](Progress-Log.md) | Dated implementation history |
 
 ---

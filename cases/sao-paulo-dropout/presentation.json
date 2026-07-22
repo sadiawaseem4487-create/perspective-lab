@@ -1,0 +1,162 @@
+{
+  "topic": {
+    "en": "Multi-theory agentic problem-solving",
+    "pt": "Resolução de problemas com IA multi-teoria",
+    "fi": "Moniteoreettinen agenttinen ongelmanratkaisu"
+  },
+  "topic_subtitle": {
+    "en": "Can we become better problem solvers with agentic AI?",
+    "pt": "Podemos nos tornar melhores solucionadores de problemas com IA agentica?",
+    "fi": "Voimmeko tulla paremmiksi ongelmanratkaisijoiksi agenttisella tekoälyllä?"
+  },
+  "introduction": {
+    "en": {
+      "title": "Why four theoretical lenses?",
+      "bullets": [
+        "The same research question is answered by Freire, Weber, Montessori, and Rogers — independently.",
+        "Each agent follows a different diagnostic process, so solutions are comparable, not interchangeable.",
+        "Live mode calls the AI model in real time; Demo version only suggests sample questions (answers are still live)."
+      ]
+    },
+    "pt": {
+      "title": "Por que quatro lentes teóricas?",
+      "bullets": [
+        "A mesma pergunta de pesquisa é respondida por Freire, Weber, Montessori e Rogers — de forma independente.",
+        "Cada agente segue um processo diagnóstico diferente, para que as soluções sejam comparáveis.",
+        "O modo Ao vivo chama o modelo em tempo real; a versão Demo só sugere perguntas (as respostas ainda são ao vivo)."
+      ]
+    },
+    "fi": {
+      "title": "Miksi neljä teoreettista näkökulmaa?",
+      "bullets": [
+        "Samaan tutkimuskysymykseen vastaavat Freire, Weber, Montessori ja Rogers — itsenäisesti.",
+        "Jokaisella agentilla on oma diagnostinen prosessi, joten ratkaisut ovat vertailukelpoisia.",
+        "Live-tila kutsuu mallia reaaliajassa; Demoversio ehdottaa vain kysymyksiä (vastaukset ovat silti live)."
+      ]
+    }
+  },
+  "case_study": {
+    "en": {
+      "title": "Case: school dropout in São Paulo",
+      "paragraphs": [
+        "Municipal schools in São Paulo face persistent dropout risk shaped by poverty, belonging, bureaucracy, and trust in schooling.",
+        "This case pack asks how different classical theories would frame and act on the same problem — then invites human guests to compare."
+      ],
+      "bullets": [
+        "Problem domain: education systems and youth disengagement",
+        "Method: parallel multi-theory agents + optional sequential chain",
+        "Evidence for research: human answers, rubric scores, presentation of key points"
+      ]
+    },
+    "pt": {
+      "title": "Caso: evasão escolar em São Paulo",
+      "paragraphs": [
+        "Escolas municipais em São Paulo enfrentam risco persistente de evasão ligado a pobreza, pertencimento, burocracia e confiança na escola.",
+        "Este pacote de caso pergunta como teorias clássicas enquadram e agem sobre o mesmo problema — e convida convidados humanos a comparar."
+      ],
+      "bullets": [
+        "Domínio: sistemas educacionais e desengajamento juvenil",
+        "Método: agentes multi-teoria em paralelo + cadeia sequencial opcional",
+        "Evidência: respostas humanas, rubrica e apresentação dos pontos-chave"
+      ]
+    },
+    "fi": {
+      "title": "Tapaus: koulupudokkuus São Paulossa",
+      "paragraphs": [
+        "São Paulon kunnalliset koulut kohtaavat pysyvää pudokkuusriskiä, johon liittyvät köyhyys, kuuluminen, byrokratia ja luottamus kouluun.",
+        "Tämä tapauspaketti kysyy, miten klassiset teoriat kehystävät ja toimivat saman ongelman kanssa — ja kutsuu ihmisvieraita vertailemaan."
+      ],
+      "bullets": [
+        "Alue: koulutusjärjestelmät ja nuorten irtautuminen",
+        "Menetelmä: moniteoria-agentit rinnakkain + valinnainen ketju",
+        "Näyttö: ihmisvastaukset, rubriikki ja avainkohtien esitys"
+      ]
+    }
+  },
+  "conclusion": {
+    "en": {
+      "title": "What should we try first?",
+      "prompts": [
+        "Which lens feels most actionable for this case?",
+        "Where do the agents agree — and where do they clash?",
+        "What would you pilot in the next 30 days with students, schools, or the municipality?"
+      ]
+    },
+    "pt": {
+      "title": "O que devemos tentar primeiro?",
+      "prompts": [
+        "Qual lente parece mais acionável neste caso?",
+        "Onde os agentes concordam — e onde divergem?",
+        "O que você pilotaria nos próximos 30 dias com estudantes, escolas ou o município?"
+      ]
+    },
+    "fi": {
+      "title": "Mitä kokeillaan ensin?",
+      "prompts": [
+        "Mikä näkökulma tuntuu toimivimmalta tässä tapauksessa?",
+        "Missä agentit ovat samaa mieltä — ja missä eri mieltä?",
+        "Mitä pilotoisit seuraavan 30 päivän aikana oppilaiden, koulujen tai kunnan kanssa?"
+      ]
+    }
+  },
+  "sources": [
+    {
+      "label": "infed.org — Paulo Freire",
+      "url": "https://infed.org/mobi/paulo-freire-dialogue-praxis-and-education/",
+      "note": {
+        "en": "Dialogue, praxis, and education",
+        "pt": "Diálogo, práxis e educação",
+        "fi": "Dialogi, praxis ja kasvatus"
+      }
+    },
+    {
+      "label": "freire.org",
+      "url": "https://www.freire.org/",
+      "note": {
+        "en": "Freire Institute resources",
+        "pt": "Recursos do Instituto Freire",
+        "fi": "Freire-instituutin aineistot"
+      }
+    },
+    {
+      "label": "HAMK Finna",
+      "url": "https://hamk.finna.fi/",
+      "note": {
+        "en": "Research library search (HAMK)",
+        "pt": "Busca na biblioteca de pesquisa (HAMK)",
+        "fi": "Tutkimuskirjaston haku (HAMK)"
+      }
+    },
+    {
+      "label": "Rogers — Diffusion of Innovations",
+      "url": "https://en.wikipedia.org/wiki/Diffusion_of_innovations",
+      "note": {
+        "en": "Adoption and scaling concepts",
+        "pt": "Conceitos de adoção e escala",
+        "fi": "Omaksumisen ja laajentamisen käsitteet"
+      }
+    }
+  ],
+  "lens_blurbs": {
+    "freire": {
+      "en": "Voice, dialogue, and whose experience is missing",
+      "pt": "Voz, diálogo e experiências ausentes",
+      "fi": "Ääni, dialogi ja puuttuvat kokemukset"
+    },
+    "weber": {
+      "en": "Authority, rules, and accountable procedures",
+      "pt": "Autoridade, regras e procedimentos responsabilizáveis",
+      "fi": "Valta, säännöt ja vastuulliset menettelyt"
+    },
+    "montessori": {
+      "en": "Prepared environment and learner autonomy",
+      "pt": "Ambiente preparado e autonomia do aprendiz",
+      "fi": "Valmistettu ympäristö ja oppijan autonomia"
+    },
+    "rogers": {
+      "en": "Adoption barriers, pilots, and diffusion",
+      "pt": "Barreiras de adoção, pilotos e difusão",
+      "fi": "Omaksumisen esteet, pilotit ja diffuusio"
+    }
+  }
+}

@@ -75,7 +75,7 @@ export default function ExportCenterPage() {
       {message && <PageAlert variant="success">{message}</PageAlert>}
 
       <PagePanel>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           <button
             type="button"
             onClick={() => handleExport("json")}
@@ -95,6 +95,16 @@ export default function ExportCenterPage() {
             <FileSpreadsheet className="h-5 w-5 text-emerald-400" />
             <span className="font-semibold text-white">{t("export.csv")}</span>
             <span className="text-xs text-slate-500">{t("export.csvHint")}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleExport("rubric.csv")}
+            disabled={Boolean(loading)}
+            className="flex flex-col items-start gap-2 rounded-2xl border border-white/10 bg-slate-950/40 p-4 text-left transition-colors hover:border-violet-500/30 hover:bg-violet-500/5 disabled:opacity-50"
+          >
+            <FileSpreadsheet className="h-5 w-5 text-violet-400" />
+            <span className="font-semibold text-white">{t("export.rubric")}</span>
+            <span className="text-xs text-slate-500">{t("export.rubricHint")}</span>
           </button>
           <button
             type="button"

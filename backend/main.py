@@ -29,6 +29,7 @@ from application import (
     get_custom_agents,
     get_human_answers,
     get_rubric_scores,
+    list_rubric_scores,
     get_main_agents,
     get_optional_agents_by_category,
     get_report,
@@ -41,6 +42,7 @@ from application import (
     load_case_manifest,
     load_models_config,
     load_perspective_types,
+    load_presentation_config,
     load_questions,
     load_theory_profile,
     load_tools_config,
@@ -261,6 +263,19 @@ async def get_agents_catalog():
         "agents_by_category": agents_by_category,
         "config_file": f"cases/{settings.case_id}/agents/agents.json",
         "case": load_case_manifest(),
+    }
+
+
+@app.get("/api/presentation")
+async def get_presentation_config():
+    """Case-pack presentation deck content (topic, intro, case study, sources)."""
+    config = load_presentation_config()
+    manifest = load_case_manifest()
+    return {
+        "case_id": settings.case_id,
+        "case_title": manifest.get("title", ""),
+        "research_question": manifest.get("research_question", ""),
+        **config,
     }
 
 
@@ -647,6 +662,70 @@ async def export_csv(_: None = Depends(require_export_key)):
         io.BytesIO(output.getvalue().encode("utf-8-sig")),
         media_type="text/csv",
         headers={"Content-Disposition": f"attachment; filename={settings.case_id}-responses.csv"},
+    )
+
+
+_RUBRIC_DIMS = ("PS1", "PS2", "PS3", "PS4", "PS5", "PS6")
+
+
+@app.get("/api/export/rubric.csv")
+async def export_rubric_csv(_: None = Depends(require_export_key)):
+    """One row per coder rating, plus session-level inter-rater columns."""
+    records = list_rubric_scores()
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(
+        [
+            "session_id",
+            "case_id",
+            "participant_id",
+            "condition",
+            "coder_id",
+            "rated_at",
+            "notes",
+            *_RUBRIC_DIMS,
+            "coder_count",
+            "exact_agreement",
+            "mean_abs_diff",
+            "updated_at",
+        ]
+    )
+    for record in records:
+        inter = record.get("inter_rater") or {}
+        ratings = list(record.get("ratings") or [])
+        if not ratings and record.get("scores"):
+            ratings = [
+                {
+                    "coder_id": record.get("coder_id", ""),
+                    "scores": record.get("scores") or {},
+                    "notes": record.get("notes", ""),
+                    "rated_at": record.get("updated_at"),
+                }
+            ]
+        for rating in ratings:
+            scores = rating.get("scores") or {}
+            writer.writerow(
+                [
+                    record.get("session_id"),
+                    record.get("case_id", settings.case_id),
+                    record.get("participant_id", ""),
+                    record.get("condition", ""),
+                    rating.get("coder_id", ""),
+                    rating.get("rated_at", ""),
+                    rating.get("notes", ""),
+                    *[scores.get(dim, "") for dim in _RUBRIC_DIMS],
+                    inter.get("coder_count", ""),
+                    inter.get("exact_agreement", ""),
+                    inter.get("mean_abs_diff", ""),
+                    record.get("updated_at", ""),
+                ]
+            )
+    return StreamingResponse(
+        io.BytesIO(output.getvalue().encode("utf-8-sig")),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename={settings.case_id}-rubric-scores.csv"
+        },
     )
 
 

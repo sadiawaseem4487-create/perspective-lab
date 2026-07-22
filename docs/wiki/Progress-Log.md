@@ -4,6 +4,8 @@ Newest entries at the top.
 
 | Date | Sprint | Event |
 |------|--------|-------|
+| 2026-07-22 | P2 | Study readiness: Overview/rubric wiki sync, in-app Guide (`/guide`), `GET /api/export/rubric.csv` + Export center button. |
+| 2026-07-22 | P1 | Academic Present deck: Topic → Introduction → Key concepts → Case study → Synthesis → Conclusion → Sources (`presentation.json` + `/api/presentation`). |
 | 2026-07-22 | 7+9 | **P0 done:** merged [PR #6](https://github.com/sadiawaseem4487-create/perspective-lab/pull/6) (Sprint 7 GUI finish + Sprint 9 research integrity). Next: P1 academic Present. |
 | 2026-07-22 | 7+9 | GUI polish: human labels (no raw i18n/dev paths), Compare redesign with theorist cards + guest chairs, softer canvas, Presentation/Export copy. |
 | 2026-07-22 | 7+9 | Finished remaining Sprint 7 GUI (xyflow sequential, Present, guest chairs, Export center) + Sprint 9 follow-ups (LLM judge API, inter-rater rubric). |
