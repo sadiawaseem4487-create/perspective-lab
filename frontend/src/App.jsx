@@ -10,6 +10,7 @@ import PresentPage from "./pages/PresentPage";
 import ExportCenterPage from "./pages/ExportCenterPage";
 import FacilitatorGuidePage from "./pages/FacilitatorGuidePage";
 import SetupWizardPage from "./pages/SetupWizardPage";
+import StudyProtocolPage from "./pages/StudyProtocolPage";
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="question" element={<Stage3Question />} />
         <Route path="report" element={<Stage4Report />} />
         <Route path="compare" element={<Stage5Compare />} />
+        <Route path="study" element={<StudyProtocolPage />} />
         <Route path="matrix" element={<ComparisonMatrixPage />} />
         <Route path="guide" element={<FacilitatorGuidePage />} />
         <Route path="export" element={<ExportCenterPage />} />

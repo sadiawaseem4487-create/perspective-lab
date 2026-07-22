@@ -112,6 +112,9 @@ export function RubricScorePanel({ sessionId, t }) {
             ? `${Math.round(interRater.exact_agreement * 100)}%`
             : "—"}{" "}
           · MAD {interRater.mean_abs_diff ?? "—"}
+          {interRater.cohens_kappa != null && (
+            <> · κ {interRater.cohens_kappa}</>
+          )}
         </div>
       )}
 

@@ -19,7 +19,7 @@ pip install -q -r requirements.txt
 
 if [ ! -f .env ] && [ ! -f "$ROOT/.env" ]; then
   cp .env.example .env
-  echo "Created backend/.env — open the app and use the Setup wizard to add your API key."
+  echo "Created backend/.env — open the app Setup page to paste your API key."
 fi
 
 echo "Starting PerspectiveLab at http://127.0.0.1:8000"

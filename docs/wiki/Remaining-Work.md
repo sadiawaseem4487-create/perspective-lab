@@ -116,15 +116,19 @@ See [Sprint-08-Desktop.md](Sprints/Sprint-08-Desktop.md).
 
 ---
 
-## P4 — Optional research depth (after P1–P3)
+## P4 — Optional research depth
 
-| ID | Task | Note |
-|----|------|------|
-| P4.1 | Study protocol wizard (baseline → agent → post) | Builds on rubric conditions |
-| P4.2 | Auto LLM judge in CI sample set | Cost + flakiness controls |
-| P4.3 | Second case pack (proves platform is generic) | No São Paulo hardcoding |
-| P4.4 | Inter-rater dashboards / Cohen’s kappa | Beyond simple exact agreement |
-| P4.5 | Repo rename `perspective-lab` | Cosmetic |
+**Status:** Partial — study protocol + Cohen’s κ shipped; second case pack / repo rename deferred
+
+| ID | Task | Status |
+|----|------|--------|
+| P4.1 | Study protocol wizard (`/study`) | [x] |
+| P4.2 | Auto LLM judge in CI sample set | [ ] optional / costly |
+| P4.3 | Second case pack | [ ] deferred |
+| P4.4 | Cohen’s kappa in inter-rater stats + CSV | [x] |
+| P4.5 | Repo rename `perspective-lab` | [ ] cosmetic |
+
+**Client handover:** [CLIENT_HANDOVER.md](../../CLIENT_HANDOVER.md) — install Start App → Setup API key → run.
 
 ---
 
@@ -138,7 +142,7 @@ See [Sprint-08-Desktop.md](Sprints/Sprint-08-Desktop.md).
 
 ## Suggested next action
 
-1. Commit/PR **P1 + P2** on `sprint/10-presentation-academic` (or split if preferred)  
-2. Then start **P3** Desktop (`sprint/8-desktop`)  
+1. Hand client **[CLIENT_HANDOVER.md](../../CLIENT_HANDOVER.md)** + project zip  
+2. Optional later: second case pack, signed installers, repo rename  
 
 [← Home](Home.md) · [Sprint plan](Sprints/README.md) · [Sprint 8](Sprints/Sprint-08-Desktop.md)

@@ -106,8 +106,32 @@ def _parse_judge_json(raw: str) -> dict:
     }
 
 
+def _cohens_kappa(labels_a: list, labels_b: list) -> Optional[float]:
+    """Unweighted Cohen's kappa for two equal-length label lists."""
+    n = len(labels_a)
+    if n == 0 or n != len(labels_b):
+        return None
+    cats = sorted(set(labels_a) | set(labels_b))
+    if len(cats) < 2:
+        return 1.0 if labels_a == labels_b else 0.0
+
+    index = {c: i for i, c in enumerate(cats)}
+    k = len(cats)
+    matrix = [[0] * k for _ in range(k)]
+    for a, b in zip(labels_a, labels_b):
+        matrix[index[a]][index[b]] += 1
+
+    po = sum(matrix[i][i] for i in range(k)) / n
+    row = [sum(matrix[i][j] for j in range(k)) / n for i in range(k)]
+    col = [sum(matrix[i][j] for i in range(k)) / n for j in range(k)]
+    pe = sum(row[i] * col[i] for i in range(k))
+    if pe >= 0.999999:
+        return 1.0 if po >= 0.999999 else 0.0
+    return round((po - pe) / (1.0 - pe), 3)
+
+
 def inter_rater_agreement(ratings: list) -> Dict[str, Any]:
-    """Simple pairwise exact-agreement and mean absolute difference across PS dims."""
+    """Pairwise exact-agreement, MAD, and Cohen's kappa across PS dimensions."""
     dims = ["PS1", "PS2", "PS3", "PS4", "PS5", "PS6"]
     usable = [r for r in ratings if isinstance(r.get("scores"), dict) and r["scores"]]
     if len(usable) < 2:
@@ -115,6 +139,7 @@ def inter_rater_agreement(ratings: list) -> Dict[str, Any]:
             "coder_count": len(usable),
             "exact_agreement": None,
             "mean_abs_diff": None,
+            "cohens_kappa": None,
             "pairwise_comparisons": 0,
         }
 
@@ -123,12 +148,15 @@ def inter_rater_agreement(ratings: list) -> Dict[str, Any]:
     abs_sum = 0.0
     abs_n = 0
     pairs = 0
+    kappa_values: list = []
 
     for i in range(len(usable)):
         for j in range(i + 1, len(usable)):
             pairs += 1
             a = usable[i]["scores"]
             b = usable[j]["scores"]
+            labels_a: list = []
+            labels_b: list = []
             for dim in dims:
                 if dim not in a or dim not in b:
                     continue
@@ -138,10 +166,18 @@ def inter_rater_agreement(ratings: list) -> Dict[str, Any]:
                     exact_hits += 1
                 abs_sum += abs(va - vb)
                 abs_n += 1
+                labels_a.append(va)
+                labels_b.append(vb)
+            kappa = _cohens_kappa(labels_a, labels_b)
+            if kappa is not None:
+                kappa_values.append(kappa)
+
+    mean_kappa = round(sum(kappa_values) / len(kappa_values), 3) if kappa_values else None
 
     return {
         "coder_count": len(usable),
         "exact_agreement": round(exact_hits / exact_total, 3) if exact_total else None,
         "mean_abs_diff": round(abs_sum / abs_n, 3) if abs_n else None,
+        "cohens_kappa": mean_kappa,
         "pairwise_comparisons": pairs,
     }
