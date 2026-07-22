@@ -9,6 +9,7 @@ import ComparisonMatrixPage from "./pages/ComparisonMatrixPage";
 import PresentPage from "./pages/PresentPage";
 import ExportCenterPage from "./pages/ExportCenterPage";
 import FacilitatorGuidePage from "./pages/FacilitatorGuidePage";
+import SetupWizardPage from "./pages/SetupWizardPage";
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
       <Route path="/present" element={<PresentPage />} />
       <Route path="/" element={<AppShell />}>
         <Route index element={<Navigate to="/question" replace />} />
+        <Route path="setup" element={<SetupWizardPage />} />
         <Route path="agents" element={<Stage1Agents />} />
         <Route path="models" element={<Stage2Models />} />
         <Route path="question" element={<Stage3Question />} />

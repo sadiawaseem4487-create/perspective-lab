@@ -12,7 +12,16 @@ export function setExportKey(key) {
 
 async function parseResponse(res) {
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.detail || "Request failed");
+  if (!res.ok) {
+    const detail = data.detail;
+    const message =
+      typeof detail === "string"
+        ? detail
+        : Array.isArray(detail)
+          ? detail.map((d) => d.msg || JSON.stringify(d)).join("; ")
+          : "Request failed";
+    throw new Error(message);
+  }
   return data;
 }
 
@@ -164,6 +173,20 @@ export async function runTheoryJudge(agentId, text, model) {
 
 export async function checkHealth() {
   const res = await fetch(`${API}/health`);
+  return parseResponse(res);
+}
+
+export async function fetchSetupStatus() {
+  const res = await fetch(`${API}/setup/status`);
+  return parseResponse(res);
+}
+
+export async function saveSetupKeys({ provider, api_key, model }) {
+  const res = await fetch(`${API}/setup/keys`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ provider, api_key, model }),
+  });
   return parseResponse(res);
 }
 

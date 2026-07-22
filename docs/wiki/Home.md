@@ -31,7 +31,7 @@ Welcome to the project wiki. This is the single source of truth for architecture
 | Field | Value |
 |-------|-------|
 | **Product** | PerspectiveLab |
-| **Current sprint** | [Sprint 8 — Desktop](Sprints/Sprint-08-Desktop.md) (next) |
+| **Current sprint** | [Sprint 8 — Desktop](Sprints/Sprint-08-Desktop.md) (in progress) |
 | **Sprint 9 status** | 🟩 Complete (research integrity) |
 | **Sprint 7 status** | 🟩 Complete (GUI research workspace) |
 | **Sprint 6 status** | 🟩 Complete |

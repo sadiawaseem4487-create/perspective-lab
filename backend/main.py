@@ -21,6 +21,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from agents.prompts import AGENT_DEFINITIONS, AGENT_ORDER
 from agents.service import ask_all_agents
 from config import get_settings
+from setup_keys import apply_llm_keys, setup_allowed
 from application import (
     build_comparison,
     build_comparison_matrix,
@@ -178,6 +179,12 @@ class SequentialAdvanceRequest(BaseModel):
     approved: bool = True
 
 
+class SetupKeysRequest(BaseModel):
+    provider: str = Field(pattern="^(openrouter|openai)$")
+    api_key: str = Field(min_length=8, max_length=512)
+    model: Optional[str] = None
+
+
 def _question_with_language(question: str, lang: str) -> str:
     lang_names = {"en": "English", "pt": "Brazilian Portuguese", "fi": "Finnish"}
     lang_label = lang_names.get(lang, "English")
@@ -197,19 +204,58 @@ def require_export_key(x_export_key: str = Header(default="")) -> None:
 
 @app.get("/api/health")
 async def health():
+    current = get_settings()
     db_ok = check_db()
     status = "ok" if db_ok else "degraded"
     code = 200 if db_ok else 503
     payload = {
         "status": status,
-        "version": settings.app_version,
-        "environment": settings.environment,
-        "llm_configured": settings.llm_configured,
-        "llm_provider": settings.resolved_llm_provider,
-        "openai_configured": settings.llm_configured,
+        "version": current.app_version,
+        "environment": current.environment,
+        "llm_configured": current.llm_configured,
+        "llm_provider": current.resolved_llm_provider,
+        "openai_configured": current.llm_configured,
         "database_ok": db_ok,
+        "setup_allowed": setup_allowed(current),
     }
     return JSONResponse(content=payload, status_code=code)
+
+
+@app.get("/api/setup/status")
+async def setup_status():
+    current = get_settings()
+    return {
+        "llm_configured": current.llm_configured,
+        "llm_provider": current.resolved_llm_provider,
+        "setup_allowed": setup_allowed(current),
+        "environment": current.environment,
+    }
+
+
+@app.post("/api/setup/keys")
+async def setup_keys(body: SetupKeysRequest):
+    current = get_settings()
+    if not setup_allowed(current):
+        raise HTTPException(status_code=403, detail="API key setup disabled in production")
+    try:
+        path = apply_llm_keys(
+            provider=body.provider,  # type: ignore[arg-type]
+            api_key=body.api_key,
+            model=body.model,
+            settings=current,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+    refreshed = get_settings()
+    return {
+        "ok": True,
+        "llm_configured": refreshed.llm_configured,
+        "llm_provider": refreshed.resolved_llm_provider,
+        "env_path": str(path.name),
+    }
 
 
 @app.get("/api/questions")

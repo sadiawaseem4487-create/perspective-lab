@@ -28,7 +28,7 @@ flowchart LR
 | **P0** | Ship current work | ✅ Done — [PR #6](https://github.com/sadiawaseem4487-create/perspective-lab/pull/6) merged 2026-07-22 | Small |
 | **P1** | Academic Present structure | ✅ Done — Topic → Intro → Key concepts → Case → Conclusion + sources | Medium |
 | **P2** | Study readiness | ✅ Done — Overview/rubric sync, Guide `/guide`, rubric CSV export | Small–medium |
-| **P3** | Sprint 8 Desktop | Tauri 2, installers, API key wizard | Large |
+| **P3** | Sprint 8 Desktop | 🟨 In progress — Tauri shell + setup wizard (installers via `tauri build`) | Large |
 | **P4** | Research depth (optional) | Causal protocol UI, stronger judge ops, multi-case packs | Large |
 
 ---
@@ -102,15 +102,17 @@ Your reference structure:
 
 See [Sprint-08-Desktop.md](Sprints/Sprint-08-Desktop.md).
 
-| ID | Task |
-|----|------|
-| 8.1 | Tauri 2 shell wrapping Vite frontend |
-| 8.2 | Bundle / proxy local FastAPI or document sidecar |
-| 8.3 | First-run API key wizard (OpenRouter / OpenAI) |
-| 8.4 | Mac `.dmg` + Windows installer CI |
-| 8.5 | Smoke test: ask → report → present offline-capable install |
+**Status:** 🟨 Scaffold complete on `sprint/8-desktop`
 
-**Exit:** Non-developer can install and run a demo without terminal.
+| ID | Task | Status |
+|----|------|--------|
+| 8.1 | Tauri 2 shell wrapping Vite/FastAPI UI | [x] |
+| 8.2 | Bundle / proxy local FastAPI sidecar scripts | [x] |
+| 8.3 | First-run API key wizard | [x] |
+| 8.4 | Mac `.dmg` + Windows installer via `tauri build` | [x] targets configured |
+| 8.5 | Smoke test: setup → ask → report | [ ] manual on each OS |
+
+**Exit:** Non-developer can install and run a demo without terminal (installer signing may still be manual).
 
 ---
 

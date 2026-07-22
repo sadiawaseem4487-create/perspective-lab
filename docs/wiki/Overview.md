@@ -34,7 +34,7 @@ The first case pack is **school dropout in São Paulo**. The platform itself is 
 | Sequential workflow + HITL | ❌ | ✅ | ✅ |
 | Professional GUI / Present / Export | ❌ | ✅ | ✅ |
 | Research rubric + inter-rater | ❌ | ✅ | ✅ |
-| Desktop install | ❌ | ❌ | ✅ Sprint 8 |
+| Desktop install | ❌ | 🟨 Tauri shell + wizard | ✅ Sprint 8 |
 
 ## Facilitator path
 
