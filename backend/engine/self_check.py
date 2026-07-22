@@ -6,6 +6,7 @@ from typing import Any, Dict, List
 
 from application import load_theory_profile
 from engine.response_parser import parse_agent_response, section_titles_found
+from engine.theory_judge import drift_check_record
 
 
 def enrich_with_self_check(agent_id: str, response_record: dict) -> dict:
@@ -25,11 +26,42 @@ def enrich_with_self_check(agent_id: str, response_record: dict) -> dict:
     schema = profile.get("output_schema", {})
     parsed = parse_agent_response(text)
     checks = _run_checks(agent_id, text, parsed, profile, schema)
-    passed = all(check["passed"] for check in checks)
+    # Structural + anti-drift hard fails determine pass
+    hard_ids = {"agent_error", "sections_present", "has_content", "anti_drift"}
+    passed = all(check["passed"] for check in checks if check["id"] in hard_ids)
 
     return {
         **response_record,
         "structured_output": parsed,
+        "self_check": {"passed": passed, "checks": checks},
+    }
+
+
+async def enrich_with_self_check_async(agent_id: str, response_record: dict) -> dict:
+    """Self-check plus optional LLM fidelity judge when THEORY_JUDGE_LLM=true."""
+    from config import get_settings
+
+    checked = enrich_with_self_check(agent_id, response_record)
+    settings = get_settings()
+    if not settings.theory_judge_llm or checked.get("error"):
+        return checked
+
+    from engine.llm_theory_judge import llm_theory_fidelity_check
+
+    profile = load_theory_profile(agent_id) or {}
+    judge = await llm_theory_fidelity_check(
+        agent_id,
+        checked.get("response", ""),
+        profile=profile,
+        model=checked.get("model"),
+    )
+    checks = list(checked["self_check"]["checks"])
+    checks.append(judge)
+    passed = checked["self_check"]["passed"]
+    if not judge.get("skipped") and not judge.get("passed"):
+        passed = False
+    return {
+        **checked,
         "self_check": {"passed": passed, "checks": checks},
     }
 
@@ -97,5 +129,19 @@ def _run_checks(
             "detail": "Non-empty response body",
         }
     )
+
+    checks.append(drift_check_record(agent_id, text, profile))
+
+    if expected_titles:
+        found = section_titles_found(text, expected_titles)
+        chain_ok = len(found) >= max(3, len(expected_titles) // 2)
+        checks.append(
+            {
+                "id": "reasoning_coverage",
+                "passed": chain_ok,
+                "detail": f"Reasoning sections covered {len(found)}/{len(expected_titles)}",
+                "found_sections": found,
+            }
+        )
 
     return checks

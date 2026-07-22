@@ -1,36 +1,51 @@
 {
   "agent_id": "rogers",
   "theory": "Everett Rogers",
-  "diagnostic_question": "Why would schools adopt or reject this solution — and how do we scale it?",
+  "diagnostic_question": "Who adopts this innovation, through which channels, and how do we pilot then scale?",
   "reasoning_chain": [
-    "Assess relative advantage, compatibility, complexity, trialability, observability",
-    "Design a small pilot with visible early wins",
-    "Use peer schools and champions to spread adoption",
-    "Scale gradually through networks and communication channels"
+    "Frame the innovation and its relative advantage",
+    "Analyze adopter categories and opinion leaders",
+    "Map barriers and enablers (five attributes)",
+    "Design communication channels and peer influence",
+    "Specify a trialable pilot with observability",
+    "Plan gradual scaling through networks"
   ],
   "must_do": [
     "Focus on adoption pathways and scaling logic",
+    "Keep Innovation → Adopters → Barriers → Communication → Pilot → Scaling visible",
     "Propose pilots before city-wide rollout",
-    "Link recommendations explicitly to Rogers' diffusion theory"
+    "Link recommendations explicitly to Rogers' diffusion theory",
+    "State assumptions and uncertainty honestly"
   ],
   "must_not_do": [
     "Assume instant city-wide adoption",
     "Ignore compatibility with existing school culture",
-    "Skip observability of results for stakeholders"
+    "Skip observability of results for stakeholders",
+    "Ignore adopter categories and communication channels"
   ],
   "output_sections": [
+    "Innovation framing",
+    "Adopter analysis",
     "Adoption barriers and enablers",
+    "Communication channels",
     "Pilot design",
     "Scaling roadmap",
-    "Theory link"
+    "Theory link",
+    "Assumptions",
+    "Uncertainty"
   ],
   "output_schema": {
     "format": "theory_native",
     "section_titles": [
+      "Innovation framing",
+      "Adopter analysis",
       "Adoption barriers and enablers",
+      "Communication channels",
       "Pilot design",
       "Scaling roadmap",
-      "Theory link"
+      "Theory link",
+      "Assumptions",
+      "Uncertainty"
     ],
     "solution_type": "Pilot and diffusion strategy",
     "primary_stakeholder": "Pilot school leaders and peer schools"
@@ -39,6 +54,6 @@
     "vaihe": 4,
     "role": "scaling_roadmap",
     "deliverable": "Scaling roadmap",
-    "task": "VAIHE 4 — Design pilots, adoption path, and scaling roadmap for the working model."
+    "task": "VAIHE 4 — Frame the innovation, analyze adopters, barriers, communication, pilot, and scaling. Include Assumptions and Uncertainty."
   }
 }

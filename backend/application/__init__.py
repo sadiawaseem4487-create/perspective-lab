@@ -15,6 +15,7 @@ __all__ = [
     "get_agents_by_category",
     "get_custom_agents",
     "get_human_answers",
+    "get_rubric_scores",
     "get_main_agents",
     "get_optional_agents_by_category",
     "get_report",
@@ -29,6 +30,7 @@ __all__ = [
     "load_questions",
     "load_tools_config",
     "save_human_answers",
+    "save_rubric_scores",
     "save_report",
     "set_selected_model",
     "set_slot_assignments",
@@ -127,6 +129,14 @@ def save_human_answers(session_id: int, question: str, respondents):
 
 def get_human_answers(session_id: int):
     return repo().get_human_answers(session_id)
+
+
+def save_rubric_scores(session_id: int, payload: dict):
+    return repo().save_rubric_scores(session_id, payload)
+
+
+def get_rubric_scores(session_id: int):
+    return repo().get_rubric_scores(session_id)
 
 
 def build_comparison(session_id: int, agent_report: dict):

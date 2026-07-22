@@ -1,0 +1,211 @@
+{
+  "report_id": "report_session_21",
+  "session_id": 21,
+  "case_id": "sao-paulo-dropout",
+  "question": "How do we solve school dropout in São Paulo?",
+  "model": "openai/gpt-4o-mini",
+  "workflow_mode": "parallel",
+  "created_at": "2026-07-07T15:17:17.346977+00:00",
+  "summary": {
+    "total_agents": 4,
+    "successful": 4
+  },
+  "responses": [
+    {
+      "agent_key": "freire",
+      "slot": "agent_1",
+      "agent_number": 1,
+      "agent_label": "Agent 1",
+      "agent_name": "Freire Agent",
+      "title": "Sociocultural Inspirer",
+      "theory": "Paulo Freire — dialogue, conscientization, praxis, and participatory action",
+      "color": "#c2410c",
+      "response": "- Missing voices\n- Students who feel disconnected from school often lack a platform to express their experiences and challenges.\n- Families of at-risk students may not be engaged in school dialogues, leaving their insights unheard.\n- Community leaders and local organizations may have valuable perspectives on the barriers faced by students.\n- Teachers may feel limited in their ability to connect with students due to systemic constraints.\n- The voices of marginalized groups, including low-income families and ethnic minorities, are often silenced in educational policy discussions.\n\n- Power and participation analysis\n- Power dynamics in education often position administrators and policymakers above students and families, silencing grassroots voices.\n- Students may feel powerless to influence their educational environment, leading to disengagement.\n- Families may lack access to decision-making processes, reinforcing feelings of exclusion and neglect.\n- Community organizations often operate in isolation from schools, missing opportunities for collaboration.\n- The existing power structures may prioritize standardized testing and metrics over the lived experiences of students.\n\n- Participatory action plan\nAction: Conduct student listening circles in high-dropout areas.\nOwner: Local educational NGOs in partnership with schools.\nTimeline: 3 months to organize and implement.\nMeasure: Number of students participating and themes identified.\n\nAction: Facilitate family engagement workshops to gather insights on barriers to education.\nOwner: School administrators and community leaders.\nTimeline: 2 months to plan and execute.\nMeasure: Attendance rates and qualitative feedback from families.\n\nAction: Co-design solutions with students, families, teachers, and community groups through collaborative forums.\nOwner: Educational institutions and local organizations.\nTimeline: 4 months for initial forums and ongoing sessions.\nMeasure: Number of actionable solutions generated and stakeholder satisfaction.\n\nAction: Establish community mentor programs for at-risk students.\nOwner: Local community organizations.\nTimeline: 6 months to recruit and train mentors.\nMeasure: Retention rates of mentored students and feedback from participants.\n\n- Theory link\n- Freire emphasizes the importance of dialogue and critical consciousness, making it essential to listen to students and families before designing interventions.\n- By surfacing lived experiences through dialogue, communities can build critical consciousness around the issues leading to dropout.\n- Co-designing solutions empowers all stakeholders, breaking down traditional power hierarchies and fostering a sense of ownership in the educational process.\n- Engaging community participation aligns with Freire's vision of education as a collaborative journey toward emancipation, ensuring that the voices of those most affected are central to the solutions.",
+      "model": "openai/gpt-4o-mini",
+      "latency_ms": 7523,
+      "error": null,
+      "structured_output": {
+        "sections": [],
+        "fallback": "- Missing voices\n- Students who feel disconnected from school often lack a platform to express their experiences and challenges.\n- Families of at-risk students may not be engaged in school dialogues, leaving their insights unheard.\n- Community leaders and local organizations may have valuable perspectives on the barriers faced by students.\n- Teachers may feel limited in their ability to connect with students due to systemic constraints.\n- The voices of marginalized groups, including low-income families and ethnic minorities, are often silenced in educational policy discussions.\n\n- Power and participation analysis\n- Power dynamics in education often position administrators and policymakers above students and families, silencing grassroots voices.\n- Students may feel powerless to influence their educational environment, leading to disengagement.\n- Families may lack access to decision-making processes, reinforcing feelings of exclusion and neglect.\n- Community organizations often operate in isolation from schools, missing opportunities for collaboration.\n- The existing power structures may prioritize standardized testing and metrics over the lived experiences of students.\n\n- Participatory action plan\nAction: Conduct student listening circles in high-dropout areas.\nOwner: Local educational NGOs in partnership with schools.\nTimeline: 3 months to organize and implement.\nMeasure: Number of students participating and themes identified.\n\nAction: Facilitate family engagement workshops to gather insights on barriers to education.\nOwner: School administrators and community leaders.\nTimeline: 2 months to plan and execute.\nMeasure: Attendance rates and qualitative feedback from families.\n\nAction: Co-design solutions with students, families, teachers, and community groups through collaborative forums.\nOwner: Educational institutions and local organizations.\nTimeline: 4 months for initial forums and ongoing sessions.\nMeasure: Number of actionable solutions generated and stakeholder satisfaction.\n\nAction: Establish community mentor programs for at-risk students.\nOwner: Local community organizations.\nTimeline: 6 months to recruit and train mentors.\nMeasure: Retention rates of mentored students and feedback from participants.\n\n- Theory link\n- Freire emphasizes the importance of dialogue and critical consciousness, making it essential to listen to students and families before designing interventions.\n- By surfacing lived experiences through dialogue, communities can build critical consciousness around the issues leading to dropout.\n- Co-designing solutions empowers all stakeholders, breaking down traditional power hierarchies and fostering a sense of ownership in the educational process.\n- Engaging community participation aligns with Freire's vision of education as a collaborative journey toward emancipation, ensuring that the voices of those most affected are central to the solutions."
+      },
+      "self_check": {
+        "passed": false,
+        "checks": [
+          {
+            "id": "sections_present",
+            "passed": false,
+            "detail": "Found 0/4 theory-native sections",
+            "found_sections": []
+          },
+          {
+            "id": "theory_named",
+            "passed": true,
+            "detail": "Expected reference to Paulo Freire"
+          },
+          {
+            "id": "no_markdown",
+            "passed": true,
+            "detail": "Response must not contain markdown headings or bold"
+          },
+          {
+            "id": "word_count",
+            "passed": true,
+            "detail": "Word count: 394 (target 300-450)"
+          },
+          {
+            "id": "has_content",
+            "passed": true,
+            "detail": "Non-empty response body"
+          }
+        ]
+      }
+    },
+    {
+      "agent_key": "weber",
+      "slot": "agent_2",
+      "agent_number": 2,
+      "agent_label": "Agent 2",
+      "agent_name": "Weber Agent",
+      "title": "Bureaucratic Rationality Agent",
+      "theory": "Max Weber — rational-legal authority, bureaucracy, rules, and formal responsibility",
+      "color": "#1e40af",
+      "response": "- Authority and rule gaps\n- Undefined roles among teachers, administrators, and municipal education officials.\n- Lack of formal procedures for tracking and responding to absenteeism.\n- Insufficient documentation of interventions for at-risk students.\n- Inconsistent application of rules leading to unequal treatment of students.\n\n- Administrative model\n- Establish a clear governance structure with defined roles:\n  - Teachers responsible for recording absences within 24 hours.\n  - Principals tasked with reviewing attendance reports weekly.\n  - Municipal education office accountable for investigating repeated absences.\n- Create a centralized case-management system for tracking student attendance and interventions.\n\n- Procedure and accountability plan\nAction: Implement attendance tracking system.\nOwner: School administrators.\nTimeline: Within the next academic quarter.\nMeasure: Reduction in absenteeism rates by 20% within six months.\n\nAction: Document every intervention in the case-management system.\nOwner: Teachers and school counselors.\nTimeline: Ongoing.\nMeasure: 100% documentation compliance within the first semester.\n\nAction: Establish clear escalation rules for absenteeism.\nOwner: School leadership team.\nTimeline: End of the current school year.\nMeasure: Equal treatment and intervention for all students with repeated absences.\n\n- Theory link\n- Weber emphasizes rational-legal authority, necessitating a clear governance process.\n- Defined roles and responsibilities enhance accountability and formal responsibility.\n- Documentation of interventions aligns with Weber’s principles of bureaucracy, ensuring consistent and equal treatment.\n- Structured procedures and clear escalation promote adherence to rules, minimizing dropout rates through systematic oversight.",
+      "model": "openai/gpt-4o-mini",
+      "latency_ms": 5012,
+      "error": null,
+      "structured_output": {
+        "sections": [],
+        "fallback": "- Authority and rule gaps\n- Undefined roles among teachers, administrators, and municipal education officials.\n- Lack of formal procedures for tracking and responding to absenteeism.\n- Insufficient documentation of interventions for at-risk students.\n- Inconsistent application of rules leading to unequal treatment of students.\n\n- Administrative model\n- Establish a clear governance structure with defined roles:\n  - Teachers responsible for recording absences within 24 hours.\n  - Principals tasked with reviewing attendance reports weekly.\n  - Municipal education office accountable for investigating repeated absences.\n- Create a centralized case-management system for tracking student attendance and interventions.\n\n- Procedure and accountability plan\nAction: Implement attendance tracking system.\nOwner: School administrators.\nTimeline: Within the next academic quarter.\nMeasure: Reduction in absenteeism rates by 20% within six months.\n\nAction: Document every intervention in the case-management system.\nOwner: Teachers and school counselors.\nTimeline: Ongoing.\nMeasure: 100% documentation compliance within the first semester.\n\nAction: Establish clear escalation rules for absenteeism.\nOwner: School leadership team.\nTimeline: End of the current school year.\nMeasure: Equal treatment and intervention for all students with repeated absences.\n\n- Theory link\n- Weber emphasizes rational-legal authority, necessitating a clear governance process.\n- Defined roles and responsibilities enhance accountability and formal responsibility.\n- Documentation of interventions aligns with Weber’s principles of bureaucracy, ensuring consistent and equal treatment.\n- Structured procedures and clear escalation promote adherence to rules, minimizing dropout rates through systematic oversight."
+      },
+      "self_check": {
+        "passed": false,
+        "checks": [
+          {
+            "id": "sections_present",
+            "passed": false,
+            "detail": "Found 0/4 theory-native sections",
+            "found_sections": []
+          },
+          {
+            "id": "theory_named",
+            "passed": true,
+            "detail": "Expected reference to Max Weber"
+          },
+          {
+            "id": "no_markdown",
+            "passed": true,
+            "detail": "Response must not contain markdown headings or bold"
+          },
+          {
+            "id": "word_count",
+            "passed": true,
+            "detail": "Word count: 230 (target 300-450)"
+          },
+          {
+            "id": "has_content",
+            "passed": true,
+            "detail": "Non-empty response body"
+          }
+        ]
+      }
+    },
+    {
+      "agent_key": "montessori",
+      "slot": "agent_3",
+      "agent_number": 3,
+      "agent_label": "Agent 3",
+      "agent_name": "Montessori Agent",
+      "title": "Self-Directed Learning Builder",
+      "theory": "Maria Montessori — prepared environment, learner autonomy, observation, and concrete activity",
+      "color": "#15803d",
+      "response": "- Environment diagnosis\n- Observe student interactions and engagement levels in the classroom.\n- Identify physical and emotional barriers that hinder student autonomy.\n- Assess the availability and accessibility of hands-on learning materials.\n- Analyze classroom layout and its impact on collaborative learning.\n- Gather feedback from students about their learning experiences and preferences.\n\n- Autonomy and activity redesign\n- Create learning stations with diverse hands-on materials to promote exploration.\n- Introduce controlled choices in lesson plans, allowing students to select topics or activities.\n- Implement project-based learning that connects to real-world issues, fostering relevance.\n- Develop a mentorship program where older students guide younger peers, enhancing community.\n- Train teachers to facilitate rather than direct, encouraging student-led inquiries.\n\n- School-day learning plan\nAction: Conduct workshops for teachers on Montessori methods.\nOwner: School administration and training coordinators.\nTimeline: Within 3 months.\nMeasure: Teacher feedback and student engagement surveys pre- and post-training.\n\nAction: Redesign classroom layouts to include more flexible, interactive spaces.\nOwner: School facilities management.\nTimeline: Within 6 months.\nMeasure: Observation of student interactions and participation rates.\n\nAction: Introduce regular reflection sessions where students can share learning experiences.\nOwner: Classroom teachers.\nTimeline: Ongoing, starting next semester.\nMeasure: Student feedback on perceived value of these sessions.\n\n- Theory link\n- Montessori emphasizes the prepared environment, ensuring it is safe, engaging, and conducive to exploration.\n- By redesigning the classroom to enhance autonomy, students are more likely to engage actively and return.\n- Hands-on activities align with Montessori's belief in concrete learning, making education meaningful.\n- Allowing student choice fosters a sense of ownership and responsibility in their learning journey.\n- Continuous observation and adaptation of the environment support self-directed learning and small, achievable progress.",
+      "model": "openai/gpt-4o-mini",
+      "latency_ms": 8580,
+      "error": null,
+      "structured_output": {
+        "sections": [],
+        "fallback": "- Environment diagnosis\n- Observe student interactions and engagement levels in the classroom.\n- Identify physical and emotional barriers that hinder student autonomy.\n- Assess the availability and accessibility of hands-on learning materials.\n- Analyze classroom layout and its impact on collaborative learning.\n- Gather feedback from students about their learning experiences and preferences.\n\n- Autonomy and activity redesign\n- Create learning stations with diverse hands-on materials to promote exploration.\n- Introduce controlled choices in lesson plans, allowing students to select topics or activities.\n- Implement project-based learning that connects to real-world issues, fostering relevance.\n- Develop a mentorship program where older students guide younger peers, enhancing community.\n- Train teachers to facilitate rather than direct, encouraging student-led inquiries.\n\n- School-day learning plan\nAction: Conduct workshops for teachers on Montessori methods.\nOwner: School administration and training coordinators.\nTimeline: Within 3 months.\nMeasure: Teacher feedback and student engagement surveys pre- and post-training.\n\nAction: Redesign classroom layouts to include more flexible, interactive spaces.\nOwner: School facilities management.\nTimeline: Within 6 months.\nMeasure: Observation of student interactions and participation rates.\n\nAction: Introduce regular reflection sessions where students can share learning experiences.\nOwner: Classroom teachers.\nTimeline: Ongoing, starting next semester.\nMeasure: Student feedback on perceived value of these sessions.\n\n- Theory link\n- Montessori emphasizes the prepared environment, ensuring it is safe, engaging, and conducive to exploration.\n- By redesigning the classroom to enhance autonomy, students are more likely to engage actively and return.\n- Hands-on activities align with Montessori's belief in concrete learning, making education meaningful.\n- Allowing student choice fosters a sense of ownership and responsibility in their learning journey.\n- Continuous observation and adaptation of the environment support self-directed learning and small, achievable progress."
+      },
+      "self_check": {
+        "passed": false,
+        "checks": [
+          {
+            "id": "sections_present",
+            "passed": false,
+            "detail": "Found 0/4 theory-native sections",
+            "found_sections": []
+          },
+          {
+            "id": "theory_named",
+            "passed": true,
+            "detail": "Expected reference to Maria Montessori"
+          },
+          {
+            "id": "no_markdown",
+            "passed": true,
+            "detail": "Response must not contain markdown headings or bold"
+          },
+          {
+            "id": "word_count",
+            "passed": true,
+            "detail": "Word count: 283 (target 300-450)"
+          },
+          {
+            "id": "has_content",
+            "passed": true,
+            "detail": "Non-empty response body"
+          }
+        ]
+      }
+    },
+    {
+      "agent_key": "rogers",
+      "slot": "agent_4",
+      "agent_number": 4,
+      "agent_label": "Agent 4",
+      "agent_name": "Rogers Agent",
+      "title": "Innovation Diffusion Agent",
+      "theory": "Everett Rogers — diffusion of innovations, adoption, pilots, and scaling",
+      "color": "#7c3aed",
+      "response": "- Adoption barriers and enablers\n- Relative advantage: Schools may perceive dropout solutions as additional burdens rather than beneficial. Highlighting success stories can enhance perceived advantages.\n- Compatibility: Existing school cultures may resist new methods. Solutions must align with current educational practices to gain acceptance.\n- Complexity: If dropout prevention strategies appear too complicated, schools may hesitate to adopt them. Simplicity in implementation is crucial.\n- Trialability: Schools may be reluctant to commit to untested strategies. Offering short-term pilot programs allows for experimentation without full commitment.\n- Observability: If successes are not clearly visible, schools will lack motivation to adopt solutions. Demonstrating early wins can inspire broader acceptance.\n\n- Pilot design\n- Action: Implement a dropout prevention pilot program in 5 selected schools with strong leadership.\n- Owner: Local educational authority in collaboration with school leaders.\n- Timeline: 8-12 weeks for pilot execution.\n- Measure: Track attendance rates, engagement levels, and feedback from students and teachers throughout the pilot.\n\n- Scaling roadmap\n- Action: After pilot success, identify 10 additional schools with similar demographics for rollout.\n- Owner: Educational authority to coordinate with pilot schools and new adopters.\n- Timeline: 6 months post-pilot evaluation for scaling.\n- Measure: Monitor dropout rates and student success stories to share across schools.\n\n- Theory link\n- Rogers' theory emphasizes that innovations spread when benefits are clear and easily tested. By designing a pilot program, we create a low-risk opportunity for schools to experience the advantages of dropout prevention firsthand. Using peer schools as champions leverages social proof, enhancing relatability and compatibility with existing practices. Gradual scaling through communication channels ensures that observable results can be shared, driving further adoption.",
+      "model": "openai/gpt-4o-mini",
+      "latency_ms": 4688,
+      "error": null,
+      "structured_output": {
+        "sections": [],
+        "fallback": "- Adoption barriers and enablers\n- Relative advantage: Schools may perceive dropout solutions as additional burdens rather than beneficial. Highlighting success stories can enhance perceived advantages.\n- Compatibility: Existing school cultures may resist new methods. Solutions must align with current educational practices to gain acceptance.\n- Complexity: If dropout prevention strategies appear too complicated, schools may hesitate to adopt them. Simplicity in implementation is crucial.\n- Trialability: Schools may be reluctant to commit to untested strategies. Offering short-term pilot programs allows for experimentation without full commitment.\n- Observability: If successes are not clearly visible, schools will lack motivation to adopt solutions. Demonstrating early wins can inspire broader acceptance.\n\n- Pilot design\n- Action: Implement a dropout prevention pilot program in 5 selected schools with strong leadership.\n- Owner: Local educational authority in collaboration with school leaders.\n- Timeline: 8-12 weeks for pilot execution.\n- Measure: Track attendance rates, engagement levels, and feedback from students and teachers throughout the pilot.\n\n- Scaling roadmap\n- Action: After pilot success, identify 10 additional schools with similar demographics for rollout.\n- Owner: Educational authority to coordinate with pilot schools and new adopters.\n- Timeline: 6 months post-pilot evaluation for scaling.\n- Measure: Monitor dropout rates and student success stories to share across schools.\n\n- Theory link\n- Rogers' theory emphasizes that innovations spread when benefits are clear and easily tested. By designing a pilot program, we create a low-risk opportunity for schools to experience the advantages of dropout prevention firsthand. Using peer schools as champions leverages social proof, enhancing relatability and compatibility with existing practices. Gradual scaling through communication channels ensures that observable results can be shared, driving further adoption."
+      },
+      "self_check": {
+        "passed": false,
+        "checks": [
+          {
+            "id": "sections_present",
+            "passed": false,
+            "detail": "Found 0/4 theory-native sections",
+            "found_sections": []
+          },
+          {
+            "id": "theory_named",
+            "passed": true,
+            "detail": "Expected reference to Everett Rogers"
+          },
+          {
+            "id": "no_markdown",
+            "passed": true,
+            "detail": "Response must not contain markdown headings or bold"
+          },
+          {
+            "id": "word_count",
+            "passed": true,
+            "detail": "Word count: 276 (target 300-450)"
+          },
+          {
+            "id": "has_content",
+            "passed": true,
+            "detail": "Non-empty response body"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -129,6 +129,7 @@ async def advance_sequential_hitl(
         vaihe=next_vaihe,
         stage_outputs=stage_outputs,
         model=row.get("model"),
+        human_note=human_note.strip(),
     )
     responses.append(response)
     if not response.get("error"):

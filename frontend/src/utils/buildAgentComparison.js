@@ -1,75 +1,94 @@
 import { cleanAgentText, parseAgentResponse, firstActionBlock, firstTextBullet, getSectionBullets } from "./parseAgentResponse";
 
-const SOLUTION_TYPES = {
-  freire: {
-    en: "Participatory community action",
-    pt: "Ação comunitária participativa",
-    fi: "Osallistuva yhteisötoiminta",
-  },
-  weber: {
-    en: "Administrative governance system",
-    pt: "Sistema administrativo de governança",
-    fi: "Hallinnollinen järjestelmä",
-  },
-  montessori: {
-    en: "Learning environment redesign",
-    pt: "Redesenho do ambiente de aprendizagem",
-    fi: "Oppimisympäristön uudistus",
-  },
-  rogers: {
-    en: "Pilot and diffusion strategy",
-    pt: "Estratégia de piloto e difusão",
-    fi: "Pilotti- ja leviämisstrategia",
-  },
-};
+const FOCUS_SECTIONS = [
+  "Lived experience",
+  "Missing voices",
+  "Authority map",
+  "Authority and rule gaps",
+  "Observation",
+  "Environment diagnosis",
+  "Innovation framing",
+  "Adoption barriers and enablers",
+  "Problem Diagnosis",
+];
 
-const STAKEHOLDERS = {
-  freire: {
-    en: "Students, families, and community groups",
-    pt: "Estudantes, famílias e grupos comunitários",
-    fi: "Opiskelijat, perheet ja yhteisöryhmät",
-  },
-  weber: {
-    en: "Teachers, principals, and municipal office",
-    pt: "Professores, diretores e secretaria municipal",
-    fi: "Opettajat, rehtorit ja kunnan toimisto",
-  },
-  montessori: {
-    en: "Teachers and students in the classroom",
-    pt: "Professores e estudantes na sala de aula",
-    fi: "Opettajat ja oppilaat luokassa",
-  },
-  rogers: {
-    en: "Pilot school leaders and peer schools",
-    pt: "Líderes de escolas piloto e escolas parceiras",
-    fi: "Pilottikoulujen johtajat ja vertaiskoulut",
-  },
-};
+const ACTION_SECTIONS = [
+  "Collective action",
+  "Participatory action plan",
+  "Process design",
+  "Procedure and accountability plan",
+  "Concrete activity",
+  "School-day learning plan",
+  "Pilot design",
+  "Scaling roadmap",
+  "Priority Actions",
+  "Implementation Steps",
+];
 
 function agentKeyFromResponse(response) {
   return (response.agent_key || response.agent_id || "").toLowerCase();
 }
 
+function firstFocus(sections, response) {
+  for (const title of FOCUS_SECTIONS) {
+    const text = firstTextBullet(sections, title);
+    if (text) return { text, source: "answer" };
+  }
+  return { text: response.theory || response.title || "", source: "schema_default" };
+}
+
+function firstAction(sections) {
+  const action = firstActionBlock(sections);
+  if (action?.action) return { text: action.action, owner: action.owner || "", source: "answer" };
+  for (const title of ACTION_SECTIONS) {
+    const text = getSectionBullets(sections, title)[0];
+    if (text) return { text, owner: "", source: "answer" };
+  }
+  return { text: "", owner: "", source: "missing" };
+}
+
+function successMetric(sections) {
+  const success = firstTextBullet(sections, "Success Indicators");
+  if (success) return { text: success, source: "answer" };
+  const uncertainty = firstTextBullet(sections, "Uncertainty");
+  if (uncertainty) return { text: uncertainty, source: "answer" };
+  const reflection = firstTextBullet(sections, "Reflection");
+  if (reflection) return { text: reflection, source: "answer" };
+  return { text: "", source: "missing" };
+}
+
+/**
+ * Build comparison rows from answer text.
+ * Stakeholder / solution type are only filled from the answer (Owner / Theory link).
+ * Never invent profile stereotypes and present them as findings.
+ */
 export function buildAgentComparison(responses, lang = "en") {
   return (responses || [])
     .filter((r) => r.response && !r.error)
     .map((r) => {
       const key = agentKeyFromResponse(r);
       const { sections } = parseAgentResponse(r.response);
-      const action = firstActionBlock(sections);
-      const firstAction = action?.action || getSectionBullets(sections, "Priority Actions")[0] || firstTextBullet(sections, "Implementation Steps");
-      const successMetric = firstTextBullet(sections, "Success Indicators") || getSectionBullets(sections, "Success Indicators")[0] || "";
-      const mainFocus = firstTextBullet(sections, "Problem Diagnosis") || r.theory || r.title || "";
+      const focus = firstFocus(sections, r);
+      const action = firstAction(sections);
+      const metric = successMetric(sections);
+      const theoryLink = firstTextBullet(sections, "Theory link");
 
       return {
         agentLabel: r.agent_label || r.agent_name || `Agent ${r.agent_number}`,
         agentKey: key,
         color: r.color || "#78716c",
-        mainFocus: mainFocus.slice(0, 160),
-        firstAction: (firstAction || "").slice(0, 160),
-        mainStakeholder: STAKEHOLDERS[key]?.[lang] || STAKEHOLDERS[key]?.en || action?.owner || "",
-        solutionType: SOLUTION_TYPES[key]?.[lang] || SOLUTION_TYPES[key]?.en || r.title || "",
-        successMetric: (successMetric || "").slice(0, 160),
+        mainFocus: focus.text.slice(0, 160),
+        firstAction: (action.text || "").slice(0, 160),
+        mainStakeholder: (action.owner || "").slice(0, 160),
+        solutionType: (theoryLink || "").slice(0, 160),
+        successMetric: (metric.text || "").slice(0, 160),
+        sources: {
+          mainFocus: focus.source,
+          firstAction: action.source,
+          mainStakeholder: action.owner ? "answer" : "missing",
+          solutionType: theoryLink ? "answer" : "missing",
+          successMetric: metric.source,
+        },
       };
     });
 }

@@ -25,10 +25,11 @@ Section titles below must appear exactly as written (in English).
 
 Plain text only. Do NOT use markdown: no ###, no **, no ---, no tables.
 
-Use exactly these section titles on their own line:
+Use exactly these section titles on their own line (do NOT prefix the title with "- "):
 {title_block}
 
 Under each section use short bullet points starting with "- " (max 5 bullets per section).
+Do not put the section title itself on a bullet line.
 
 If the section is an action plan, you may use structured action blocks with:
 Action:, Owner:, Timeline:, Measure:

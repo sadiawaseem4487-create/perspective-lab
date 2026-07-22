@@ -5,7 +5,7 @@
   "question": "How can we reduce school dropout in São Paulo?",
   "model": "openai/gpt-4o-mini",
   "workflow_mode": "sequential",
-  "created_at": "2026-07-07T14:27:04.330506+00:00",
+  "created_at": "2026-07-22T15:43:58.555398+00:00",
   "summary": {
     "total_agents": 4,
     "successful": 4

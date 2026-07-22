@@ -16,6 +16,7 @@
     "models": "models",
     "questions": "questions",
     "reports": "reports",
-    "human_answers": "human_answers"
+    "human_answers": "human_answers",
+    "rubric_scores": "rubric_scores"
   }
 }

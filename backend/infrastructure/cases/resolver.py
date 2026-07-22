@@ -20,6 +20,7 @@ class CasePaths:
         self.questions_dir = case_root / dirs.get("questions", "questions")
         self.reports_dir = case_root / dirs.get("reports", "reports")
         self.human_answers_dir = case_root / dirs.get("human_answers", "human_answers")
+        self.rubric_scores_dir = case_root / dirs.get("rubric_scores", "rubric_scores")
 
         self.agents_config = self.agents_dir / "agents.json"
         self.slot_assignments = self.agents_dir / "slot_assignments.json"

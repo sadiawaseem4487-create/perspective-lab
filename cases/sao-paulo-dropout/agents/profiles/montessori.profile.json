@@ -1,36 +1,51 @@
 {
   "agent_id": "montessori",
   "theory": "Maria Montessori",
-  "diagnostic_question": "What in the learning environment blocks autonomy and engagement?",
+  "diagnostic_question": "What in the prepared environment blocks autonomous, concrete learning?",
   "reasoning_chain": [
-    "Observe how students experience the classroom environment",
-    "Identify barriers to autonomy, hands-on activity, and success",
-    "Redesign environment, materials, and teacher guidance",
-    "Enable self-directed progress in small achievable steps"
+    "Observe how learners actually use the environment",
+    "Diagnose the prepared environment (materials, space, order)",
+    "Design meaningful learner choice within limits",
+    "Propose concrete activity and hands-on work",
+    "Redefine the teacher as guide, not lecturer",
+    "Enable independent learning and self-correction"
   ],
   "must_do": [
     "Focus on prepared environment and learner autonomy",
+    "Keep Observation → Prepared Environment → Choice → Concrete Activity → Teacher as Guide → Independent Learning visible",
     "Propose concrete classroom and school-day changes",
-    "Link recommendations explicitly to Montessori's theory"
+    "Link recommendations explicitly to Montessori's theory",
+    "State assumptions and uncertainty honestly"
   ],
   "must_not_do": [
     "Default to lecture-only or punitive discipline",
     "Ignore developmental readiness and observation",
-    "Propose generic motivation slogans without environment design"
+    "Propose generic motivation slogans without environment design",
+    "Replace the guide role with constant teacher control"
   ],
   "output_sections": [
-    "Environment diagnosis",
-    "Autonomy and activity redesign",
-    "School-day learning plan",
-    "Theory link"
+    "Observation",
+    "Prepared environment",
+    "Learner choice",
+    "Concrete activity",
+    "Teacher as guide",
+    "Independent learning",
+    "Theory link",
+    "Assumptions",
+    "Uncertainty"
   ],
   "output_schema": {
     "format": "theory_native",
     "section_titles": [
-      "Environment diagnosis",
-      "Autonomy and activity redesign",
-      "School-day learning plan",
-      "Theory link"
+      "Observation",
+      "Prepared environment",
+      "Learner choice",
+      "Concrete activity",
+      "Teacher as guide",
+      "Independent learning",
+      "Theory link",
+      "Assumptions",
+      "Uncertainty"
     ],
     "solution_type": "Learning environment redesign",
     "primary_stakeholder": "Teachers and students in the classroom"
@@ -39,6 +54,6 @@
     "vaihe": 3,
     "role": "school_day_redesign",
     "deliverable": "School-day learning redesign",
-    "task": "VAIHE 3 — Redesign the school-day environment using insights from prior stages."
+    "task": "VAIHE 3 — Redesign the school-day through observation, prepared environment, choice, concrete activity, teacher-as-guide, and independent learning. Include Assumptions and Uncertainty."
   }
 }

@@ -358,6 +358,72 @@ class CaseRepository:
             return _read_json(path)
         return None
 
+    def save_rubric_scores(self, session_id: int, payload: dict) -> dict:
+        self.paths.rubric_scores_dir.mkdir(parents=True, exist_ok=True)
+        path = self.paths.rubric_scores_dir / f"session_{session_id}.json"
+        existing = _read_json(path) if path.is_file() else {}
+        ratings = list(existing.get("ratings") or [])
+
+        coder_id = (payload.get("coder_id") or "").strip()
+        scores = payload.get("scores") or {}
+        notes = payload.get("notes", "")
+        if coder_id and scores:
+            entry = {
+                "coder_id": coder_id,
+                "scores": scores,
+                "notes": notes,
+                "rated_at": datetime.now(timezone.utc).isoformat(),
+            }
+            replaced = False
+            for i, rating in enumerate(ratings):
+                if rating.get("coder_id") == coder_id:
+                    ratings[i] = entry
+                    replaced = True
+                    break
+            if not replaced:
+                ratings.append(entry)
+
+        from engine.llm_theory_judge import inter_rater_agreement
+
+        data = {
+            "session_id": session_id,
+            "case_id": self.case_id,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "participant_id": payload.get("participant_id", existing.get("participant_id", "")),
+            "condition": payload.get("condition", existing.get("condition", "parallel")),
+            "coder_id": coder_id or existing.get("coder_id", ""),
+            "pre_solution": payload.get("pre_solution", existing.get("pre_solution", "")),
+            "post_solution": payload.get("post_solution", existing.get("post_solution", "")),
+            "scores": scores or existing.get("scores") or {},
+            "notes": notes if notes or coder_id else existing.get("notes", ""),
+            "ratings": ratings,
+            "inter_rater": inter_rater_agreement(ratings),
+        }
+        _write_json(path, data)
+        return data
+
+    def get_rubric_scores(self, session_id: int) -> Optional[dict]:
+        path = self.paths.rubric_scores_dir / f"session_{session_id}.json"
+        if not path.is_file():
+            return None
+        data = _read_json(path)
+        ratings = list(data.get("ratings") or [])
+        # Backfill ratings from legacy single-coder files
+        if not ratings and data.get("scores") and data.get("coder_id"):
+            ratings = [
+                {
+                    "coder_id": data["coder_id"],
+                    "scores": data["scores"],
+                    "notes": data.get("notes", ""),
+                    "rated_at": data.get("updated_at"),
+                }
+            ]
+            data["ratings"] = ratings
+        from engine.llm_theory_judge import inter_rater_agreement
+
+        data["inter_rater"] = inter_rater_agreement(ratings)
+        return data
+
     def build_comparison(self, session_id: int, agent_report: dict) -> dict:
         human = self.get_human_answers(session_id) or {"respondents": []}
         return {
@@ -367,8 +433,15 @@ class CaseRepository:
             "created_at": agent_report.get("created_at"),
             "agent_solutions": [
                 {
-                    "agent_label": r.get("agent_label", f"Agent {r.get('agent_number')}"),
+                    "agent_key": r.get("agent_key") or "",
+                    "agent_label": r.get("title")
+                    or r.get("agent_name")
+                    or r.get("agent_label")
+                    or f"Agent {r.get('agent_number')}",
                     "agent_number": r.get("agent_number"),
+                    "title": r.get("title") or r.get("agent_name") or "",
+                    "theory": r.get("theory") or "",
+                    "color": r.get("color") or "#c2410c",
                     "solution": r.get("response", ""),
                 }
                 for r in agent_report.get("responses", [])

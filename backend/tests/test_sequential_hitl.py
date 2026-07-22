@@ -23,9 +23,12 @@ def mock_stage_runner():
         ("rogers", 4, "scaling_roadmap"),
     ]
 
-    async def _run(question, vaihe, stage_outputs, model=None):
+    async def _run(question, vaihe, stage_outputs, model=None, human_note=""):
         agent_id, slot, role = stages[vaihe - 1]
-        return _stage_response(agent_id, vaihe, role, slot)
+        result = _stage_response(agent_id, vaihe, role, slot)
+        if human_note:
+            result["human_note_applied"] = human_note
+        return result
 
     with patch(
         "application.sequential_hitl.run_single_sequential_stage",
@@ -84,6 +87,7 @@ def test_sequential_advance_runs_next_stage(client, monkeypatch, mock_stage_runn
     assert len(payload["responses"]) == 2
     assert payload["human_checkpoints"][0]["vaihe"] == 1
     assert mock_stage_runner.await_count == 2
+    assert mock_stage_runner.await_args.kwargs.get("human_note") == "Looks good"
 
 
 def test_sequential_finalize_completes_run(client, monkeypatch, mock_stage_runner):

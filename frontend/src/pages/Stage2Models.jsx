@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchModels, fetchSelectedModel, selectModel } from "../api";
+import { PageHero, PagePanel } from "../components/PageChrome";
 import { useLanguage } from "../i18n/LanguageContext";
+import { cn } from "@/lib/utils";
 
 export default function Stage2Models() {
   const { t } = useLanguage();
@@ -35,22 +37,27 @@ export default function Stage2Models() {
   }
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-wide text-orange-700">{t("stage2.badge")}</p>
-        <h2 className="font-display text-3xl font-bold text-stone-900">{t("stage2.title")}</h2>
-        <p className="mt-2 text-stone-600">
-          {t("stage2.desc")}{" "}
-          <code className="rounded bg-stone-100 px-1">cases/&lt;case&gt;/models/available_models.json</code>.
-        </p>
-      </section>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <PageHero
+        badge={t("stage2.badge")}
+        title={t("stage2.title")}
+        description={
+          <p>
+            {t("stage2.desc")}{" "}
+            <code className="rounded bg-slate-900/80 px-1 text-slate-300">
+              cases/&lt;case&gt;/models/available_models.json
+            </code>
+            .
+          </p>
+        }
+      />
 
-      <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-        <label className="block text-sm font-semibold text-stone-700">{t("stage2.selected")}</label>
+      <PagePanel>
+        <label className="block text-sm font-semibold text-slate-200">{t("stage2.selected")}</label>
         <select
           value={selected}
           onChange={(e) => setSelected(e.target.value)}
-          className="mt-2 w-full rounded-xl border border-stone-300 px-4 py-3 text-stone-900"
+          className="page-select mt-2 w-full"
         >
           {models.map((m) => (
             <option key={m.id} value={m.id}>
@@ -59,7 +66,7 @@ export default function Stage2Models() {
           ))}
         </select>
         {defaultModel && (
-          <p className="mt-2 text-sm text-stone-500">
+          <p className="mt-2 text-sm text-slate-400">
             {t("common.default")}: {defaultModel}
           </p>
         )}
@@ -67,31 +74,36 @@ export default function Stage2Models() {
           type="button"
           onClick={handleSave}
           disabled={saving || !selected}
-          className="mt-4 rounded-xl bg-orange-800 px-6 py-3 font-semibold text-white hover:bg-orange-900 disabled:opacity-50"
+          className="page-btn-primary mt-4"
         >
           {saving ? t("common.saving") : t("stage2.save")}
         </button>
-        {message && <p className="mt-3 text-sm text-stone-600">{message}</p>}
-      </section>
+        {message && <p className="mt-3 text-sm text-slate-400">{message}</p>}
+      </PagePanel>
 
       <div className="grid gap-4 md:grid-cols-2">
         {models.map((m) => (
           <article
             key={m.id}
-            className={`rounded-xl border p-4 ${selected === m.id ? "border-orange-400 bg-orange-50" : "border-stone-200 bg-white"}`}
+            className={cn(
+              "rounded-xl border p-4 transition-colors",
+              selected === m.id
+                ? "border-orange-500/40 bg-orange-500/10"
+                : "border-white/10 bg-slate-900/40"
+            )}
           >
-            <h3 className="font-semibold text-stone-900">{m.name}</h3>
-            <p className="text-xs text-stone-500">{m.provider}</p>
-            <p className="mt-2 text-sm text-stone-600">{m.notes}</p>
+            <h3 className="font-semibold text-white">{m.name}</h3>
+            <p className="text-xs text-slate-400">{m.provider}</p>
+            <p className="mt-2 text-sm text-slate-300">{m.notes}</p>
           </article>
         ))}
       </div>
 
       <div className="flex justify-between">
-        <Link to="/agents" className="rounded-xl border border-stone-300 px-6 py-3 font-semibold text-stone-700">
+        <Link to="/agents" className="page-btn-secondary">
           {t("common.back")}
         </Link>
-        <Link to="/question" className="rounded-xl bg-orange-800 px-6 py-3 font-semibold text-white hover:bg-orange-900">
+        <Link to="/question" className="page-btn-primary">
           {t("stage2.next")}
         </Link>
       </div>
