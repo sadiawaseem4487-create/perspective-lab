@@ -25,7 +25,7 @@ flowchart LR
 
 | Priority | Theme | Outcome | Effort |
 |----------|--------|---------|--------|
-| **P0** | Ship current work | Commit + PR + merge `sprint/9-research-integrity` | Small |
+| **P0** | Ship current work | ✅ Done — [PR #6](https://github.com/sadiawaseem4487-create/perspective-lab/pull/6) merged 2026-07-22 | Small |
 | **P1** | Academic Present structure | Topic → Intro → Key concepts → Case → Conclusion + sources | Medium |
 | **P2** | Study readiness | Rubric wiki sync, Overview matrix, facilitator checklist | Small–medium |
 | **P3** | Sprint 8 Desktop | Tauri 2, installers, API key wizard | Large |
@@ -37,11 +37,11 @@ flowchart LR
 
 | Task | Done when |
 |------|-----------|
-| Commit remaining GUI + Present + dedupe + integrity work | Clean `git status` on branch |
-| Open PR → CI green → merge | On `main` |
-| Tag release notes (what changed for researchers) | Short wiki Progress-Log entry |
+| Commit remaining GUI + Present + dedupe + integrity work | ✅ |
+| Open PR → CI green → merge | ✅ [PR #6](https://github.com/sadiawaseem4487-create/perspective-lab/pull/6) |
+| Tag release notes (what changed for researchers) | ✅ Progress-Log + this page |
 
-**Depends on:** your explicit “commit / PR” request.
+**Next:** P1 academic Present structure.
 
 ---
 
