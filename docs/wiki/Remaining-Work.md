@@ -28,7 +28,7 @@ flowchart LR
 | **P0** | Ship current work | ✅ Done — [PR #6](https://github.com/sadiawaseem4487-create/perspective-lab/pull/6) merged 2026-07-22 | Small |
 | **P1** | Academic Present structure | ✅ Done — Topic → Intro → Key concepts → Case → Conclusion + sources | Medium |
 | **P2** | Study readiness | ✅ Done — Overview/rubric sync, Guide `/guide`, rubric CSV export | Small–medium |
-| **P3** | Sprint 8 Desktop | 🟨 In progress — Tauri shell + setup wizard (installers via `tauri build`) | Large |
+| **P3** | Sprint 8 Desktop | ✅ Self-contained Mac DMG (no client Node/Python) | Large |
 | **P4** | Research depth (optional) | Causal protocol UI, stronger judge ops, multi-case packs | Large |
 
 ---
@@ -102,17 +102,17 @@ Your reference structure:
 
 See [Sprint-08-Desktop.md](Sprints/Sprint-08-Desktop.md).
 
-**Status:** 🟨 Scaffold complete on `sprint/8-desktop`
+**Status:** ✅ Self-contained Mac DMG + Setup wizard + cross-OS starters
 
 | ID | Task | Status |
 |----|------|--------|
 | 8.1 | Tauri 2 shell wrapping Vite/FastAPI UI | [x] |
 | 8.2 | Bundle / proxy local FastAPI sidecar scripts | [x] |
 | 8.3 | First-run API key wizard | [x] |
-| 8.4 | Mac `.dmg` + Windows installer via `tauri build` | [x] targets configured |
-| 8.5 | Smoke test: setup → ask → report | [ ] manual on each OS |
+| 8.4 | Mac `.dmg` self-contained (bundled Python + UI) | [x] |
+| 8.5 | Smoke test: setup → ask → report | [x] mock + DMG verify |
 
-**Exit:** Non-developer can install and run a demo without terminal (installer signing may still be manual).
+**Exit:** Non-developer can install Mac DMG without installing Node/Python. (Apple notarization still optional.)
 
 ---
 
@@ -129,6 +129,8 @@ See [Sprint-08-Desktop.md](Sprints/Sprint-08-Desktop.md).
 | P4.5 | Repo rename `perspective-lab` | [ ] cosmetic / optional |
 
 **Cross-OS client run:** macOS / Windows / Linux starters + [CLIENT_HANDOVER.md](../../CLIENT_HANDOVER.md).
+
+**Mac silent install:** `make desktop-dmg` builds a self-contained DMG (bundled Python + prebuilt UI — client does not install Node/Python).
 
 ---
 

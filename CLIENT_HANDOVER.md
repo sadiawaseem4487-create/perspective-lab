@@ -127,30 +127,28 @@ To go back: `CASE_ID=sao-paulo-dropout` or remove the line.
 
 ---
 
-## Optional: Mac installer (.dmg) — like downloading from the web
+## Optional: Mac installer (.dmg) — fully self-contained
 
-On your Desktop (after build): **`PerspectiveLab-Installer.dmg`**
+On your Desktop after `make desktop-dmg`: **`PerspectiveLab-Installer.dmg`**
+
+**Client does not need to install Node.js or Python.** Both the UI and Python runtime are inside the app.
 
 1. Double-click the **.dmg**
 2. Drag **PerspectiveLab** into **Applications**
 3. Open **Applications → PerspectiveLab**
-4. If macOS blocks it: **right-click → Open → Open** (once)
-5. Click **Continue** on the setup dialog  
-   - If Node.js is missing, it can **download a private copy** for this app (one-time, needs internet)
-6. A Terminal window shows install progress — **keep it open**
-7. Browser opens → **Setup** → paste your API key
+4. If macOS blocks it: **right-click → Open → Open** (once — unsigned until Apple notarization)
+5. One-time prepare dialog → Terminal starts the server
+6. Browser → **Setup** → paste API key
 
-Rebuild the DMG on a Mac anytime:
+Rebuild:
 
 ```bash
 make desktop-dmg
 ```
 
-**Note:** Apple notarization (no right-click Open) needs an Apple Developer account. Unsigned DMGs still work with right-click Open.
-
 ---
 
-## Optional: desktop window (all OS with Rust)
+## Optional: desktop window (Tauri / Rust)
 
 ```bash
 # Install Rust: https://rustup.rs
