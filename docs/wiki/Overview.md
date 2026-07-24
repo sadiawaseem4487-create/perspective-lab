@@ -34,7 +34,7 @@ The first case pack is **school dropout in São Paulo**. The platform itself is 
 | Sequential workflow + HITL | ❌ | ✅ | ✅ |
 | Professional GUI / Present / Export | ❌ | ✅ | ✅ |
 | Research rubric + inter-rater | ❌ | ✅ | ✅ |
-| Desktop install | ❌ | 🟨 Tauri shell + Mac/Win/Linux starters | ✅ |
+| Desktop install | ❌ | ✅ Self-contained Mac DMG (+ Win/Linux starters) | ✅ |
 
 ## Facilitator path
 

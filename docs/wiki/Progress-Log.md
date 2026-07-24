@@ -4,6 +4,7 @@ Newest entries at the top.
 
 | Date | Sprint | Event |
 |------|--------|-------|
+| 2026-07-24 | 8 | Self-contained Mac DMG: bundled Python 3.12 + prebuilt UI + offline wheels — client needs no Node/Python install. |
 | 2026-07-22 | P4 | Shipped: second case pack `digital-inclusion`; cross-OS starters (Mac/Win/Linux); CLIENT_HANDOVER updated for all platforms. |
 | 2026-07-22 | P4 | Study protocol `/study`, Cohen’s κ in inter-rater + CSV; **CLIENT_HANDOVER.md** (Start App → Setup key → run). |
 | 2026-07-22 | 8 | Desktop sprint started: Tauri 2 shell, FastAPI sidecar scripts, API key Setup wizard (`/setup`), `make desktop-dev`. |
