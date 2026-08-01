@@ -31,17 +31,18 @@ def _auth_secret() -> str:
 def auth_required() -> bool:
     """Whether research APIs and the app shell require a logged-in user.
 
-    Production SaaS always requires login (even if AUTH_REQUIRED was left false).
+    Non-development (production/staging) always requires login (SaaS).
     Development may open the app when AUTH_REQUIRED=false for local testing.
     """
     settings = get_settings()
     raw = (settings.auth_required or os.environ.get("AUTH_REQUIRED", "")).strip().lower()
-    if settings.environment == "production":
+    if settings.environment != "development":
         # SaaS: never leave the research UI open without accounts
         if raw in ("0", "false", "no", "off"):
             logger.warning(
-                "AUTH_REQUIRED=%s ignored in production — login is required",
+                "AUTH_REQUIRED=%s ignored when ENVIRONMENT=%s — login is required",
                 raw or "(empty)",
+                settings.environment,
             )
         return True
     if raw in ("0", "false", "no", "off"):

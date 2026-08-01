@@ -6,7 +6,10 @@ Multi-theory agentic research tool.
 
 Four theory lenses (Freire, Weber, Montessori, Rogers) answer the same problem — then you compare, invite guests, and present.
 
-Repo: https://github.com/sadiawaseem4487-create/perspective-lab
+| | |
+|--|--|
+| **Live app** | https://perspective-lab.onrender.com/ |
+| **GitHub** | https://github.com/sadiawaseem4487-create/perspective-lab |
 
 ---
 
@@ -14,7 +17,7 @@ Repo: https://github.com/sadiawaseem4487-create/perspective-lab
 
 | Folder | Purpose |
 |--------|---------|
-| `backend/` | FastAPI API + agents |
+| `backend/` | FastAPI API + agents + user accounts |
 | `frontend/` | React UI |
 | `cases/` | Case packs (prompts, questions — **not** session reports) |
 | `docker/` | Production container helpers |
@@ -22,6 +25,19 @@ Repo: https://github.com/sadiawaseem4487-create/perspective-lab
 | `desktop/` | Optional Mac packaging scripts |
 
 Runtime data (reports, guest answers, invites) is **local only** and is not pushed to GitHub.
+
+---
+
+## Accounts (SaaS)
+
+1. **Sign in** / create an account  
+2. **Settings → API key** — paste **your own** OpenRouter or OpenAI key  
+3. **Workspace** — ask agents (billed to your key)  
+4. **History** — only your sessions  
+
+Guests on invite links never need a key. Lab admin may use the server key from `.env`.
+
+Details: [docs/wiki/User-Accounts.md](./docs/wiki/User-Accounts.md)
 
 ---
 
@@ -34,22 +50,21 @@ Runtime data (reports, guest answers, invites) is **local only** and is not push
 | Linux | `./start.sh` |
 
 1. Browser → http://localhost:8000  
-2. **Setup** → paste OpenRouter or OpenAI key  
-3. **Workspace** → ask a question  
+2. Sign in (or set `AUTH_REQUIRED=false` in `backend/.env` for open local mode)  
+3. **Settings** → paste OpenRouter or OpenAI key  
+4. **Workspace** → ask a question  
 
 Details: [CLIENT_HANDOVER.md](./CLIENT_HANDOVER.md)
 
 ---
 
-## Cloud (Vercel UI + Render API)
+## Cloud (same Render URL)
 
-For lab sharing in the browser (no Mac install):
+Keep updating **one** service — do not recreate:
 
-→ **[CLOUD_DEPLOY.md](./CLOUD_DEPLOY.md)**
+→ **[ONLINE_DEPLOY.md](./ONLINE_DEPLOY.md)** → https://perspective-lab.onrender.com/
 
-1. Deploy API on [Render](https://render.com) (Docker)  
-2. Deploy UI on [Vercel](https://vercel.com) — root directory `frontend`  
-3. Set `VITE_API_BASE_URL` to the Render URL  
+Optional split (Vercel UI + Render API): [CLOUD_DEPLOY.md](./CLOUD_DEPLOY.md)
 
 ---
 
@@ -67,7 +82,7 @@ cd backend && source .venv/bin/activate && uvicorn main:app --reload --port 8000
 cd frontend && npm run dev   # http://localhost:5173
 ```
 
-Copy `.env.example` → `.env` and add your API key.
+Copy `backend/.env.example` → `backend/.env` and add your API key + `AUTH_SECRET`.
 
 ---
 

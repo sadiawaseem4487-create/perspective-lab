@@ -1,6 +1,14 @@
-# Deploy PerspectiveLab to the cloud (Vercel + Render)
+# Deploy PerspectiveLab to the cloud
 
-Mac ZIP/Gatekeeper can wait. For lab testing from any browser, use this free split:
+**Preferred (already live):** keep updating the same all-in-one Render app:
+
+→ **[ONLINE_DEPLOY.md](./ONLINE_DEPLOY.md)** → https://perspective-lab.onrender.com/
+
+---
+
+## Optional split (Vercel UI + Render API)
+
+Mac ZIP/Gatekeeper can wait. For a split free stack:
 
 | What | Where | Why |
 |------|--------|-----|

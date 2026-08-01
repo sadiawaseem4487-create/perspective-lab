@@ -34,7 +34,9 @@ Welcome to the project wiki. This is the single source of truth for architecture
 | Field | Value |
 |-------|-------|
 | **Product** | PerspectiveLab |
-| **Current sprint** | All core sprints complete — Desktop DMG + research UI ready |
+| **Live URL** | https://perspective-lab.onrender.com/ |
+| **Accounts** | Per-user login + personal API keys + private History ([User accounts](User-Accounts.md)) |
+| **Current sprint** | Core sprints complete — SaaS accounts on Render |
 | **Sprint 8 status** | 🟩 Complete (self-contained Mac DMG) |
 | **Sprint 9 status** | 🟩 Complete (research integrity) |
 | **Sprint 7 status** | 🟩 Complete (GUI research workspace) |
