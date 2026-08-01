@@ -8,11 +8,25 @@ Always **update this Render service** — do not create a new Web Service.
 
 ---
 
+## Enable auto-deploy (one-time)
+
+So every push to `main` updates https://perspective-lab.onrender.com/ without Manual Deploy:
+
+1. Open https://dashboard.render.com → service **`perspective-lab`**
+2. **Settings** → **Build & Deploy**
+3. **Auto-Deploy** → **On Commit** (or **Yes**)
+4. Confirm branch is **`main`** and repo is **`sadiawaseem4487-create/perspective-lab`**
+5. Save
+
+Then push to `main` as usual; Render builds automatically.
+
+---
+
 ## Update the existing Render deploy
 
 1. Open https://dashboard.render.com → service **`perspective-lab`** (the one serving `perspective-lab.onrender.com`)
 2. Confirm it is connected to GitHub repo **`perspective-lab`** / branch **`main`**
-3. **Manual Deploy** → **Deploy latest commit** (or “Clear build cache & deploy”)
+3. If Auto-Deploy is on, a push to `main` is enough. Otherwise **Manual Deploy** → **Deploy latest commit** (or “Clear build cache & deploy”)
 4. Wait until status is **Live**
 
 ### Environment on that same service

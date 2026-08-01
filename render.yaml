@@ -3,6 +3,8 @@ services:
     name: perspectivelab-api
     runtime: docker
     plan: free
+    # Redeploy automatically when main (or the connected branch) receives a commit
+    autoDeployTrigger: commit
     healthCheckPath: /api/health
     envVars:
       - key: ENVIRONMENT
