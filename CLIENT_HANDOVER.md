@@ -173,6 +173,15 @@ Rebuild:
 make desktop-dmg
 ```
 
+### Team ZIP (same app, easy to share)
+
+```bash
+make desktop-zip
+```
+
+Creates **`~/Desktop/PerspectiveLab-Team.zip`** (app + Fix Mac Open + README).  
+Share via Teams / Drive / email for lab testing. Recipients: unzip → drag to Applications → run **Fix Mac Open** once if blocked.
+
 ---
 
 ## Optional: desktop window (Tauri / Rust)

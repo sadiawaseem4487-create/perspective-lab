@@ -1,4 +1,4 @@
-.PHONY: dev build docker-up docker-down docker-logs install test test-health desktop-dev desktop-build
+.PHONY: dev build docker-up docker-down docker-logs install test test-health desktop-dev desktop-build desktop-dmg desktop-zip
 
 install:
 	cd backend && python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt
@@ -20,6 +20,10 @@ desktop-build:
 desktop-dmg:
 	chmod +x desktop/macos/build-dmg.sh desktop/macos/PerspectiveLab-launcher.sh
 	./desktop/macos/build-dmg.sh
+
+desktop-zip:
+	chmod +x desktop/macos/build-team-zip.sh desktop/macos/Fix-Mac-Open.command
+	./desktop/macos/build-team-zip.sh
 
 docker-up:
 	cp -n .env.example .env || true
