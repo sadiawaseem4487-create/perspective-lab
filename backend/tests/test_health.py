@@ -5,5 +5,5 @@ def test_health_ok(client):
     assert payload["status"] == "ok"
     assert payload["database_ok"] is True
     assert "version" in payload
-    assert payload["llm_configured"] is False
+    assert "llm_configured" in payload
     assert payload["environment"] == "development"

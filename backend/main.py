@@ -20,7 +20,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from agents.prompts import AGENT_DEFINITIONS, AGENT_ORDER
 from agents.service import ask_all_agents
-from config import get_settings
+from config import get_settings, refresh_settings
 from setup_keys import apply_llm_keys, setup_allowed
 from application import (
     append_human_respondent,
@@ -291,7 +291,7 @@ async def setup_keys(body: SetupKeysRequest):
     except PermissionError as exc:
         raise HTTPException(status_code=403, detail=str(exc)) from exc
 
-    refreshed = get_settings()
+    refreshed = refresh_settings()
     return {
         "ok": True,
         "llm_configured": refreshed.llm_configured,

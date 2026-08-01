@@ -160,21 +160,43 @@ export default function TheoryRoundtable() {
   }
 
   useEffect(() => {
-    checkHealth()
-      .then((d) => setApiReady(d.llm_configured ?? d.openai_configured))
-      .catch(() => setApiReady(false));
+    let cancelled = false;
+    function refreshHealth() {
+      checkHealth()
+        .then((d) => {
+          if (!cancelled) setApiReady(Boolean(d.llm_configured ?? d.openai_configured));
+        })
+        .catch(() => {
+          if (!cancelled) setApiReady(false);
+        });
+    }
+    refreshHealth();
+    window.addEventListener("focus", refreshHealth);
+    const id = window.setInterval(refreshHealth, 15000);
 
     fetchAgentsCatalog()
-      .then((d) => setAgents(d.main_agents || []))
+      .then((d) => {
+        if (!cancelled) setAgents(d.main_agents || []);
+      })
       .catch(() => {});
 
     fetchQuestions(lang)
-      .then((d) => setDemoQuestions(d.questions || []))
+      .then((d) => {
+        if (!cancelled) setDemoQuestions(d.questions || []);
+      })
       .catch(() => {});
 
     fetchSelectedModel()
-      .then((d) => setModel(d.model || ""))
+      .then((d) => {
+        if (!cancelled) setModel(d.model || "");
+      })
       .catch(() => {});
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("focus", refreshHealth);
+      window.clearInterval(id);
+    };
   }, [lang]);
 
   // Hydrate per Live/Demo mode (Strict Mode safe: always clear restoring in finally)
@@ -284,6 +306,15 @@ export default function TheoryRoundtable() {
     setSelectedKey(null);
 
     try {
+      const health = await checkHealth();
+      const ready = Boolean(health.llm_configured ?? health.openai_configured);
+      setApiReady(ready);
+      if (!ready) {
+        throw new Error(
+          "API key not configured. Open Settings → API key, save your OpenRouter key, then try again."
+        );
+      }
+
       if (workflowMode === "sequential_hitl") {
         const run = await startSequentialRun(question.trim(), model, lang, uiMode);
         setSequentialRun(run);

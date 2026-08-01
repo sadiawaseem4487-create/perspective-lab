@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 from typing import Literal, Optional
 
-from config import Settings, get_settings
+from config import Settings, get_settings, refresh_settings
 
 Provider = Literal["openrouter", "openai"]
 
@@ -50,24 +50,30 @@ def apply_llm_keys(
     if len(key) < 8:
         raise ValueError("API key looks too short")
 
+    # OpenRouter keys always go to the OpenRouter slot
+    if key.startswith("sk-or-"):
+        provider = "openrouter"
+
     path = env_file_path(settings)
     path.parent.mkdir(parents=True, exist_ok=True)
     existing = path.read_text(encoding="utf-8") if path.is_file() else ""
 
     if provider == "openrouter":
         model_value = (model or "openai/gpt-4o-mini").strip()
+        if "/" not in model_value:
+            model_value = f"openai/{model_value}"
         block = (
             f"LLM_PROVIDER=openrouter\n"
             f"OPENROUTER_API_KEY={key}\n"
-            f"OPENAI_API_KEY=\n"
             f"OPENAI_MODEL={model_value}\n"
         )
     else:
         model_value = (model or "gpt-4o-mini").strip()
+        if model_value.startswith("openai/"):
+            model_value = model_value[len("openai/") :]
         block = (
             f"LLM_PROVIDER=openai\n"
             f"OPENAI_API_KEY={key}\n"
-            f"OPENROUTER_API_KEY=\n"
             f"OPENAI_MODEL={model_value}\n"
         )
 
@@ -75,18 +81,17 @@ def apply_llm_keys(
     content = f"{cleaned}\n\n{block}".strip() + "\n"
     path.write_text(content, encoding="utf-8")
 
-    get_settings.cache_clear()
-    # Ensure the running process sees keys immediately (not only via .env re-read).
+    # Apply to process env without leaving empty-string overrides
     if provider == "openrouter":
         os.environ["LLM_PROVIDER"] = "openrouter"
         os.environ["OPENROUTER_API_KEY"] = key
-        os.environ["OPENAI_API_KEY"] = ""
+        os.environ.pop("OPENAI_API_KEY", None)
         os.environ["OPENAI_MODEL"] = model_value
     else:
         os.environ["LLM_PROVIDER"] = "openai"
         os.environ["OPENAI_API_KEY"] = key
-        os.environ["OPENROUTER_API_KEY"] = ""
+        os.environ.pop("OPENROUTER_API_KEY", None)
         os.environ["OPENAI_MODEL"] = model_value
 
-    get_settings.cache_clear()
+    refresh_settings()
     return path

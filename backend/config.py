@@ -1,4 +1,5 @@
 import logging
+import os
 from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional
@@ -7,11 +8,24 @@ from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+_BACKEND_DIR = Path(__file__).resolve().parent
+_ENV_FILES = (
+    _BACKEND_DIR / ".env",
+    _BACKEND_DIR.parent / ".env",
+)
+
+
+def _drop_empty_llm_env_overrides() -> None:
+    """Empty string env vars override .env and look like 'no key' — remove them."""
+    for key in ("OPENAI_API_KEY", "OPENROUTER_API_KEY", "LLM_PROVIDER", "OPENAI_MODEL"):
+        if key in os.environ and not str(os.environ.get(key, "")).strip():
+            os.environ.pop(key, None)
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=(".env", "../.env"),
+        # Absolute paths — cwd must not affect whether the key is found
+        env_file=_ENV_FILES,
         env_file_encoding="utf-8",
         extra="ignore",
     )
@@ -19,7 +33,7 @@ class Settings(BaseSettings):
     app_name: str = "PerspectiveLab"
     app_version: str = "1.0.0"
     case_id: str = "sao-paulo-dropout"
-    project_root: Path = Path(__file__).parent.parent
+    project_root: Path = _BACKEND_DIR.parent
     environment: str = Field(default="development", pattern="^(development|production|staging)$")
     debug: bool = False
 
@@ -36,7 +50,7 @@ class Settings(BaseSettings):
     openai_timeout_seconds: int = 90
     openai_max_retries: int = 2
 
-    database_path: Path = Path(__file__).parent / "data" / "sessions.db"
+    database_path: Path = _BACKEND_DIR / "data" / "sessions.db"
 
     cors_origins: str = "*"
     allowed_hosts: str = "*"
@@ -52,7 +66,7 @@ class Settings(BaseSettings):
 
     log_level: str = "INFO"
 
-    frontend_dist: Path = Path(__file__).parent.parent / "frontend" / "dist"
+    frontend_dist: Path = _BACKEND_DIR.parent / "frontend" / "dist"
 
     @field_validator("openai_api_key", "openrouter_api_key", mode="before")
     @classmethod
@@ -130,4 +144,12 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
+    _drop_empty_llm_env_overrides()
     return Settings()
+
+
+def refresh_settings() -> Settings:
+    """Clear cache and reload settings (e.g. after writing backend/.env)."""
+    get_settings.cache_clear()
+    _drop_empty_llm_env_overrides()
+    return get_settings()
