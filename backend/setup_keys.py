@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 from typing import Literal, Optional
@@ -73,6 +74,19 @@ def apply_llm_keys(
     cleaned = _KEY_LINE.sub("", existing).strip()
     content = f"{cleaned}\n\n{block}".strip() + "\n"
     path.write_text(content, encoding="utf-8")
+
+    get_settings.cache_clear()
+    # Ensure the running process sees keys immediately (not only via .env re-read).
+    if provider == "openrouter":
+        os.environ["LLM_PROVIDER"] = "openrouter"
+        os.environ["OPENROUTER_API_KEY"] = key
+        os.environ["OPENAI_API_KEY"] = ""
+        os.environ["OPENAI_MODEL"] = model_value
+    else:
+        os.environ["LLM_PROVIDER"] = "openai"
+        os.environ["OPENAI_API_KEY"] = key
+        os.environ["OPENROUTER_API_KEY"] = ""
+        os.environ["OPENAI_MODEL"] = model_value
 
     get_settings.cache_clear()
     return path

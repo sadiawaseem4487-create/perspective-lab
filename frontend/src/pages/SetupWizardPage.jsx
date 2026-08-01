@@ -38,7 +38,7 @@ export default function SetupWizardPage({ embedded = false }) {
       });
       setDone(true);
       setApiKey("");
-      if (!embedded) navigate("/question");
+      navigate("/question");
     } catch (err) {
       setError(err.message);
     } finally {

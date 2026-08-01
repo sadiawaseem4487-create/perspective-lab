@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   ClipboardList,
   FileText,
@@ -43,7 +43,6 @@ function NavItem({ to, icon: Icon, label, end = false }) {
 export default function AppShell() {
   const { t } = useLanguage();
   const location = useLocation();
-  const navigate = useNavigate();
   const isWorkspace = location.pathname === "/question";
   const isPresent = location.pathname === "/present";
   const fillCanvas = isWorkspace || isPresent;
@@ -56,17 +55,15 @@ export default function AppShell() {
       .catch(() => {});
   }, []);
 
+  // Banner only — do not force-redirect (that trapped users on Settings after save).
   useEffect(() => {
     checkHealth()
       .then((h) => {
         const missing = !h.llm_configured && h.setup_allowed !== false;
         setNeedsSetup(missing);
-        if (missing && !location.pathname.startsWith("/settings") && location.pathname !== "/setup") {
-          navigate("/settings?tab=api", { replace: true });
-        }
       })
       .catch(() => {});
-  }, [location.pathname, navigate]);
+  }, [location.pathname]);
 
   // Research flow: ask → analyze → invite → report → present → guide
   const nav = {
