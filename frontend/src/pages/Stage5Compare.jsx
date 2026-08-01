@@ -8,6 +8,7 @@ import { GuestResponsesPanel } from "../components/GuestResponsesPanel";
 import { PageAlert, PageHero, PagePanel, ResearchQuestionBlock } from "../components/PageChrome";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useAppMode } from "@/context/AppModeContext";
+import { useAuth } from "@/context/AuthContext";
 import { getAgentLens, getAgentTheorist } from "@/lib/agentIcons";
 import { cn } from "@/lib/utils";
 import { getActiveSessionId, setActiveSessionId } from "@/utils/sessionWorkspace";
@@ -37,6 +38,8 @@ const TABS = [
 export default function Stage5Compare() {
   const { t, lang } = useLanguage();
   const { isDemo } = useAppMode();
+  const { user } = useAuth();
+  const userId = user?.id;
   const uiMode = isDemo ? "demo" : "live";
   const [params] = useSearchParams();
   const [sessionId, setSessionId] = useState(null);
@@ -65,7 +68,7 @@ export default function Stage5Compare() {
         const unique = uniqueReportsByQuestion(list);
         const id =
           fromQuery ||
-          resolvePreferredSessionId(list, getActiveSessionId(uiMode)) ||
+          resolvePreferredSessionId(list, getActiveSessionId(uiMode, userId)) ||
           unique[0]?.session_id;
         if (!id) {
           setSessionId(null);
@@ -92,7 +95,7 @@ export default function Stage5Compare() {
 
   async function loadComparison(id) {
     setSessionId(id);
-    setActiveSessionId(id, uiMode);
+    setActiveSessionId(id, uiMode, userId);
     setSaved(false);
     setManual(emptyPerson());
     setShowManual(false);

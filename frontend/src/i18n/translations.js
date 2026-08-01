@@ -285,6 +285,13 @@ export const translations = {
       noPastQuestionsDemo: "Try a sample below, then Ask agents — Demo runs appear here.",
       restoring: "Restoring your last session…",
       nextSteps: "Continue",
+      guideTitle: "How to start",
+      guide1: "Write the situation in the box below: background, constraints, and a clear question.",
+      guide2: "Aim for at least 8 words — short prompts make agents invent details.",
+      guide3: "Agents start only when you press Ask agents — nothing runs automatically.",
+      guide4: "Your work stays here until you click New problem.",
+      guideHint:
+        "Example: Context → Constraints → Focus questions (what should we do, who is involved, first 90 days?).",
     },
     present: {
       title: "Presentation",
@@ -1053,6 +1060,13 @@ export const translations = {
       noPastQuestionsDemo: "Escolha um exemplo e pergunte — as execuções Demo aparecem aqui.",
       restoring: "Restaurando sua última sessão…",
       nextSteps: "Continuar",
+      guideTitle: "Como começar",
+      guide1: "Escreva a situação na caixa abaixo: contexto, limites e uma pergunta clara.",
+      guide2: "Use pelo menos 8 palavras — prompts curtos fazem os agentes inventarem detalhes.",
+      guide3: "Os agentes só começam quando você pressiona Ask agents — nada roda automaticamente.",
+      guide4: "Seu trabalho fica aqui até você clicar em New problem.",
+      guideHint:
+        "Exemplo: Contexto → Limites → Perguntas-foco (o que fazer, quem participa, primeiros 90 dias?).",
     },
     present: {
       title: "Apresentação",
@@ -1820,6 +1834,13 @@ export const translations = {
       noPastQuestionsDemo: "Valitse esimerkki ja kysy — Demo-ajot näkyvät tässä.",
       restoring: "Palautetaan edellinen istunto…",
       nextSteps: "Jatka",
+      guideTitle: "Miten aloittaa",
+      guide1: "Kirjoita tilanne alle: tausta, rajoitteet ja selkeä kysymys.",
+      guide2: "Vähintään 8 sanaa — lyhyet kehotteet saavat agentit keksimään yksityiskohtia.",
+      guide3: "Agentit käynnistyvät vasta kun painat Ask agents — mitään ei tapahdu automaattisesti.",
+      guide4: "Työsi säilyy täällä kunnes klikkaat New problem.",
+      guideHint:
+        "Esimerkki: Konteksti → Rajoitteet → Fokus-kysymykset (mitä tehdä, ketkä mukana, 90 päivää?).",
     },
     present: {
       title: "Esitys",

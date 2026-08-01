@@ -5,6 +5,7 @@ import { ReportBriefDocument, ReportModeToggle } from "../components/ReportBrief
 import { fetchComparison, fetchReport, fetchReports } from "../api";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useAppMode } from "@/context/AppModeContext";
+import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import {
   displayQuestion,
@@ -28,6 +29,8 @@ import {
 export default function Stage4Report() {
   const { t, lang } = useLanguage();
   const { isDemo } = useAppMode();
+  const { user } = useAuth();
+  const userId = user?.id;
   const uiMode = isDemo ? "demo" : "live";
   const [reports, setReports] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -134,7 +137,7 @@ export default function Stage4Report() {
       .then((list) => {
         const unique = uniqueReportsByQuestion(list);
         setReports(unique);
-        const id = resolvePreferredSessionId(list, getActiveSessionId(uiMode));
+        const id = resolvePreferredSessionId(list, getActiveSessionId(uiMode, userId));
         if (id) return loadReport(id);
         setSelected(null);
         setHumanAnswers([]);
@@ -160,8 +163,8 @@ export default function Stage4Report() {
         fetchReport(sessionId),
         fetchComparison(sessionId).catch(() => ({ human_answers: [] })),
       ]);
-      setActiveSessionId(sessionId, uiMode);
-      setPresentPlaylist([sessionId], uiMode);
+      setActiveSessionId(sessionId, uiMode, userId);
+      setPresentPlaylist([sessionId], uiMode, userId);
       const report = {
         ...data,
         question: displayQuestion(data.question),

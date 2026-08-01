@@ -4,6 +4,7 @@ import { fetchComparisonMatrix, fetchReports } from "@/api";
 import { PageAlert, PageHero, PagePanel, ResearchQuestionBlock } from "@/components/PageChrome";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAppMode } from "@/context/AppModeContext";
+import { useAuth } from "@/context/AuthContext";
 import { getAgentLens, getAgentTheorist } from "@/lib/agentIcons";
 import { cn } from "@/lib/utils";
 import { getActiveSessionId, setActiveSessionId } from "@/utils/sessionWorkspace";
@@ -114,6 +115,8 @@ function MatrixTable({ matrix, columns, lang, t }) {
 export default function ComparisonMatrixPage() {
   const { t, lang } = useLanguage();
   const { isDemo } = useAppMode();
+  const { user } = useAuth();
+  const userId = user?.id;
   const uiMode = isDemo ? "demo" : "live";
   const [sessionId, setSessionId] = useState(null);
   const [matrixData, setMatrixData] = useState(null);
@@ -127,7 +130,7 @@ export default function ComparisonMatrixPage() {
         const list = await fetchReports(uiMode);
         const unique = uniqueReportsByQuestion(list);
         const id =
-          resolvePreferredSessionId(list, getActiveSessionId(uiMode)) || unique[0]?.session_id;
+          resolvePreferredSessionId(list, getActiveSessionId(uiMode, userId)) || unique[0]?.session_id;
         if (!id) {
           setSessionId(null);
           setMatrixData(null);
@@ -152,7 +155,7 @@ export default function ComparisonMatrixPage() {
 
   useEffect(() => {
     if (!sessionId) return;
-    setActiveSessionId(sessionId, uiMode);
+    setActiveSessionId(sessionId, uiMode, userId);
     setLoading(true);
     fetchComparisonMatrix(sessionId)
       .then((data) => {

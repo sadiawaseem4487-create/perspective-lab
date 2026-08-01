@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -51,9 +51,10 @@ export default function TheoryRoundtable() {
   const { t, lang } = useLanguage();
   const { isDemo, mode } = useAppMode();
   const { workflowMode, setWorkflowMode } = useWorkflowMode();
-  const { llmConfigured, personalKey, refresh: refreshAuth } = useAuth();
+  const { llmConfigured, personalKey, refresh: refreshAuth, user } = useAuth();
   const navigate = useNavigate();
   const uiMode = isDemo ? "demo" : "live";
+  const userId = user?.id;
 
   const [agents, setAgents] = useState([]);
   const [question, setQuestion] = useState("");
@@ -72,22 +73,20 @@ export default function TheoryRoundtable() {
   const [checkpointNote, setCheckpointNote] = useState("");
   const [revealed, setRevealed] = useState(new Set());
   const [selectedKey, setSelectedKey] = useState(null);
-  const demoPrefillDoneRef = useRef(false);
 
   useEffect(() => {
     if (personalKey?.model) setModel(personalKey.model);
   }, [personalKey]);
 
   function rememberSession(id) {
-    setActiveSessionId(id, uiMode);
+    setActiveSessionId(id, uiMode, userId);
     setActiveSessionIdState(id);
-    // Keep Present/Report aligned with the Workspace-selected problem.
-    setPresentPlaylist(id ? [id] : [], uiMode);
+    setPresentPlaylist(id ? [id] : [], uiMode, userId);
   }
 
   function applyQuestionText(text, { persistDraft = true } = {}) {
     setQuestion(text);
-    if (persistDraft) setDraftQuestion(text, uiMode);
+    if (persistDraft) setDraftQuestion(text, uiMode, userId);
   }
 
   async function refreshSessionList() {
@@ -155,15 +154,15 @@ export default function TheoryRoundtable() {
     setSelectedKey(null);
     setGuestHumans([]);
     setError("");
-    // Keep active session so Report / Present / Invite stay on the last completed run
-    // until a new ask succeeds.
-    clearDraftQuestion(uiMode);
+    setActiveSessionId(null, uiMode, userId);
+    setActiveSessionIdState(null);
+    setPresentPlaylist([], uiMode, userId);
+    clearDraftQuestion(uiMode, userId);
   }
 
   function startNewProblem() {
-    demoPrefillDoneRef.current = true;
     clearRunState();
-    applyQuestionText("");
+    applyQuestionText("", { persistDraft: false });
   }
 
   useEffect(() => {
@@ -211,10 +210,10 @@ export default function TheoryRoundtable() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
 
-  // Hydrate per Live/Demo mode (Strict Mode safe: always clear restoring in finally)
+  // Hydrate only this user's last in-progress workspace — never auto-run agents.
+  // First login / no saved session → empty framing + guidelines.
   useEffect(() => {
     let cancelled = false;
-    demoPrefillDoneRef.current = false;
 
     (async () => {
       setRestoring(true);
@@ -224,22 +223,20 @@ export default function TheoryRoundtable() {
       setSelectedKey(null);
       setGuestHumans([]);
       setError("");
+      setLoading(false);
 
       try {
         const list = await refreshSessionList();
         if (cancelled) return;
 
-        const preferred = getActiveSessionId(uiMode);
+        const preferred = getActiveSessionId(uiMode, userId);
         const exists = preferred && list.some((r) => r.session_id === preferred);
-        const draft = getDraftQuestion(uiMode);
+        const draft = getDraftQuestion(uiMode, userId);
 
         if (exists) {
           await loadSession(preferred, { animateReveal: false });
-        } else if (draft) {
+        } else if (draft && draft.trim()) {
           applyQuestionText(draft, { persistDraft: false });
-          setActiveSessionIdState(null);
-        } else if (isDemo) {
-          setQuestion("");
           setActiveSessionIdState(null);
         } else {
           applyQuestionText("", { persistDraft: false });
@@ -256,14 +253,7 @@ export default function TheoryRoundtable() {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode]);
-
-  useEffect(() => {
-    if (restoring || result || question.trim()) return;
-    if (!isDemo || demoQuestions.length === 0 || demoPrefillDoneRef.current) return;
-    demoPrefillDoneRef.current = true;
-    applyQuestionText(demoQuestions[0].text);
-  }, [demoQuestions, isDemo, restoring, result, question]);
+  }, [mode, userId]);
 
   const responseMap = useMemo(() => {
     const map = {};
@@ -340,7 +330,7 @@ export default function TheoryRoundtable() {
         const data = await askQuestion(question.trim(), model, lang, workflowMode, uiMode);
         setResult(data);
         rememberSession(data.session_id);
-        setDraftQuestion(question.trim(), uiMode);
+        setDraftQuestion(question.trim(), uiMode, userId);
         await refreshSessionList();
 
         const keys = (data.responses || [])
@@ -455,13 +445,25 @@ export default function TheoryRoundtable() {
         <p className="text-sm text-slate-400">{t("workspace.restoring")}</p>
       )}
 
+      {!restoring && !question.trim() && !result && !sequentialRun && !loading && (
+        <div className="rounded-2xl border border-orange-500/25 bg-orange-500/5 px-5 py-4 text-sm text-slate-300">
+          <p className="font-semibold text-slate-100">{t("workspace.guideTitle")}</p>
+          <ol className="mt-3 list-decimal space-y-2 pl-5 text-slate-400">
+            <li>{t("workspace.guide1")}</li>
+            <li>{t("workspace.guide2")}</li>
+            <li>{t("workspace.guide3")}</li>
+            <li>{t("workspace.guide4")}</li>
+          </ol>
+          <p className="mt-3 text-xs text-slate-500">{t("workspace.guideHint")}</p>
+        </div>
+      )}
+
       {isDemo && (
         <DemoQuestionPanel
           questions={demoQuestions}
           activeText={question}
           onSelect={(text) => {
             if (result || sequentialRun) clearRunState();
-            demoPrefillDoneRef.current = true;
             applyQuestionText(text);
           }}
           t={t}

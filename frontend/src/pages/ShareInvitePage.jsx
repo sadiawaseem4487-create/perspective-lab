@@ -11,6 +11,7 @@ import {
 import { PageAlert, PageHero, PagePanel, ResearchQuestionBlock } from "@/components/PageChrome";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAppMode } from "@/context/AppModeContext";
+import { useAuth } from "@/context/AuthContext";
 import { getActiveSessionId, setActiveSessionId } from "@/utils/sessionWorkspace";
 import {
   displayQuestion,
@@ -27,6 +28,8 @@ const DEFAULT_MAX = 100;
 export default function ShareInvitePage() {
   const { t } = useLanguage();
   const { isDemo } = useAppMode();
+  const { user } = useAuth();
+  const userId = user?.id;
   const uiMode = isDemo ? "demo" : "live";
   const [params] = useSearchParams();
   const [sessionId, setSessionId] = useState(null);
@@ -41,7 +44,7 @@ export default function ShareInvitePage() {
 
   async function loadSession(id) {
     setSessionId(id);
-    setActiveSessionId(id, uiMode);
+    setActiveSessionId(id, uiMode, userId);
     setInviteUrl("");
     setActiveToken("");
     const [comparison, inviteData] = await Promise.all([
@@ -67,7 +70,7 @@ export default function ShareInvitePage() {
         const unique = uniqueReportsByQuestion(list);
         const id =
           fromQuery ||
-          resolvePreferredSessionId(list, getActiveSessionId(uiMode)) ||
+          resolvePreferredSessionId(list, getActiveSessionId(uiMode, userId)) ||
           unique[0]?.session_id;
         if (!id) {
           setSessionId(null);

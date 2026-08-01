@@ -21,6 +21,7 @@ import {
 } from "@/utils/uniqueReports";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAppMode } from "@/context/AppModeContext";
+import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import { parseGuestAnswerBlocks } from "@/utils/guestAnswer";
 
@@ -368,6 +369,8 @@ function SlideContent({ slide }) {
 export default function PresentPage() {
   const { t, lang } = useLanguage();
   const { isDemo } = useAppMode();
+  const { user } = useAuth();
+  const userId = user?.id;
   const navigate = useNavigate();
   const uiMode = isDemo ? "demo" : "live";
   const [params] = useSearchParams();
@@ -397,13 +400,13 @@ export default function PresentPage() {
         setReports(unique);
         const preferred =
           fromQuery ||
-          resolvePreferredSessionId(list, getActiveSessionId(uiMode)) ||
+          resolvePreferredSessionId(list, getActiveSessionId(uiMode, userId)) ||
           unique[0]?.session_id;
         const next = preferred ? [preferred] : [];
         setPlaylist(next);
         if (next[0]) {
-          setActiveSessionId(next[0], uiMode);
-          setPresentPlaylist(next, uiMode);
+          setActiveSessionId(next[0], uiMode, userId);
+          setPresentPlaylist(next, uiMode, userId);
         }
       })
       .catch((err) => setError(err.message))
@@ -415,7 +418,7 @@ export default function PresentPage() {
       setSessionsPayload([]);
       return;
     }
-    setPresentPlaylist(playlist, uiMode);
+    setPresentPlaylist(playlist, uiMode, userId);
     let cancelled = false;
 
     async function loadDeck({ resetSlide = false } = {}) {
@@ -481,7 +484,7 @@ export default function PresentPage() {
   function updatePlaylist(ids) {
     const clean = ids.length ? ids.slice(0, 1) : playlist.slice(0, 1);
     setPlaylist(clean);
-    if (clean[0]) setActiveSessionId(clean[0], uiMode);
+    if (clean[0]) setActiveSessionId(clean[0], uiMode, userId);
   }
 
   useEffect(() => {

@@ -3,12 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { PageAlert, PageHero } from "../components/PageChrome";
 import { fetchSession, fetchSessions } from "../api";
 import { useAppMode } from "@/context/AppModeContext";
+import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { setActiveSessionId } from "@/utils/sessionWorkspace";
 
 export default function HistoryPage() {
   const { t, lang } = useLanguage();
   const { isDemo } = useAppMode();
+  const { user } = useAuth();
+  const userId = user?.id;
   const navigate = useNavigate();
   const uiMode = isDemo ? "demo" : "live";
   const locale = lang === "fi" ? "fi-FI" : lang === "pt" ? "pt-BR" : "en-GB";
@@ -37,7 +40,7 @@ export default function HistoryPage() {
   }
 
   function restoreSession(sessionId) {
-    setActiveSessionId(sessionId, uiMode);
+    setActiveSessionId(sessionId, uiMode, userId);
     navigate(`/compare?session=${sessionId}`);
   }
 
@@ -104,7 +107,7 @@ export default function HistoryPage() {
                   </button>
                   <Link
                     to={`/report?session=${selected.id}`}
-                    onClick={() => setActiveSessionId(selected.id, uiMode)}
+                    onClick={() => setActiveSessionId(selected.id, uiMode, userId)}
                     className="page-btn-secondary px-3 py-2 text-xs"
                   >
                     {t("history.openReport")}
