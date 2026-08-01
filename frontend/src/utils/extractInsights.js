@@ -39,9 +39,9 @@ function firstActionInAnySection(sections) {
   return firstTextBullet(sections, "Problem Diagnosis") || "";
 }
 
-export function extractInsight(response) {
+export function extractInsight(response, preParsed = null) {
   if (!response?.response || response.error) return null;
-  const { sections, fallback } = parseAgentResponse(response.response);
+  const { sections, fallback } = preParsed || parseAgentResponse(response.response);
   let headline = firstActionInAnySection(sections);
   if (!headline && fallback) headline = fallback.slice(0, 140);
   if (!headline) return null;

@@ -92,7 +92,8 @@ const ACTION_TITLES = [
  */
 function agentDeck(response, lang, presentation, t) {
   const key = (response.agent_key || "").toLowerCase();
-  const { sections } = parseAgentResponse(response.response || "");
+  const parsed = parseAgentResponse(response.response || "");
+  const { sections } = parsed;
   const blurbs = presentation?.lens_blurbs || {};
   const lens = pickLocale(blurbs[key], lang, getAgentLens(key, lang));
 
@@ -112,7 +113,7 @@ function agentDeck(response, lang, presentation, t) {
   }
 
   const who = (actionBlock?.owner || "").trim();
-  const insight = extractInsight(response);
+  const insight = extractInsight(response, parsed);
 
   if (!focus && insight?.headline) focus = insight.headline;
   if (!action && insight?.headline && insight.headline !== focus) action = insight.headline;

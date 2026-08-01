@@ -146,18 +146,13 @@ export default function Stage4Report() {
 
   useEffect(() => {
     hydrateFromActiveSession();
+    // Prefetch PDF libs so Export PDF is fast on first click
+    import("jspdf").catch(() => {});
+    import("jspdf-autotable").catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uiMode, lang]);
 
-  useEffect(() => {
-    function onFocus() {
-      if (editing) return;
-      hydrateFromActiveSession();
-    }
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uiMode, lang, editing]);
+  // Do not re-fetch/rebuild the brief on every window focus — that made Report feel slow.
 
   async function loadReport(sessionId) {
     try {

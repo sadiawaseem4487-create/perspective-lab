@@ -447,33 +447,9 @@ export default function PresentPage() {
 
     loadDeck({ resetSlide: true });
 
-    function onFocus() {
-      const fromQuery = Number(params.get("session"));
-      fetchReports(uiMode)
-        .then((list) => {
-          if (cancelled) return;
-          const unique = uniqueReportsByQuestion(list);
-          setReports(unique);
-          const preferred =
-            fromQuery ||
-            resolvePreferredSessionId(list, getActiveSessionId(uiMode)) ||
-            unique[0]?.session_id;
-          if (preferred && preferred !== playlist[0]) {
-            const next = [preferred];
-            setPlaylist(next);
-            setActiveSessionId(preferred, uiMode);
-            setPresentPlaylist(next, uiMode);
-            return;
-          }
-          return loadDeck({ resetSlide: false });
-        })
-        .catch(() => {});
-    }
-
-    window.addEventListener("focus", onFocus);
+    // Avoid full deck rebuild on every tab focus — Present felt slow for large reports.
     return () => {
       cancelled = true;
-      window.removeEventListener("focus", onFocus);
     };
   }, [playlist, uiMode, params]);
 

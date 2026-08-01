@@ -263,7 +263,8 @@ class AuthLoginRequest(BaseModel):
 
 class UserLlmKeyRequest(BaseModel):
     provider: str = Field(pattern="^(openrouter|openai)$")
-    api_key: str = Field(min_length=8, max_length=512)
+    # Empty when only updating the default model on an existing saved key.
+    api_key: str = Field(default="", max_length=512)
     model: Optional[str] = None
 
 
@@ -525,6 +526,48 @@ async def get_questions(lang: str = "en"):
 @app.get("/api/models")
 async def get_models():
     return load_models_config()
+
+
+@app.get("/api/models/catalog")
+async def get_models_catalog(
+    provider: str = "openrouter",
+    user: Optional[dict] = Depends(get_optional_user),
+):
+    """Live OpenRouter catalog (cached) with case-pack fallback; static list for OpenAI."""
+    from openrouter_models import fetch_openrouter_models, openai_static_models
+
+    provider_n = (provider or "openrouter").strip().lower()
+    pack = load_models_config() or {}
+    fallback = list(pack.get("models") or [])
+
+    if provider_n == "openai":
+        return {
+            "provider": "openai",
+            "source": "static",
+            "default_model": "gpt-4o-mini",
+            "models": openai_static_models(),
+            "count": len(openai_static_models()),
+        }
+
+    api_key = ""
+    try:
+        creds = resolve_llm_credentials(user)
+        if creds.get("provider") == "openrouter" and creds.get("api_key"):
+            api_key = creds["api_key"]
+        elif get_settings().openrouter_api_key:
+            api_key = get_settings().openrouter_api_key
+    except Exception:
+        api_key = ""
+
+    live = await fetch_openrouter_models(api_key or None)
+    models = live or fallback
+    return {
+        "provider": "openrouter",
+        "source": "openrouter" if live else "fallback",
+        "default_model": pack.get("default_model") or "openai/gpt-4o-mini",
+        "models": models,
+        "count": len(models),
+    }
 
 
 @app.get("/api/tools")

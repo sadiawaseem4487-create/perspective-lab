@@ -90,6 +90,13 @@ export async function fetchModels() {
   return parseResponse(res);
 }
 
+export async function fetchModelsCatalog(provider = "openrouter") {
+  const res = await fetch(`${API}/models/catalog?provider=${encodeURIComponent(provider)}`, {
+    headers: authHeaders(),
+  });
+  return parseResponse(res);
+}
+
 export async function fetchSelectedModel() {
   const res = await fetch(`${API}/model/selected`);
   return parseResponse(res);

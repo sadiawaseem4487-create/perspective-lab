@@ -74,6 +74,10 @@ export default function TheoryRoundtable() {
   const [selectedKey, setSelectedKey] = useState(null);
   const demoPrefillDoneRef = useRef(false);
 
+  useEffect(() => {
+    if (personalKey?.model) setModel(personalKey.model);
+  }, [personalKey]);
+
   function rememberSession(id) {
     setActiveSessionId(id, uiMode);
     setActiveSessionIdState(id);
@@ -193,7 +197,9 @@ export default function TheoryRoundtable() {
 
     fetchSelectedModel()
       .then((d) => {
-        if (!cancelled) setModel(d.model || "");
+        if (!cancelled) {
+          setModel(personalKey?.model || d.model || "");
+        }
       })
       .catch(() => {});
 

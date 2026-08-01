@@ -291,11 +291,8 @@ def user_from_token(token: str) -> Optional[Dict[str, Any]]:
 
 def set_user_llm_key(user_id: int, provider: str, api_key: str, model: str = "") -> None:
     key = (api_key or "").strip()
-    if len(key) < 8:
-        raise ValueError("API key looks too short")
-    if key.startswith("sk-or-"):
-        provider = "openrouter"
-    provider = "openrouter" if provider == "openrouter" else "openai"
+    provider = "openrouter" if (provider == "openrouter" or key.startswith("sk-or-")) else "openai"
+
     if provider == "openrouter":
         model_value = (model or "openai/gpt-4o-mini").strip()
         if "/" not in model_value:
@@ -304,7 +301,32 @@ def set_user_llm_key(user_id: int, provider: str, api_key: str, model: str = "")
         model_value = (model or "gpt-4o-mini").strip()
         if model_value.startswith("openai/"):
             model_value = model_value[len("openai/") :]
+
     now = datetime.now(timezone.utc).isoformat()
+
+    # Model-only update when a key is already stored (empty api_key).
+    if not key:
+        with get_connection() as conn:
+            row = conn.execute(
+                "SELECT provider, key_cipher FROM user_llm_keys WHERE user_id = ?",
+                (user_id,),
+            ).fetchone()
+            if not row:
+                raise ValueError("Save an API key first, then you can change the model.")
+            conn.execute(
+                """
+                UPDATE user_llm_keys
+                SET provider = ?, model = ?, updated_at = ?
+                WHERE user_id = ?
+                """,
+                (provider, model_value, now, user_id),
+            )
+            conn.commit()
+        return
+
+    if len(key) < 8:
+        raise ValueError("API key looks too short")
+
     cipher = encrypt_secret(key)
     with get_connection() as conn:
         conn.execute(

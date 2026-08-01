@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { KeyRound, ShieldCheck } from "lucide-react";
 import { fetchSetupStatus, saveSetupKeys, saveUserLlmKey } from "@/api";
+import { ModelPicker } from "@/components/ModelPicker";
 import { PageAlert, PageHero, PagePanel } from "@/components/PageChrome";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -25,12 +26,17 @@ export default function SetupWizardPage({ embedded = false }) {
         if (data.llm_provider) setProvider(data.llm_provider);
         if (data.llm_configured) setDone(true);
         if (data.personal_key?.model) setModel(data.personal_key.model);
+        else if (data.llm_provider === "openai") setModel("gpt-4o-mini");
       })
       .catch((err) => setError(err.message));
   }, []);
 
   useEffect(() => {
-    if (personalKey?.configured) setDone(true);
+    if (personalKey?.configured) {
+      setDone(true);
+      if (personalKey.model) setModel(personalKey.model);
+      if (personalKey.provider) setProvider(personalKey.provider);
+    }
   }, [personalKey]);
 
   async function handleSave(e) {
@@ -38,19 +44,18 @@ export default function SetupWizardPage({ embedded = false }) {
     setError("");
     setSaving(true);
     try {
+      const keyTrim = apiKey.trim();
       if (isAuthenticated) {
-        // Every logged-in user (including admin) can store a personal key.
-        // Admin may also write the shared server .env when setup_allowed.
         await saveUserLlmKey({
           provider,
-          api_key: apiKey.trim(),
+          api_key: keyTrim,
           model: model.trim() || undefined,
         });
-        if (isAdmin && status?.setup_allowed) {
+        if (isAdmin && status?.setup_allowed && keyTrim) {
           try {
             await saveSetupKeys({
               provider,
-              api_key: apiKey.trim(),
+              api_key: keyTrim,
               model: model.trim() || undefined,
             });
           } catch {
@@ -58,9 +63,10 @@ export default function SetupWizardPage({ embedded = false }) {
           }
         }
       } else if (status?.setup_allowed) {
+        if (!keyTrim) throw new Error("Paste an API key to continue.");
         await saveSetupKeys({
           provider,
-          api_key: apiKey.trim(),
+          api_key: keyTrim,
           model: model.trim() || undefined,
         });
       } else {
@@ -78,9 +84,11 @@ export default function SetupWizardPage({ embedded = false }) {
   }
 
   const canSave =
-    Boolean(apiKey.trim()) &&
-    (isAuthenticated || status?.setup_allowed) &&
-    !saving;
+    !saving &&
+    Boolean(model.trim()) &&
+    (isAuthenticated
+      ? Boolean(apiKey.trim()) || done
+      : Boolean(apiKey.trim()) && status?.setup_allowed);
 
   return (
     <div className={embedded ? "space-y-4" : "mx-auto max-w-xl space-y-6"}>
@@ -94,7 +102,7 @@ export default function SetupWizardPage({ embedded = false }) {
       {embedded && (
         <p className="text-sm text-slate-400">
           {isAuthenticated
-            ? "Paste your own OpenRouter or OpenAI key. Agents will bill this key — not the lab admin key."
+            ? "Paste your own OpenRouter or OpenAI key, then pick any model from the catalog. Agents bill this key — not the lab admin key."
             : t("setup.desc")}
         </p>
       )}
@@ -140,8 +148,8 @@ export default function SetupWizardPage({ embedded = false }) {
                 setModel(next === "openrouter" ? "openai/gpt-4o-mini" : "gpt-4o-mini");
               }}
             >
-              <option value="openrouter">OpenRouter</option>
-              <option value="openai">OpenAI</option>
+              <option value="openrouter">OpenRouter (all providers)</option>
+              <option value="openai">OpenAI (direct)</option>
             </select>
           </div>
 
@@ -156,9 +164,13 @@ export default function SetupWizardPage({ embedded = false }) {
                 className="page-input w-full pl-10"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
-                placeholder={t("setup.apiKeyPh")}
-                required
-                minLength={8}
+                placeholder={
+                  done
+                    ? "Leave blank to keep saved key — or paste a new one"
+                    : t("setup.apiKeyPh")
+                }
+                required={!done}
+                minLength={done ? 0 : 8}
                 autoComplete="off"
               />
             </div>
@@ -168,12 +180,7 @@ export default function SetupWizardPage({ embedded = false }) {
             <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">
               {t("setup.model")}
             </label>
-            <input
-              className="page-input w-full"
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              placeholder={provider === "openrouter" ? "openai/gpt-4o-mini" : "gpt-4o-mini"}
-            />
+            <ModelPicker provider={provider} value={model} onChange={setModel} disabled={saving} />
           </div>
 
           <button
