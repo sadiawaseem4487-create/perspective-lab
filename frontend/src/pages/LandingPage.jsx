@@ -151,23 +151,15 @@ export default function LandingPage() {
           <span>PerspectiveLab</span>
         </Link>
         <div className="landing-top-actions">
-          <LanguageSwitcher />
+          <LanguageSwitcher variant="compact" />
           {isAuthenticated ? (
-            <Link to="/question" className="landing-btn-ghost">
+            <Link to="/question" className="landing-top-cta">
               {t("landing.openApp")}
             </Link>
           ) : (
-            <>
-              <Link to="/login" className="landing-btn-ghost">
-                Sign in
-              </Link>
-              <Link to="/register" className="landing-btn-ghost">
-                Create account
-              </Link>
-              <Link to="/login" className="landing-btn-ghost">
-                {t("landing.openApp")}
-              </Link>
-            </>
+            <Link to="/login" className="landing-top-cta">
+              {t("landing.signIn")}
+            </Link>
           )}
         </div>
       </header>
@@ -199,22 +191,17 @@ export default function LandingPage() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
             ) : (
-              <>
-                <Link to="/register" className="landing-btn-primary">
-                  Create account
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link to="/login" className="landing-btn-secondary">
-                  Sign in
-                </Link>
-              </>
+              <Link to="/login" className="landing-btn-primary">
+                {t("landing.signIn")}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             )}
             <a href="#how" className="landing-btn-secondary">
               {t("landing.ctaSecondary")}
             </a>
           </motion.div>
           <motion.p variants={fadeUp} className="landing-lede" style={{ marginTop: "0.5rem", fontSize: "0.95rem" }}>
-            Each person uses their own API key. Your sessions stay private to your account.
+            {t("landing.accountNote")}
           </motion.p>
         </motion.div>
         <HeroVisual t={t} reduceMotion={reduceMotion} />

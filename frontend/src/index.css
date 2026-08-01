@@ -532,12 +532,47 @@
   .landing-top-actions {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
+    gap: 0.85rem;
   }
 
-  /* Keep header compact — select only, no “Language:” label */
-  .landing-top-actions .text-xs {
-    display: none;
+  .landing-lang {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .landing-lang-select {
+    appearance: none;
+    border: none;
+    background: transparent
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%94a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")
+      no-repeat right 0.1rem center;
+    padding: 0.35rem 1.15rem 0.35rem 0.15rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #94a3b8;
+    cursor: pointer;
+  }
+
+  .landing-lang-select:hover,
+  .landing-lang-select:focus {
+    color: #e2e8f0;
+    outline: none;
+  }
+
+  .landing-top-cta {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 0.4rem;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-decoration: none;
+    background: #ea580c;
+    color: #fff;
+  }
+
+  .landing-top-cta:hover {
+    background: #c2410c;
   }
 
   .landing-hero {

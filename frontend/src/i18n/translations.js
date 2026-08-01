@@ -39,6 +39,9 @@ export const translations = {
     },
     landing: {
       openApp: "Open app",
+      signIn: "Sign in",
+      createAccount: "Create account",
+      accountNote: "Each person uses their own API key. Your sessions stay private to your account.",
       headline: "Four theories. One research question.",
       lede: "A multi-agent workspace that keeps competing perspectives visible—from ask to brief to presentation.",
       sampleLabel: "Sample framing",
@@ -802,6 +805,9 @@ export const translations = {
     },
     landing: {
       openApp: "Abrir app",
+      signIn: "Entrar",
+      createAccount: "Criar conta",
+      accountNote: "Cada pessoa usa a própria chave de API. Suas sessões ficam privadas na sua conta.",
       headline: "Quatro teorias. Uma pergunta de pesquisa.",
       lede: "Um espaço multi-agente que mantém perspectivas concorrentes visíveis—da pergunta ao brief e à apresentação.",
       sampleLabel: "Exemplo de enquadramento",
@@ -1564,6 +1570,9 @@ export const translations = {
     },
     landing: {
       openApp: "Avaa sovellus",
+      signIn: "Kirjaudu",
+      createAccount: "Luo tili",
+      accountNote: "Jokainen käyttää omaa API-avaintaan. Istunnot pysyvät tililläsi yksityisinä.",
       headline: "Neljä teoriaa. Yksi tutkimuskysymys.",
       lede: "Moniagenttinen työtila, joka pitää kilpailevat näkökulmat näkyvissä—kysymyksestä briefiin ja esitykseen.",
       sampleLabel: "Esimerkkikehystys",

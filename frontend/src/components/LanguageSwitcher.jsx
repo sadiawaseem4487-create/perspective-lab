@@ -3,6 +3,27 @@ import { useLanguage } from "../i18n/LanguageContext";
 export default function LanguageSwitcher({ variant = "header" }) {
   const { lang, setLang, languages, t } = useLanguage();
   const isSidebar = variant === "sidebar";
+  const isCompact = variant === "compact";
+
+  if (isCompact) {
+    return (
+      <label className="landing-lang">
+        <span className="sr-only">{t("app.language")}</span>
+        <select
+          value={lang}
+          onChange={(e) => setLang(e.target.value)}
+          className="landing-lang-select"
+          aria-label={t("app.language")}
+        >
+          {languages.map((l) => (
+            <option key={l.code} value={l.code} className="text-stone-900">
+              {l.flag} {l.label}
+            </option>
+          ))}
+        </select>
+      </label>
+    );
+  }
 
   return (
     <div className="flex items-center gap-2">
