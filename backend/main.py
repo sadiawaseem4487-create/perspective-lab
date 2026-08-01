@@ -801,7 +801,7 @@ async def save_rubric(session_id: int, body: RubricScoresRequest):
 @limiter.limit(settings.rate_limit_ask)
 async def theory_judge(request: Request, body: TheoryJudgeRequest):
     """On-demand LLM theory fidelity check (does not mutate stored reports)."""
-    if not settings.llm_configured:
+    if not get_settings().llm_configured:
         raise HTTPException(status_code=503, detail="LLM API key not configured.")
     from engine.llm_theory_judge import llm_theory_fidelity_check
 
@@ -818,7 +818,7 @@ async def theory_judge(request: Request, body: TheoryJudgeRequest):
 @app.post("/api/sequential/start")
 @limiter.limit(settings.rate_limit_ask)
 async def sequential_start(request: Request, body: SequentialStartRequest):
-    if not settings.llm_configured:
+    if not get_settings().llm_configured:
         raise HTTPException(status_code=503, detail="LLM API key not configured.")
 
     from application.sequential_hitl import start_sequential_hitl
@@ -851,7 +851,7 @@ async def sequential_status(run_id: int):
 @app.post("/api/sequential/{run_id}/advance")
 @limiter.limit(settings.rate_limit_ask)
 async def sequential_advance(request: Request, run_id: int, body: SequentialAdvanceRequest):
-    if not settings.llm_configured:
+    if not get_settings().llm_configured:
         raise HTTPException(status_code=503, detail="LLM API key not configured.")
 
     from application.sequential_hitl import advance_sequential_hitl
@@ -885,7 +885,7 @@ async def ask_question(
     body: AskRequest,
     mode: Optional[str] = None,
 ):
-    if not settings.llm_configured:
+    if not get_settings().llm_configured:
         raise HTTPException(
             status_code=503,
             detail="LLM API key not configured. Add OPENROUTER_API_KEY or OPENAI_API_KEY to backend/.env",
