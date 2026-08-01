@@ -30,16 +30,17 @@ async def _agent_pipeline_node(task: AgentTask) -> dict:
     """Ask one agent, then run theory-native self-check (two-step pipeline node)."""
     from agents.service import ask_agent_slot
     from engine.self_check import enrich_with_self_check_async
-    from llm_context import use_llm_credentials
 
-    with use_llm_credentials(task.get("llm_creds")):
-        result = await ask_agent_slot(
-            task["slot_number"],
-            task["agent_id"],
-            task["question"],
-            task.get("model"),
-        )
-        checked = await enrich_with_self_check_async(task["agent_id"], result)
+    # Pass creds as an explicit argument — ContextVar is unreliable across LangGraph Send.
+    creds = task.get("llm_creds")
+    result = await ask_agent_slot(
+        task["slot_number"],
+        task["agent_id"],
+        task["question"],
+        task.get("model"),
+        llm_creds=creds,
+    )
+    checked = await enrich_with_self_check_async(task["agent_id"], result, llm_creds=creds)
     return {"responses": [checked]}
 
 
@@ -79,9 +80,21 @@ def get_parallel_graph():
     return _GRAPH
 
 
-async def run_parallel_workflow(question: str, model: Optional[str] = None) -> List[dict]:
+def reset_parallel_graph() -> None:
+    """Test helper / hot-reload safety."""
+    global _GRAPH
+    _GRAPH = None
+
+
+async def run_parallel_workflow(
+    question: str,
+    model: Optional[str] = None,
+    llm_creds: Optional[Dict[str, Any]] = None,
+) -> List[dict]:
     """Execute Phase 1 parallel workflow via LangGraph fan-out + self-check."""
     from llm_context import get_request_llm_credentials
+
+    creds = llm_creds if llm_creds is not None else get_request_llm_credentials()
 
     graph = get_parallel_graph()
     result = await graph.ainvoke(
@@ -89,7 +102,7 @@ async def run_parallel_workflow(question: str, model: Optional[str] = None) -> L
             "question": question,
             "model": model,
             "responses": [],
-            "llm_creds": get_request_llm_credentials(),
+            "llm_creds": creds,
         }
     )
     responses = list(result.get("responses", []))

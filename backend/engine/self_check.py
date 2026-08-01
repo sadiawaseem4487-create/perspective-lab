@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from application import load_theory_profile
 from engine.response_parser import parse_agent_response, section_titles_found
@@ -37,7 +37,11 @@ def enrich_with_self_check(agent_id: str, response_record: dict) -> dict:
     }
 
 
-async def enrich_with_self_check_async(agent_id: str, response_record: dict) -> dict:
+async def enrich_with_self_check_async(
+    agent_id: str,
+    response_record: dict,
+    llm_creds: Optional[dict] = None,
+) -> dict:
     """Self-check plus optional LLM fidelity judge when THEORY_JUDGE_LLM=true."""
     from config import get_settings
 
@@ -47,14 +51,16 @@ async def enrich_with_self_check_async(agent_id: str, response_record: dict) -> 
         return checked
 
     from engine.llm_theory_judge import llm_theory_fidelity_check
+    from llm_context import use_llm_credentials
 
     profile = load_theory_profile(agent_id) or {}
-    judge = await llm_theory_fidelity_check(
-        agent_id,
-        checked.get("response", ""),
-        profile=profile,
-        model=checked.get("model"),
-    )
+    with use_llm_credentials(llm_creds):
+        judge = await llm_theory_fidelity_check(
+            agent_id,
+            checked.get("response", ""),
+            profile=profile,
+            model=checked.get("model"),
+        )
     checks = list(checked["self_check"]["checks"])
     checks.append(judge)
     passed = checked["self_check"]["passed"]

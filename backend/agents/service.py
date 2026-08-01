@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import time
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from openai import APITimeoutError, AsyncOpenAI, RateLimitError
 
@@ -14,30 +14,46 @@ from engine.profiles import format_profile_instructions
 logger = logging.getLogger(__name__)
 
 
-def get_client() -> AsyncOpenAI:
+def _resolve_active_creds(llm_creds: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Prefer explicit creds, then request context, then server .env."""
     from llm_context import get_request_llm_credentials
 
     settings = get_settings()
-    creds = get_request_llm_credentials()
-    if creds and creds.get("api_key"):
-        api_key = creds["api_key"]
+    creds = llm_creds or get_request_llm_credentials() or {}
+    if creds.get("api_key"):
         provider = creds.get("provider") or "openai"
         base_url = creds.get("base_url")
-    else:
-        if not settings.llm_configured:
-            raise RuntimeError("No LLM API key configured (OPENROUTER_API_KEY or OPENAI_API_KEY)")
-        api_key = settings.llm_api_key
-        provider = settings.resolved_llm_provider
-        base_url = settings.llm_base_url
+        if provider == "openrouter" and not base_url:
+            base_url = "https://openrouter.ai/api/v1"
+        return {
+            "api_key": creds["api_key"],
+            "provider": provider,
+            "base_url": base_url,
+            "model": creds.get("model") or settings.llm_model,
+        }
+    if not settings.llm_configured:
+        raise RuntimeError(
+            "No LLM API key available. Open Settings → API key and save your OpenRouter or OpenAI key."
+        )
+    return {
+        "api_key": settings.llm_api_key,
+        "provider": settings.resolved_llm_provider,
+        "base_url": settings.llm_base_url,
+        "model": settings.llm_model,
+    }
 
+
+def get_client(llm_creds: Optional[Dict[str, Any]] = None) -> AsyncOpenAI:
+    settings = get_settings()
+    active = _resolve_active_creds(llm_creds)
     kwargs = {
-        "api_key": api_key,
+        "api_key": active["api_key"],
         "timeout": settings.openai_timeout_seconds,
         "max_retries": settings.openai_max_retries,
     }
-    if base_url:
-        kwargs["base_url"] = base_url
-    if provider == "openrouter":
+    if active.get("base_url"):
+        kwargs["base_url"] = active["base_url"]
+    if active.get("provider") == "openrouter":
         kwargs["default_headers"] = {
             "HTTP-Referer": "https://github.com/perspective-lab",
             "X-Title": "PerspectiveLab",
@@ -63,15 +79,18 @@ async def ask_agent_slot(
     agent_id: str,
     question: str,
     model: Optional[str] = None,
+    llm_creds: Optional[Dict[str, Any]] = None,
 ) -> dict:
-    from llm_context import get_request_llm_credentials
-
     settings = get_settings()
     catalog = load_agents_catalog()
     agent = catalog.get(agent_id) or AGENT_DEFINITIONS.get(agent_id, {})
     started = time.perf_counter()
-    creds = get_request_llm_credentials()
-    active_model = model or (creds.get("model") if creds else None) or settings.llm_model
+    try:
+        active = _resolve_active_creds(llm_creds)
+    except RuntimeError as exc:
+        return _error_response(slot_number, agent_id, agent, model or settings.llm_model, str(exc), started)
+
+    active_model = model or active.get("model") or settings.llm_model
     prompt = agent.get("system_prompt") or agent.get("prompt", "")
     profile_block = format_profile_instructions(agent_id)
     if profile_block:
@@ -85,7 +104,7 @@ async def ask_agent_slot(
 
     for attempt in range(settings.openai_max_retries + 1):
         try:
-            client = get_client()
+            client = get_client(active)
             completion = await client.chat.completions.create(
                 model=active_model,
                 messages=[
@@ -138,13 +157,17 @@ async def ask_all_agents(
     question: str,
     model: Optional[str] = None,
     mode: str = "parallel",
+    llm_creds: Optional[Dict[str, Any]] = None,
 ) -> list:
+    from llm_context import get_request_llm_credentials
+
+    creds = llm_creds or get_request_llm_credentials()
     if mode == "parallel":
         from engine.parallel_workflow import run_parallel_workflow
 
-        return await run_parallel_workflow(question, model=model)
+        return await run_parallel_workflow(question, model=model, llm_creds=creds)
     if mode == "sequential":
         from engine.sequential_workflow import run_sequential_workflow
 
-        return await run_sequential_workflow(question, model=model)
+        return await run_sequential_workflow(question, model=model, llm_creds=creds)
     raise ValueError(f"Unknown workflow mode: {mode}")

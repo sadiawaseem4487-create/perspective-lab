@@ -34,7 +34,6 @@ async def _run_stage(
 ) -> dict:
     from agents.service import ask_agent_slot
     from engine.self_check import enrich_with_self_check_async
-    from llm_context import use_llm_credentials
 
     stage_question = build_stage_question(
         state["question"],
@@ -42,14 +41,15 @@ async def _run_stage(
         agent_id,
         human_note=human_note,
     )
-    with use_llm_credentials(state.get("llm_creds")):
-        result = await ask_agent_slot(
-            slot_number,
-            agent_id,
-            stage_question,
-            state.get("model"),
-        )
-        checked = await enrich_with_self_check_async(agent_id, result)
+    creds = state.get("llm_creds")
+    result = await ask_agent_slot(
+        slot_number,
+        agent_id,
+        stage_question,
+        state.get("model"),
+        llm_creds=creds,
+    )
+    checked = await enrich_with_self_check_async(agent_id, result, llm_creds=creds)
     checked["sequential_stage"] = {
         "vaihe": slot_number,
         "role": stage_role,
@@ -99,9 +99,15 @@ def get_sequential_graph():
     return _GRAPH
 
 
-async def run_sequential_workflow(question: str, model: Optional[str] = None) -> List[dict]:
+async def run_sequential_workflow(
+    question: str,
+    model: Optional[str] = None,
+    llm_creds: Optional[Dict[str, Any]] = None,
+) -> List[dict]:
     """Execute Phase 2 sequential workflow via LangGraph linear chain."""
     from llm_context import get_request_llm_credentials
+
+    creds = llm_creds if llm_creds is not None else get_request_llm_credentials()
 
     graph = get_sequential_graph()
     result = await graph.ainvoke(
@@ -110,7 +116,7 @@ async def run_sequential_workflow(question: str, model: Optional[str] = None) ->
             "model": model,
             "stage_outputs": {},
             "responses": [],
-            "llm_creds": get_request_llm_credentials(),
+            "llm_creds": creds,
         }
     )
     return list(result.get("responses", []))
@@ -122,6 +128,7 @@ async def run_single_sequential_stage(
     stage_outputs: Optional[Dict[str, str]] = None,
     model: Optional[str] = None,
     human_note: str = "",
+    llm_creds: Optional[Dict[str, Any]] = None,
 ) -> dict:
     """Run one Vaihe (1–4) for human-in-the-loop sequential mode."""
     from llm_context import get_request_llm_credentials
@@ -129,13 +136,14 @@ async def run_single_sequential_stage(
     if vaihe < 1 or vaihe > len(SEQUENTIAL_STAGES):
         raise ValueError(f"vaihe must be 1–{len(SEQUENTIAL_STAGES)}")
 
+    creds = llm_creds if llm_creds is not None else get_request_llm_credentials()
     agent_id, slot_number, stage_role = SEQUENTIAL_STAGES[vaihe - 1]
     state: SequentialState = {
         "question": question,
         "model": model,
         "stage_outputs": stage_outputs or {},
         "responses": [],
-        "llm_creds": get_request_llm_credentials(),
+        "llm_creds": creds,
     }
     result = await _run_stage(state, agent_id, slot_number, stage_role, human_note=human_note)
     return result["responses"][0]

@@ -1097,7 +1097,16 @@ async def ask_question(
         lang,
         workflow_mode,
     )
-    responses = await ask_all_agents(question_with_lang, model=model, mode=workflow_mode)
+    # Pass credentials explicitly — do not rely on ContextVar across LangGraph fan-out
+    from llm_context import get_request_llm_credentials
+
+    llm_creds = get_request_llm_credentials() or resolve_llm_credentials(user)
+    responses = await ask_all_agents(
+        question_with_lang,
+        model=model,
+        mode=workflow_mode,
+        llm_creds=llm_creds,
+    )
 
     failed = [r for r in responses if r.get("error")]
     if len(failed) == len(responses):
