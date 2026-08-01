@@ -4,6 +4,7 @@ Newest entries at the top.
 
 | Date | Sprint | Event |
 |------|--------|-------|
+| 2026-08-01 | Docs | Cleared GitHub entry docs: README, USER_GUIDE, deploy guides, wiki Home. |
 | 2026-08-01 | UX | OpenRouter live model catalog + searchable picker; faster Report/Present (v1.1.8). |
 | 2026-08-01 | Auth | Durable accounts via Postgres DATABASE_URL on free Render; SQLite kept for local (v1.1.6). |
 | 2026-08-01 | Auth | Fix account wipe on redeploy: Render Starter + persistent disk, health `persistent_storage`, register-with-same-password signs in (v1.1.5). |

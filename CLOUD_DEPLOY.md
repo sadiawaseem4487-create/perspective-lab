@@ -1,71 +1,41 @@
-# Deploy PerspectiveLab to the cloud
+# Optional: Vercel UI + Render API
 
-**Preferred all-in-one (already live):** https://perspective-lab.onrender.com/  
-→ [ONLINE_DEPLOY.md](./ONLINE_DEPLOY.md)
+**Preferred (all-in-one):** https://perspective-lab.onrender.com/ — see [ONLINE_DEPLOY.md](./ONLINE_DEPLOY.md)
 
-**Optional Vercel UI** (this page): static frontend on Vercel, API stays on Render.
+Use Vercel only if you want a separate frontend URL. The API always stays on Render.
 
-| What | Where | URL |
-|------|--------|-----|
-| API + full app | Render | https://perspective-lab.onrender.com |
-| UI only | Vercel | *(after import — e.g. `https://perspective-lab.vercel.app`)* |
-
-Repo: https://github.com/sadiawaseem4487-create/perspective-lab
+| Piece | Host |
+|-------|------|
+| API + accounts + agents | Render |
+| UI (static) | Vercel (optional) |
 
 ---
 
-## Deploy UI on Vercel (recommended path)
+## Deploy frontend on Vercel
 
-1. Open https://vercel.com/new
-2. Import **`sadiawaseem4487-create/perspective-lab`**
-3. Configure:
-   - **Root Directory:** `frontend` ← required (do not leave as repo root)
-   - **Framework Preset:** Vite
-   - Clear any custom Install/Build overrides that say `cd frontend && …` (those break when Root Directory is already `frontend`)
-   - Install: `npm ci` · Build: `npm run build` · Output: `dist`
-4. Environment Variable (optional — auto-detects Vercel → Render if unset):
+1. [vercel.com/new](https://vercel.com/new) → import this repo  
+2. **Root Directory:** `frontend`  
+3. Install `npm ci` · Build `npm run build` · Output `dist`  
+4. Optional env: `VITE_API_BASE_URL=https://perspective-lab.onrender.com`  
+5. Deploy  
 
-| Key | Value |
-|-----|--------|
-| `VITE_API_BASE_URL` | `https://perspective-lab.onrender.com` |
-
-5. Deploy → copy the Vercel URL
-
-If you already created the project and the build failed with `cd: frontend: No such file or directory`:
-
-1. Project → **Settings → General → Root Directory** → set to `frontend` → Save  
-2. **Settings → Build & Development Settings** → reset Install/Build to defaults (or `npm ci` / `npm run build`)  
-3. **Deployments → Redeploy**
+If build fails with `cd: frontend: No such file or directory`, Root Directory is wrong — set it to `frontend` and remove any `cd frontend && …` overrides.
 
 ---
 
-## Link CORS on Render (required once)
+## CORS on Render (once)
 
-On the **existing** Render service → Environment → update:
+On the Render web service → Environment:
 
 | Key | Value |
 |-----|--------|
 | `CORS_ORIGINS` | `https://perspective-lab.onrender.com,https://YOUR-APP.vercel.app` |
-| `ALLOWED_HOSTS` | `perspective-lab.onrender.com` |
-| `PUBLIC_APP_URL` | `https://YOUR-APP.vercel.app` *(if invite links should open on Vercel)* |
 
-Save → Render redeploys. Prefer keeping `PUBLIC_APP_URL` on Render if guests should use the all-in-one site.
+Redeploy Render. Do **not** put API keys on Vercel.
 
 ---
 
-## Smoke test
+## Test
 
-1. Open the Vercel URL → Sign in  
-2. Settings → paste your API key  
-3. Workspace → Ask agents (API calls go to Render)  
-4. `/api/health` is **not** on Vercel — use https://perspective-lab.onrender.com/api/health  
-
----
-
-## Notes
-
-- Do **not** put `OPENROUTER_API_KEY` on Vercel — only on Render / in each user’s Settings  
-- First Render request after idle can take ~30–60s (free tier)  
-- Auto-deploy: connect the GitHub repo in Vercel; pushes to `main` rebuild the UI  
-
-[← ONLINE_DEPLOY](ONLINE_DEPLOY.md) · [User accounts](docs/wiki/User-Accounts.md)
+Open the Vercel URL → Sign in → Settings → Workspace.  
+Health: https://perspective-lab.onrender.com/api/health  

@@ -2,81 +2,47 @@
 
 > **Research question:** Can we be better problem solvers with agentic AI?
 
-Welcome to the project wiki. This is the single source of truth for architecture, standards, sprints, and progress.
+Developer notes for architecture, sprints, and progress.  
+**Product users** should start with the root [README.md](../../README.md) or [USER_GUIDE.md](../../USER_GUIDE.md).
 
 ---
 
-## Quick links
+## Status
+
+| | |
+|--|--|
+| **Live** | https://perspective-lab.onrender.com/ |
+| **Accounts** | Login + personal API keys + Postgres |
+| **Updated** | 2026-08-01 |
+
+---
+
+## Developer links
 
 | Page | Description |
 |------|-------------|
-| [Overview](Overview.md) | Vision, goals, and capability roadmap |
-| [Facilitator Checklist](Facilitator-Checklist.md) | Pilot session path (also in-app `/guide`) |
-| [Client handover](../../CLIENT_HANDOVER.md) | Give this to your client: install + API key only |
-| [Free hosting](Free-Hosting.md) | Vercel UI + Render API for remote invite links |
-| [Architecture](Architecture.md) | System layers and folder layout |
-| [Design Patterns](Design-Patterns.md) | Hexagonal architecture, case packs, workflows |
-| [Code Standards](Code-Standards.md) | Clean code rules, smells to avoid |
-| [Research Alignment](Research-Alignment.md) | Parallel vs sequential agents (document spec) |
-| [Test Plan](Test-Plan.md) | Manual + automated test cases for current sprint |
-| [Problem-Solving Rubric](Problem-Solving-Rubric.md) | Measuring “better problem solvers” (API + CSV export live) |
-| [Development Pipeline](Development-Pipeline.md) | CI/CD + sprint approval workflow |
-| [GitHub Setup](GitHub-Setup.md) | First-time repo + push instructions |
-| [Sprint Plan](Sprints/README.md) | All sprints, tasks, exit criteria |
-| [Remaining Work](Remaining-Work.md) | Prioritized backlog — next: Sprint 8 Desktop |
-| [User accounts](User-Accounts.md) | Login + per-user API keys (admin vs lab users) |
-| [Progress Log](Progress-Log.md) | Dated implementation history |
+| [Architecture](Architecture.md) | Layers and folders |
+| [Design Patterns](Design-Patterns.md) | Hexagonal + case packs |
+| [Code Standards](Code-Standards.md) | Clean code rules |
+| [User accounts](User-Accounts.md) | Auth model |
+| [Sprint Plan](Sprints/README.md) | Sprint history |
+| [Progress Log](Progress-Log.md) | Dated changes |
+| [Facilitator Checklist](Facilitator-Checklist.md) | Pilot session path |
+| [Overview](Overview.md) | Vision / roadmap |
 
----
+## Ops & handover
 
-## Project status
-
-| Field | Value |
-|-------|-------|
-| **Product** | PerspectiveLab |
-| **Live URL** | https://perspective-lab.onrender.com/ |
-| **Accounts** | Per-user login + personal API keys + private History ([User accounts](User-Accounts.md)) |
-| **Current sprint** | Core sprints complete — SaaS accounts on Render |
-| **Sprint 8 status** | 🟩 Complete (self-contained Mac DMG) |
-| **Sprint 9 status** | 🟩 Complete (research integrity) |
-| **Sprint 7 status** | 🟩 Complete (GUI research workspace) |
-| **Sprint 6 status** | 🟩 Complete |
-| **Sprint 1 status** | 🟩 Complete |
-| **Last updated** | 2026-08-01 |
-
----
-
-## Repository layout
-
-```
-perspective-lab/                 # (folder rename pending)
-├── backend/
-│   ├── api/                     # FastAPI routes (thin)
-│   ├── application/             # Use-case facades
-│   ├── core/                    # Domain constants
-│   ├── infrastructure/          # Adapters (cases, LLM, DB)
-│   └── agents/                  # Agent orchestration (→ engine/ in Sprint 2)
-├── frontend/
-├── cases/
-│   └── sao-paulo-dropout/       # First case pack
-├── docs/wiki/                   # This wiki
-├── .cursor/rules/               # AI coding standards
-└── AGENTS.md                    # Agent instructions for Cursor
-```
+| Doc | Description |
+|-----|-------------|
+| [ONLINE_DEPLOY.md](../../ONLINE_DEPLOY.md) | Render production |
+| [CLOUD_DEPLOY.md](../../CLOUD_DEPLOY.md) | Optional Vercel UI |
+| [CLIENT_HANDOVER.md](../../CLIENT_HANDOVER.md) | Local install for non-developers |
+| [AGENTS.md](../../AGENTS.md) | Cursor / AI agent rules |
 
 ---
 
 ## How to update this wiki
 
-1. Complete a task → check the box in the relevant [sprint page](Sprints/README.md).
-2. Finish a sprint → update sprint status and [Progress Log](Progress-Log.md).
-3. Change architecture → update [Architecture](Architecture.md) and [Design Patterns](Design-Patterns.md).
-4. Bump **Last updated** on this page when anything material changes.
-
----
-
-## External references
-
-- Research spec: `SaoPaolo_agentit_versio1_2026.docx`
-- User guide: [USER_GUIDE.md](../../USER_GUIDE.md)
-- Deployment: [DEPLOYMENT.md](../../DEPLOYMENT.md)
+1. Finish work → note it in [Progress Log](Progress-Log.md)  
+2. Architecture change → update [Architecture](Architecture.md)  
+3. Keep the root [README.md](../../README.md) as the public entry point  

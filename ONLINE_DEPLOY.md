@@ -1,114 +1,67 @@
-# Online deploy — same site (update, don’t recreate)
+# Deploy on Render (production)
 
-**Live app (keep this URL):** https://perspective-lab.onrender.com/
+**Live app:** https://perspective-lab.onrender.com/  
+**Repo:** https://github.com/sadiawaseem4487-create/perspective-lab  
 
-GitHub source: https://github.com/sadiawaseem4487-create/perspective-lab  
-
-Always **update this Render service** — do not create a new Web Service.
-
----
-
-## Keep accounts after redeploy (required)
-
-Accounts must live in **Postgres** (`DATABASE_URL`), not SQLite on the web container.
-
-Render’s free web filesystem is wiped on every redeploy / idle restart. That is why Sign in kept failing and the red “storage is not persistent” banner appeared.
-
-### One-time setup on the live service
-
-1. Render Dashboard → **New** → **Postgres** (Free is OK for the lab)
-   - Name: `perspectivelab-db` (or any name)
-2. Open your **web** service (`perspective-lab`) → **Environment**
-3. Add:
-   - Key: `DATABASE_URL`
-   - Value: from the Postgres service → **Connections** → **Internal Database URL**
-     (or use “Add from Database” if the UI offers it)
-4. **Manual Deploy** the web service
-
-Confirm:
-
-https://perspective-lab.onrender.com/api/health
-
-Must show:
-- `"storage_backend": "postgres"`
-- `"persistent_storage": true`
-- `"version": "1.1.6"` (or newer)
-
-Then **Create account once** — it survives future deploys. The red login banner disappears.
-
-`render.yaml` declares a free Postgres + `DATABASE_URL` wiring for Blueprint sync. Prefer updating the **existing** web service rather than creating a second app URL.
-
-**Do not** recreate the web service from scratch (new empty DB + new `AUTH_SECRET`).
-
-Admin seed: `ADMIN_EMAIL` / `ADMIN_PASSWORD` when those env vars are set.
-
-Note: Render’s **free** Postgres expires after ~30 days unless upgraded — still far better than wiping on every deploy. For long-term free durability you can point `DATABASE_URL` at Neon instead.
+Always **update the existing** web service — do not create a second app URL.
 
 ---
 
+## One-time: durable accounts (Postgres)
+
+Render’s free web disk is wiped on redeploy. Accounts must use Postgres.
+
+1. Render → **New → PostgreSQL** (Free is OK) — e.g. `perspectivelab-db`  
+2. Open web service **`perspective-lab`** → **Environment**  
+3. Add **`DATABASE_URL`** = Postgres **External Database URL** if regions differ, otherwise Internal  
+4. **Manual Deploy** → Deploy latest commit  
+
+Check: https://perspective-lab.onrender.com/api/health  
+
+Expect:
+
+```json
+"storage_backend": "postgres",
+"persistent_storage": true
+```
+
+Then create accounts once — they survive future deploys.
+
 ---
 
-## Critical: fix Environment on Render (do this once)
-
-Live health must show `environment: production`, `auth_required: true`, and version ≥ `1.1.2`.
-
-The Docker entrypoint **forces production on Render** even if the dashboard still says `development`. After a cache-clear deploy, confirm:
-
-https://perspective-lab.onrender.com/api/health
-
-Also set these on the service:
+## Environment (web service)
 
 | Key | Value |
 |-----|--------|
 | `ENVIRONMENT` | `production` |
 | `AUTH_REQUIRED` | `true` |
-| `AUTH_SECRET` | *(long random string)* |
-| `ADMIN_EMAIL` | `admin@perspectivelab.local` |
-| `ADMIN_PASSWORD` | *(your admin password)* |
+| `AUTH_SECRET` | long random string (keep stable) |
+| `DATABASE_URL` | from Postgres (required) |
 | `PUBLIC_APP_URL` | `https://perspective-lab.onrender.com` |
-| `CORS_ORIGINS` | `https://perspective-lab.onrender.com` |
+| `CORS_ORIGINS` | `https://perspective-lab.onrender.com` (+ Vercel URL if used) |
 | `ALLOWED_HOSTS` | `perspective-lab.onrender.com` |
-| `OPENROUTER_API_KEY` or `OPENAI_API_KEY` | *(optional admin key)* |
-| `EXPORT_API_KEY` | *(long random string)* |
 | `CASE_ID` | `sao-paulo-dropout` |
 | `WORKERS` | `1` |
-
-**Manual Deploy → Clear build cache & deploy.** Each user must paste their own API key in Settings before Ask agents works.
-
----
-
-## Enable auto-deploy (one-time)
-
-So every push to `main` updates the live URL without Manual Deploy:
-
-1. Open https://dashboard.render.com → service **`perspective-lab`**
-2. **Settings** → **Build & Deploy**
-3. **Auto-Deploy** → **On Commit**
-4. Confirm branch **`main`** / repo **`sadiawaseem4487-create/perspective-lab`**
-5. Save
-
-**Production auth:** non-development environments always require login. Sign out must leave the app.
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | optional seed admin |
+| `OPENROUTER_API_KEY` | optional (users still paste their own keys) |
 
 ---
 
-## Deploy latest code
+## Auto-deploy
 
-1. Open the **`perspective-lab`** service
-2. If Auto-Deploy is on, a push to `main` is enough
-3. Otherwise **Manual Deploy** → **Clear build cache & deploy**
-4. Wait until status is **Live**
+Service → **Settings → Build & Deploy** → Auto-Deploy **On Commit** → branch `main`.
 
-Latest SaaS features on `main`: accounts, per-user API keys, private History, Sign out → login.
+Or **Manual Deploy** after each push.
 
 ---
 
-## After deploy — smoke check
+## Optional Vercel UI
 
-- https://perspective-lab.onrender.com/api/health → `environment: production`, `auth_required: true`
-- https://perspective-lab.onrender.com/login → Sign in
-- Sign out → returns to login (not Workspace)
-- Register → Settings → paste **your** API key → Workspace → Ask agents
-- History shows only that user’s sessions
-- Invite links (`/invite/...`) stay public (no login)
+Static frontend only; API stays on Render → [CLOUD_DEPLOY.md](./CLOUD_DEPLOY.md)
 
-Optional Vercel UI is not required; this Render URL already serves UI + API.
+---
+
+## Smoke test
+
+1. Sign in → Settings → API key → Workspace → Ask agents  
+2. Health endpoint shows `persistent_storage: true`  
