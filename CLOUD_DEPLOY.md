@@ -19,10 +19,10 @@ Repo: https://github.com/sadiawaseem4487-create/perspective-lab
 1. Open https://vercel.com/new
 2. Import **`sadiawaseem4487-create/perspective-lab`**
 3. Configure:
-   - **Root Directory:** `frontend` ← important
+   - **Root Directory:** `frontend` ← required (do not leave as repo root)
    - **Framework Preset:** Vite
-   - **Build Command:** `npm run build`
-   - **Output Directory:** `dist`
+   - Clear any custom Install/Build overrides that say `cd frontend && …` (those break when Root Directory is already `frontend`)
+   - Install: `npm ci` · Build: `npm run build` · Output: `dist`
 4. Environment Variable (optional — auto-detects Vercel → Render if unset):
 
 | Key | Value |
@@ -30,6 +30,12 @@ Repo: https://github.com/sadiawaseem4487-create/perspective-lab
 | `VITE_API_BASE_URL` | `https://perspective-lab.onrender.com` |
 
 5. Deploy → copy the Vercel URL
+
+If you already created the project and the build failed with `cd: frontend: No such file or directory`:
+
+1. Project → **Settings → General → Root Directory** → set to `frontend` → Save  
+2. **Settings → Build & Development Settings** → reset Install/Build to defaults (or `npm ci` / `npm run build`)  
+3. **Deployments → Redeploy**
 
 ---
 
