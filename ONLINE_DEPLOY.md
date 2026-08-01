@@ -10,31 +10,39 @@ Always **update this Render service** — do not create a new Web Service.
 
 ## Keep accounts after redeploy (required)
 
-User accounts live in **SQLite** at `/app/backend/data/sessions.db`.
+Accounts must live in **Postgres** (`DATABASE_URL`), not SQLite on the web container.
 
-Render **free** web services have an **ephemeral** filesystem: every redeploy or idle spin-down deletes that file, so Sign in fails and you are forced to Create account again.
+Render’s free web filesystem is wiped on every redeploy / idle restart. That is why Sign in kept failing and the red “storage is not persistent” banner appeared.
 
-**Fix (one-time on the live `perspective-lab` service):**
+### One-time setup on the live service
 
-1. Render Dashboard → your web service → **Settings** → change instance to **Starter** (disks are not available on Free)
-2. **Disks** → **Add disk**
-   - Name: `perspectivelab-data` (any name)
-   - Mount path: `/app/backend/data`
-   - Size: **1 GB**
-3. **Environment** → set `DATABASE_PATH=/app/backend/data/sessions.db` (Blueprint already sets this)
-4. **Manual Deploy** → deploy
+1. Render Dashboard → **New** → **Postgres** (Free is OK for the lab)
+   - Name: `perspectivelab-db` (or any name)
+2. Open your **web** service (`perspective-lab`) → **Environment**
+3. Add:
+   - Key: `DATABASE_URL`
+   - Value: from the Postgres service → **Connections** → **Internal Database URL**
+     (or use “Add from Database” if the UI offers it)
+4. **Manual Deploy** the web service
 
-Confirm after deploy:
+Confirm:
 
 https://perspective-lab.onrender.com/api/health
 
-Must show `"persistent_storage": true` and `"version": "1.1.5"` (or newer). Then create your account **once** — it will survive future deploys.
+Must show:
+- `"storage_backend": "postgres"`
+- `"persistent_storage": true`
+- `"version": "1.1.6"` (or newer)
 
-`render.yaml` now declares `plan: starter` + disk so Blueprint sync can apply the same config.
+Then **Create account once** — it survives future deploys. The red login banner disappears.
 
-**Do not** create a brand-new Web Service (that starts with an empty disk and new `AUTH_SECRET`).
+`render.yaml` declares a free Postgres + `DATABASE_URL` wiring for Blueprint sync. Prefer updating the **existing** web service rather than creating a second app URL.
 
-Admin seed: `ADMIN_EMAIL` / `ADMIN_PASSWORD` — only if those env vars are set.
+**Do not** recreate the web service from scratch (new empty DB + new `AUTH_SECRET`).
+
+Admin seed: `ADMIN_EMAIL` / `ADMIN_PASSWORD` when those env vars are set.
+
+Note: Render’s **free** Postgres expires after ~30 days unless upgraded — still far better than wiping on every deploy. For long-term free durability you can point `DATABASE_URL` at Neon instead.
 
 ---
 

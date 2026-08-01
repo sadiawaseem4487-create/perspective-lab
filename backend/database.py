@@ -1,28 +1,24 @@
 import logging
-import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from typing import Optional
 
 from config import get_settings
+from db import open_connection, pk_sql, table_columns, using_postgres
 
 logger = logging.getLogger(__name__)
 
 
-def _db_path() -> str:
-    settings = get_settings()
-    settings.database_path.parent.mkdir(parents=True, exist_ok=True)
-    return str(settings.database_path)
-
-
 def storage_is_persistent() -> bool:
-    """True when account data is expected to survive process restarts/redeploys.
+    """True when account data survives cloud redeploys.
 
-    Local and docker-compose keep SQLite on the host. On Render, only a disk
-    mounted under the database directory survives redeploys (free tier cannot).
+    Postgres via DATABASE_URL is durable on free Render. Local SQLite is fine
+    on the host. Ephemeral Render SQLite without a disk is not durable.
     """
     import os
 
+    if using_postgres():
+        return True
     if os.environ.get("RENDER", "").lower() != "true":
         return True
 
@@ -47,13 +43,15 @@ def count_users_safe() -> int:
 
 
 def init_db() -> None:
+    pk = pk_sql()
     with get_connection() as conn:
-        conn.execute("PRAGMA journal_mode=WAL")
-        conn.execute("PRAGMA foreign_keys=ON")
+        if conn.dialect == "sqlite":
+            conn.execute("PRAGMA journal_mode=WAL")
+            conn.execute("PRAGMA foreign_keys=ON")
         conn.execute(
-            """
+            f"""
             CREATE TABLE IF NOT EXISTS sessions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id {pk},
                 question TEXT NOT NULL,
                 created_at TEXT NOT NULL,
                 workflow_mode TEXT NOT NULL DEFAULT 'parallel'
@@ -61,9 +59,9 @@ def init_db() -> None:
             """
         )
         conn.execute(
-            """
+            f"""
             CREATE TABLE IF NOT EXISTS responses (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id {pk},
                 session_id INTEGER NOT NULL,
                 agent_key TEXT NOT NULL,
                 agent_name TEXT NOT NULL,
@@ -83,15 +81,15 @@ def init_db() -> None:
             "CREATE INDEX IF NOT EXISTS idx_sessions_created_at ON sessions(created_at DESC)"
         )
         conn.execute(
-            """
+            f"""
             CREATE TABLE IF NOT EXISTS sequential_runs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id {pk},
                 question TEXT NOT NULL,
                 model TEXT,
                 language TEXT NOT NULL DEFAULT 'en',
                 current_vaihe INTEGER NOT NULL DEFAULT 0,
                 status TEXT NOT NULL DEFAULT 'awaiting_review',
-                stage_outputs TEXT NOT NULL DEFAULT '{}',
+                stage_outputs TEXT NOT NULL DEFAULT '{{}}',
                 responses TEXT NOT NULL DEFAULT '[]',
                 human_checkpoints TEXT NOT NULL DEFAULT '[]',
                 session_id INTEGER,
@@ -103,7 +101,6 @@ def init_db() -> None:
         _migrate(conn)
         conn.commit()
 
-    # Auth tables + seeded admin (idempotent)
     try:
         from auth_service import ensure_auth_tables, seed_admin_user
 
@@ -114,7 +111,7 @@ def init_db() -> None:
 
 
 def _migrate(conn) -> None:
-    session_columns = {row[1] for row in conn.execute("PRAGMA table_info(sessions)")}
+    session_columns = table_columns(conn, "sessions")
     if "workflow_mode" not in session_columns:
         conn.execute(
             "ALTER TABLE sessions ADD COLUMN workflow_mode TEXT NOT NULL DEFAULT 'parallel'"
@@ -125,13 +122,13 @@ def _migrate(conn) -> None:
             "CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id, id DESC)"
         )
 
-    columns = {row[1] for row in conn.execute("PRAGMA table_info(responses)")}
+    columns = table_columns(conn, "responses")
     if "latency_ms" not in columns:
         conn.execute("ALTER TABLE responses ADD COLUMN latency_ms INTEGER")
     if "error" not in columns:
         conn.execute("ALTER TABLE responses ADD COLUMN error TEXT")
 
-    seq_columns = {row[1] for row in conn.execute("PRAGMA table_info(sequential_runs)")}
+    seq_columns = table_columns(conn, "sequential_runs")
     if "user_id" not in seq_columns:
         conn.execute("ALTER TABLE sequential_runs ADD COLUMN user_id INTEGER")
         conn.execute(
@@ -144,18 +141,14 @@ def check_db() -> bool:
         with get_connection() as conn:
             conn.execute("SELECT 1").fetchone()
         return True
-    except sqlite3.Error:
+    except Exception:
         return False
 
 
 @contextmanager
 def get_connection():
-    conn = sqlite3.connect(_db_path(), timeout=30, check_same_thread=False)
-    conn.row_factory = sqlite3.Row
-    try:
+    with open_connection() as conn:
         yield conn
-    finally:
-        conn.close()
 
 
 def save_session(
@@ -166,14 +159,13 @@ def save_session(
 ) -> int:
     now = datetime.now(timezone.utc).isoformat()
     with get_connection() as conn:
-        cursor = conn.execute(
+        session_id = conn.execute_insert(
             """
             INSERT INTO sessions (question, created_at, workflow_mode, user_id)
             VALUES (?, ?, ?, ?)
             """,
             (question, now, workflow_mode, user_id),
         )
-        session_id = cursor.lastrowid
         for item in responses:
             conn.execute(
                 """
@@ -206,7 +198,7 @@ def list_sessions(limit: int = 50, user_id: Optional[int] = None) -> list:
                        COUNT(r.id) AS response_count
                 FROM sessions s
                 LEFT JOIN responses r ON r.session_id = s.id
-                GROUP BY s.id
+                GROUP BY s.id, s.question, s.created_at, s.workflow_mode, s.user_id
                 ORDER BY s.id DESC
                 LIMIT ?
                 """,
@@ -220,7 +212,7 @@ def list_sessions(limit: int = 50, user_id: Optional[int] = None) -> list:
                 FROM sessions s
                 LEFT JOIN responses r ON r.session_id = s.id
                 WHERE s.user_id = ?
-                GROUP BY s.id
+                GROUP BY s.id, s.question, s.created_at, s.workflow_mode, s.user_id
                 ORDER BY s.id DESC
                 LIMIT ?
                 """,
@@ -276,10 +268,8 @@ def user_owns_session(session_id: int, user_id: Optional[int]) -> bool:
     if not row:
         return False
     if user_id is None:
-        # Auth disabled / anonymous mode — allow (tests + local open mode)
         return True
     if row["user_id"] is None:
-        # Legacy unscoped rows are hidden from logged-in SaaS users
         return False
     return int(row["user_id"]) == int(user_id)
 
@@ -313,7 +303,7 @@ def export_all() -> list:
 
 def create_sequential_run(payload: dict) -> int:
     with get_connection() as conn:
-        cursor = conn.execute(
+        run_id = conn.execute_insert(
             """
             INSERT INTO sequential_runs
             (question, model, language, current_vaihe, status, stage_outputs, responses,
@@ -336,7 +326,7 @@ def create_sequential_run(payload: dict) -> int:
             ),
         )
         conn.commit()
-        return cursor.lastrowid
+        return run_id
 
 
 def get_sequential_run(run_id: int) -> Optional[dict]:

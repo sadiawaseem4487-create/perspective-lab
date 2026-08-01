@@ -4,6 +4,7 @@ Newest entries at the top.
 
 | Date | Sprint | Event |
 |------|--------|-------|
+| 2026-08-01 | Auth | Durable accounts via Postgres DATABASE_URL on free Render; SQLite kept for local (v1.1.6). |
 | 2026-08-01 | Auth | Fix account wipe on redeploy: Render Starter + persistent disk, health `persistent_storage`, register-with-same-password signs in (v1.1.5). |
 | 2026-08-01 | Auth | Ask agents enabled when framing is ready; missing API key opens Settings instead of a dead button (v1.1.4). |
 | 2026-08-01 | Auth | Fix: pass per-user LLM key through LangGraph fan-out; Docker defaults production; Sign out hard-redirect. |

@@ -66,14 +66,15 @@ flowchart TD
 
 ---
 
-## Persistence warning (Render)
+## Persistence (Render)
 
-Accounts live in SQLite (`DATABASE_PATH=/app/backend/data/sessions.db`).
+Production must use **Postgres** via `DATABASE_URL` (wired in `render.yaml`).
 
-- **Free Render** cannot attach a disk → every redeploy wipes users.
-- **Starter + disk** mounted at `/app/backend/data` → accounts survive (see [ONLINE_DEPLOY.md](../../ONLINE_DEPLOY.md)).
-- Health must report `"persistent_storage": true`.
-- Creating an account again with the **same email + password** signs you in (no “already exists” dead-end).
+- Local / tests: SQLite file (`DATABASE_PATH`) — fine
+- Render without `DATABASE_URL`: ephemeral SQLite → accounts wiped every deploy (red login warning)
+- Render with Postgres: `"persistent_storage": true` — create account once
+
+See [ONLINE_DEPLOY.md](../../ONLINE_DEPLOY.md). Creating again with the same email + password signs you in.
 
 ---
 

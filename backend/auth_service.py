@@ -13,6 +13,7 @@ from typing import Any, Dict, Optional
 
 from config import get_settings
 from database import get_connection
+from db import pk_sql
 
 logger = logging.getLogger(__name__)
 
@@ -108,12 +109,13 @@ def decrypt_secret(token: str) -> str:
 
 
 def ensure_auth_tables() -> None:
+    pk = pk_sql()
     with get_connection() as conn:
         conn.execute(
-            """
+            f"""
             CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+                id {pk},
+                email TEXT NOT NULL UNIQUE,
                 password_hash TEXT NOT NULL,
                 role TEXT NOT NULL DEFAULT 'user',
                 name TEXT NOT NULL DEFAULT '',
@@ -201,7 +203,7 @@ def create_user(email: str, password: str, name: str = "") -> Dict[str, Any]:
             raise ValueError(
                 "An account with this email already exists. Sign in instead."
             )
-        cur = conn.execute(
+        cur_id = conn.execute_insert(
             """
             INSERT INTO users (email, password_hash, role, name, created_at)
             VALUES (?, ?, 'user', ?, ?)
@@ -209,7 +211,7 @@ def create_user(email: str, password: str, name: str = "") -> Dict[str, Any]:
             (email_n, hash_password(password), (name or "").strip(), now),
         )
         conn.commit()
-        return get_user_by_id(cur.lastrowid)
+        return get_user_by_id(cur_id)
 
 
 def count_users() -> int:
@@ -310,10 +312,10 @@ def set_user_llm_key(user_id: int, provider: str, api_key: str, model: str = "")
             INSERT INTO user_llm_keys (user_id, provider, key_cipher, model, updated_at)
             VALUES (?, ?, ?, ?, ?)
             ON CONFLICT(user_id) DO UPDATE SET
-              provider = excluded.provider,
-              key_cipher = excluded.key_cipher,
-              model = excluded.model,
-              updated_at = excluded.updated_at
+              provider = EXCLUDED.provider,
+              key_cipher = EXCLUDED.key_cipher,
+              model = EXCLUDED.model,
+              updated_at = EXCLUDED.updated_at
             """,
             (user_id, provider, cipher, model_value, now),
         )

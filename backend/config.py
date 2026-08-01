@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "PerspectiveLab"
-    app_version: str = "1.1.5"
+    app_version: str = "1.1.6"
     case_id: str = "sao-paulo-dropout"
     project_root: Path = _BACKEND_DIR.parent
     environment: str = Field(default="development", pattern="^(development|production|staging)$")
@@ -51,6 +51,8 @@ class Settings(BaseSettings):
     openai_max_retries: int = 2
 
     database_path: Path = _BACKEND_DIR / "data" / "sessions.db"
+    # When set (e.g. Render Postgres), accounts survive free-tier redeploys.
+    database_url: str = ""
 
     cors_origins: str = "*"
     allowed_hosts: str = "*"

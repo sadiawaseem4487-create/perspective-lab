@@ -379,6 +379,7 @@ async def health(user: Optional[dict] = Depends(get_optional_user)):
     code = 200 if db_ok else 503
     creds = resolve_llm_credentials(user)
     from database import count_users_safe, storage_is_persistent
+    from db import storage_backend
 
     persistent = storage_is_persistent()
     user_count = count_users_safe() if db_ok else 0
@@ -392,6 +393,7 @@ async def health(user: Optional[dict] = Depends(get_optional_user)):
         "openai_configured": bool(creds.get("configured")),
         "database_ok": db_ok,
         "database_path": str(current.database_path),
+        "storage_backend": storage_backend(),
         "persistent_storage": persistent,
         "user_count": user_count,
         "setup_allowed": setup_allowed(current),

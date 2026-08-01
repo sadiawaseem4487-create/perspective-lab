@@ -67,8 +67,9 @@ export default function LoginPage() {
       />
       {storageWarning && (
         <PageAlert>
-          Server storage is not persistent — accounts can disappear after each cloud redeploy. Attach a Render disk at{" "}
-          <code className="text-slate-200">/app/backend/data</code> (Starter plan) so logins survive.
+          Server storage is not persistent yet — accounts can disappear after each cloud redeploy.
+          Add a free Render Postgres and set <code className="text-slate-200">DATABASE_URL</code> on the web
+          service (see deploy docs), then redeploy. The warning disappears when storage is durable.
         </PageAlert>
       )}
       {error && <PageAlert>{error}</PageAlert>}
