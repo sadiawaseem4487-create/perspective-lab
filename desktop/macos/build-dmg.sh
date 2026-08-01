@@ -125,10 +125,19 @@ fi
 cp "$ROOT/desktop/macos/PerspectiveLab-launcher.sh" "$APP/Contents/MacOS/PerspectiveLab"
 chmod +x "$APP/Contents/MacOS/PerspectiveLab"
 
+# Optional: sign + notarize when Developer ID is configured (removes Gatekeeper warning)
+if [ -n "${DEVELOPER_ID:-}" ]; then
+  echo "Signing app with Developer ID…"
+  codesign --force --deep --options runtime --sign "$DEVELOPER_ID" "$APP"
+fi
+
 # DMG layout
 mkdir -p "$STAGE/dmg"
 cp -R "$APP" "$STAGE/dmg/PerspectiveLab.app"
 ln -s /Applications "$STAGE/dmg/Applications"
+cp "$ROOT/desktop/macos/Fix-Mac-Open.command" "$STAGE/dmg/Fix Mac Open.command"
+chmod +x "$STAGE/dmg/Fix Mac Open.command"
+cp "$ROOT/desktop/macos/GATEKEEPER.md" "$STAGE/dmg/About Mac security.txt" 2>/dev/null || true
 cat > "$STAGE/dmg/READ ME.txt" << 'EOF'
 PerspectiveLab — self-contained Mac installer
 =============================================
@@ -136,18 +145,36 @@ PerspectiveLab — self-contained Mac installer
 No Node.js or Python install needed on this Mac.
 
 1. Drag PerspectiveLab into Applications
-2. Open Applications → PerspectiveLab
-3. If macOS blocks it: right-click → Open → Open (once)
-4. Browser opens → Setup → paste your API key
-5. Keep the Terminal window open while using the app
+2. If macOS says it "could not verify" the app:
+     • Double-click "Fix Mac Open.command"   ← easiest
+     • Or right-click PerspectiveLab → Open → Open (once)
+     • Or System Settings → Privacy & Security → Open Anyway
+3. Browser opens → Setup → paste your API key
+4. Keep the Terminal window open while using the app
 
-Everything (Python + research server + UI) is inside the app.
+This warning is normal for apps without Apple notarization.
+It is NOT malware. See "About Mac security.txt" for details.
 EOF
 
 rm -f "$OUT_DMG"
 echo "Creating DMG (this may take a minute)…"
 hdiutil create -volname "$VOL" -srcfolder "$STAGE/dmg" -ov -format UDZO "$OUT_DMG"
 xattr -cr "$OUT_DMG" 2>/dev/null || true
+
+if [ -n "${DEVELOPER_ID:-}" ] && [ -f "$OUT_DMG" ]; then
+  echo "Signing DMG…"
+  codesign --force --sign "$DEVELOPER_ID" "$OUT_DMG" || true
+  if security find-generic-password -s "perspectivelab-notary" &>/dev/null || \
+     xcrun notarytool history --keychain-profile "perspectivelab-notary" &>/dev/null; then
+    echo "Submitting DMG for Apple notarization…"
+    xcrun notarytool submit "$OUT_DMG" --keychain-profile "perspectivelab-notary" --wait
+    xcrun stapler staple "$OUT_DMG"
+    echo "Notarized — clients will not see the malware warning."
+  else
+    echo "Note: DEVELOPER_ID set but notary profile 'perspectivelab-notary' missing."
+    echo "See desktop/macos/GATEKEEPER.md to finish notarization."
+  fi
+fi
 
 rm -rf "$STAGE"
 echo ""

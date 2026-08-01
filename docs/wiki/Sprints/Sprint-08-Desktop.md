@@ -1,6 +1,6 @@
 # Sprint 8 — Desktop packaging
 
-| **Status** | 🟨 In progress |
+| **Status** | 🟩 Complete |
 
 Tauri 2 desktop shell, FastAPI sidecar, first-run API key wizard, Mac/Windows bundle targets.
 

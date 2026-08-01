@@ -158,8 +158,11 @@ See [Sprint-08-Desktop.md](Sprints/Sprint-08-Desktop.md).
 
 ## Suggested next action
 
-1. Create an invite on **Compare**, open `/invite/…` on another device (same Wi‑Fi or cloud)
-2. Optional: follow [Free-Hosting.md](Free-Hosting.md) for Vercel + Render
-3. Zip the repo + send **[CLIENT_HANDOVER.md](../../CLIENT_HANDOVER.md)** to the client  
+Core plan (P0–P5 + Sprint 8) is complete. Practical next steps for a client pilot:
+
+1. Rebuild Mac installer: `make desktop-dmg` → share **`~/Desktop/PerspectiveLab-Installer.dmg`**
+2. Optional: follow [Free-Hosting.md](Free-Hosting.md) for remote guest invites (Vercel + Render)
+3. Send **[CLIENT_HANDOVER.md](../../CLIENT_HANDOVER.md)** + DMG (or zip) to the client
+4. Optional later: Apple notarization (`desktop/macos/GATEKEEPER.md`), repo rename, CI LLM judge
 
 [← Home](Home.md) · [Sprint plan](Sprints/README.md) · [Sprint 8](Sprints/Sprint-08-Desktop.md) · [Free hosting](Free-Hosting.md)
