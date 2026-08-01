@@ -9,13 +9,17 @@ services:
         value: production
       - key: CASE_ID
         value: sao-paulo-dropout
+      - key: ALLOWED_HOSTS
+        value: "*"
       - key: CORS_ORIGINS
+        value: "*"
+      - key: WORKERS
+        value: "1"
+      - key: EXPORT_API_KEY
+        generateValue: true
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
         sync: false
       - key: PUBLIC_APP_URL
         sync: false
-      - key: EXPORT_API_KEY
-        generateValue: true
-      - key: OPENROUTER_API_KEY
-        sync: false
-      - key: ALLOWED_HOSTS
-        value: "*"
