@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import operator
-from typing import Annotated, List, Optional, TypedDict
+from typing import Annotated, Any, Dict, List, Optional, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Send
@@ -15,6 +15,7 @@ class ParallelState(TypedDict):
     question: str
     model: Optional[str]
     responses: Annotated[List[dict], operator.add]
+    llm_creds: Optional[Dict[str, Any]]
 
 
 class AgentTask(TypedDict):
@@ -22,25 +23,29 @@ class AgentTask(TypedDict):
     agent_id: str
     question: str
     model: Optional[str]
+    llm_creds: Optional[Dict[str, Any]]
 
 
 async def _agent_pipeline_node(task: AgentTask) -> dict:
     """Ask one agent, then run theory-native self-check (two-step pipeline node)."""
     from agents.service import ask_agent_slot
     from engine.self_check import enrich_with_self_check_async
+    from llm_context import use_llm_credentials
 
-    result = await ask_agent_slot(
-        task["slot_number"],
-        task["agent_id"],
-        task["question"],
-        task.get("model"),
-    )
-    checked = await enrich_with_self_check_async(task["agent_id"], result)
+    with use_llm_credentials(task.get("llm_creds")):
+        result = await ask_agent_slot(
+            task["slot_number"],
+            task["agent_id"],
+            task["question"],
+            task.get("model"),
+        )
+        checked = await enrich_with_self_check_async(task["agent_id"], result)
     return {"responses": [checked]}
 
 
 def _fan_out_to_agents(state: ParallelState) -> List[Send]:
     assignments = get_slot_assignments()
+    creds = state.get("llm_creds")
     return [
         Send(
             "agent_pipeline",
@@ -49,6 +54,7 @@ def _fan_out_to_agents(state: ParallelState) -> List[Send]:
                 "agent_id": assignments[slot],
                 "question": state["question"],
                 "model": state.get("model"),
+                "llm_creds": creds,
             },
         )
         for index, slot in enumerate(SLOT_ORDER, start=1)
@@ -75,8 +81,17 @@ def get_parallel_graph():
 
 async def run_parallel_workflow(question: str, model: Optional[str] = None) -> List[dict]:
     """Execute Phase 1 parallel workflow via LangGraph fan-out + self-check."""
+    from llm_context import get_request_llm_credentials
+
     graph = get_parallel_graph()
-    result = await graph.ainvoke({"question": question, "model": model, "responses": []})
+    result = await graph.ainvoke(
+        {
+            "question": question,
+            "model": model,
+            "responses": [],
+            "llm_creds": get_request_llm_credentials(),
+        }
+    )
     responses = list(result.get("responses", []))
-    responses.sort(key=lambda item: item.get("agent_number", 0))
+    responses.sort(key=lambda r: r.get("agent_number") or 0)
     return responses

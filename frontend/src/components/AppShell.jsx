@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   ClipboardList,
   FileText,
@@ -48,7 +48,6 @@ export default function AppShell() {
   const { t } = useLanguage();
   const { user, isAuthenticated, logout, isAdmin, llmConfigured, refresh } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
   const isWorkspace = location.pathname === "/question";
   const isPresent = location.pathname === "/present";
   const fillCanvas = isWorkspace || isPresent;
@@ -69,7 +68,8 @@ export default function AppShell() {
 
   async function handleSignOut() {
     await logout();
-    navigate("/login", { replace: true });
+    // Full navigation so RequireAuth cannot leave a stale Workspace shell open
+    window.location.assign("/login");
   }
 
   // Research flow: ask → analyze → invite → report → present → guide

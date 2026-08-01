@@ -31,25 +31,28 @@ def _auth_secret() -> str:
 def auth_required() -> bool:
     """Whether research APIs and the app shell require a logged-in user.
 
-    Non-development (production/staging) always requires login (SaaS).
-    Development may open the app when AUTH_REQUIRED=false for local testing.
+    Non-development always requires login. A public HTTPS PUBLIC_APP_URL also
+    forces login (so a mis-set ENVIRONMENT=development on Render cannot leave
+    the SaaS app open). Development may open the app when AUTH_REQUIRED=false.
     """
     settings = get_settings()
     raw = (settings.auth_required or os.environ.get("AUTH_REQUIRED", "")).strip().lower()
-    if settings.environment != "development":
-        # SaaS: never leave the research UI open without accounts
+    public = (settings.public_app_url or os.environ.get("PUBLIC_APP_URL") or "").strip().lower()
+    public_saas = public.startswith("https://") and "localhost" not in public and "127.0.0.1" not in public
+
+    if settings.environment != "development" or public_saas:
         if raw in ("0", "false", "no", "off"):
             logger.warning(
-                "AUTH_REQUIRED=%s ignored when ENVIRONMENT=%s — login is required",
+                "AUTH_REQUIRED=%s ignored (environment=%s public_app_url=%s) — login is required",
                 raw or "(empty)",
                 settings.environment,
+                public or "(none)",
             )
         return True
     if raw in ("0", "false", "no", "off"):
         return False
     if raw in ("1", "true", "yes", "on"):
         return True
-    # Development default: on when AUTH_SECRET is configured
     secret = (settings.auth_secret or os.environ.get("AUTH_SECRET") or "").strip()
     return bool(secret)
 

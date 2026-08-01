@@ -400,7 +400,7 @@ export default function TheoryRoundtable() {
   const wordCount = quality.wordCount;
   const framingReady = quality.ok;
   const canAsk =
-    !loading && !restoring && framingReady && !sequentialRun && apiReady !== false;
+    !loading && !restoring && framingReady && !sequentialRun && apiReady === true;
 
   const qualityHint = (() => {
     if (framingReady) {
