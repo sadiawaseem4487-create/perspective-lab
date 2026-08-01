@@ -46,6 +46,7 @@ export default function LoginPage() {
         description={
           <p className="text-slate-400">
             Use your PerspectiveLab account. Each person pastes their own API key in Settings before asking agents.
+            If Sign in fails after a cloud redeploy, create the account again — free Render disks reset without a persistent volume.
           </p>
         }
       />

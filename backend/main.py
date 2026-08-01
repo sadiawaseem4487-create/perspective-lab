@@ -451,7 +451,12 @@ async def auth_register(body: AuthRegisterRequest):
 @app.post("/api/auth/login")
 async def auth_login(body: AuthLoginRequest):
     row = get_user_by_email(body.email)
-    if not row or not verify_password(body.password, row["password_hash"]):
+    if not row:
+        raise HTTPException(
+            status_code=401,
+            detail="No account for this email. Use Create one below — accounts reset if the server redeployed without a persistent disk.",
+        )
+    if not verify_password(body.password, row["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     token = issue_token(row["id"])
     return {"ok": True, "token": token, "user": public_user(row)}

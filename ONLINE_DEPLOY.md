@@ -8,7 +8,25 @@ Always **update this Render service** — do not create a new Web Service.
 
 ---
 
-## Critical: fix Environment on Render (do this once)
+## Keep accounts after redeploy (important)
+
+User accounts and sessions are stored in **SQLite** on the server.
+
+On Render’s free web service, the filesystem is **ephemeral**: every redeploy can wipe `sessions.db`, so emails you registered earlier stop working (“No account for this email”).
+
+**Fix (one-time on the same `perspective-lab` service):**
+
+1. Render → service → **Disks** → **Add disk**
+2. Mount path: `/app/backend/data`
+3. Size: 1 GB is enough
+4. Environment → set `DATABASE_PATH=/app/backend/data/sessions.db`
+5. Redeploy
+
+After that, accounts survive deploys. Until then: use **Create one** again after each wipe.
+
+Admin seed account (if `ADMIN_*` env vars are set): `ADMIN_EMAIL` / `ADMIN_PASSWORD` — not your personal Gmail unless you registered that address again.
+
+---
 
 Live health must show `environment: production` and `auth_required: true`.
 

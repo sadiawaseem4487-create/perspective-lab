@@ -66,6 +66,12 @@ flowchart TD
 
 ---
 
+## Persistence warning (Render)
+
+Accounts live in SQLite (`DATABASE_PATH`). Without a **persistent disk** on Render, redeploys wipe users — old emails will not sign in until you **Create one** again. See [ONLINE_DEPLOY.md](../../ONLINE_DEPLOY.md).
+
+---
+
 ## Files
 
 - `backend/auth_service.py` — passwords, tokens, per-user keys
