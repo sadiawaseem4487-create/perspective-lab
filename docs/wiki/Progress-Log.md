@@ -4,6 +4,7 @@ Newest entries at the top.
 
 | Date | Sprint | Event |
 |------|--------|-------|
+| 2026-08-01 | UX | Generalize UI branding (no São Paulo chrome); faster agent replies via leaner prompts (v1.2.1). |
 | 2026-08-01 | UX | Ask-agents: prevent double submit, fuller answers (max_tokens 2200), longer timeouts (v1.2.0). |
 | 2026-08-01 | Docs | Cleared GitHub entry docs: README, USER_GUIDE, deploy guides, wiki Home. |
 | 2026-08-01 | UX | OpenRouter live model catalog + searchable picker; faster Report/Present (v1.1.8). |

@@ -12,8 +12,7 @@ import {
   Presentation,
   Table2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { fetchAgentsCatalog } from "@/api";
+import { useEffect } from "react";
 import BrandLogo from "@/components/BrandLogo";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ModeToggle from "@/components/ModeToggle";
@@ -51,14 +50,7 @@ export default function AppShell() {
   const isWorkspace = location.pathname === "/question";
   const isPresent = location.pathname === "/present";
   const fillCanvas = isWorkspace || isPresent;
-  const [caseInfo, setCaseInfo] = useState(null);
   const needsSetup = isAuthenticated && !llmConfigured;
-
-  useEffect(() => {
-    fetchAgentsCatalog()
-      .then((data) => setCaseInfo(data.case || null))
-      .catch(() => {});
-  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -156,17 +148,11 @@ export default function AppShell() {
         {!fillCanvas && (
           <header className="shrink-0 border-b border-white/10 px-6 py-4">
             <div className="min-w-0">
-              {caseInfo && (
-                <p className="text-sm leading-snug">
-                  <span className="font-semibold uppercase tracking-wide text-orange-400">
-                    {t("shell.case")}
-                  </span>
-                  <span className="text-orange-400"> · </span>
-                  <span className="font-semibold text-white">
-                    {caseInfo.title || caseInfo.id}
-                  </span>
-                </p>
-              )}
+              <p className="text-sm leading-snug">
+                <span className="font-semibold text-white">{t("shell.productName")}</span>
+                <span className="text-slate-500"> · </span>
+                <span className="text-slate-400">{t("shell.tagline")}</span>
+              </p>
               {needsSetup && (
                 <p className="mt-1 text-xs text-amber-300">
                   {t("setup.banner")}{" "}

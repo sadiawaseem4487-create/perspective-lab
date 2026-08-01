@@ -15,10 +15,10 @@ export default function Layout() {
               Research Application
             </p>
             <h1 className="font-display text-2xl font-bold sm:text-3xl">
-              São Paulo Dropout Agents
+              PerspectiveLab
             </h1>
             <p className="mt-1 max-w-2xl text-sm text-orange-100/90">
-              Four theoretical AI agents for school dropout questions — built for comparison research
+              Multi-theory agentic problem-solving for research
             </p>
           </div>
           <nav className="flex flex-wrap gap-2">

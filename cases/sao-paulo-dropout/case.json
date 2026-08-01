@@ -1,7 +1,7 @@
 {
   "id": "sao-paulo-dropout",
-  "title": "School Dropout in São Paulo",
-  "research_question": "How do we solve school dropout in São Paulo?",
+  "title": "PerspectiveLab",
+  "research_question": "How do we solve complex problems with multiple theoretical lenses?",
   "languages": ["en", "fi", "pt"],
   "researchers": ["Sanni Pöntinen", "Sadia Bibi", "Jari Stenvall"],
   "workflow": {

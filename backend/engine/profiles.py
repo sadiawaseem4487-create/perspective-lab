@@ -5,7 +5,7 @@ from typing import Optional
 from application import load_theory_profile
 
 
-def format_profile_instructions(agent_id: str) -> str:
+def format_profile_instructions(agent_id: str, include_sections: bool = True) -> str:
     """Build authoritative prompt block from a case-pack theory profile.
 
     Profiles are the source of truth for reasoning chain, must/must-not,
@@ -39,14 +39,15 @@ def format_profile_instructions(agent_id: str) -> str:
         for item in must_not:
             lines.append(f"- {item}")
 
-    sections = profile.get("output_sections", [])
-    if sections:
-        lines.append("")
-        lines.append(
-            "Output section titles (exact English titles on their own line, NOT as bullets):"
-        )
-        for section in sections:
-            lines.append(section)
+    if include_sections:
+        sections = profile.get("output_sections", [])
+        if sections:
+            lines.append("")
+            lines.append(
+                "Output section titles (exact English titles on their own line, NOT as bullets):"
+            )
+            for section in sections:
+                lines.append(section)
 
     lines.append("")
     lines.append(

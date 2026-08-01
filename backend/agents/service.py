@@ -92,14 +92,15 @@ async def ask_agent_slot(
 
     active_model = model or active.get("model") or settings.llm_model
     prompt = agent.get("system_prompt") or agent.get("prompt", "")
-    profile_block = format_profile_instructions(agent_id)
+    # Avoid duplicating section lists (profile + format) — fewer tokens, faster replies
+    profile_block = format_profile_instructions(agent_id, include_sections=False)
     if profile_block:
         prompt = f"{prompt}\n\n{profile_block}"
     full_prompt = f"{prompt}\n\n{get_output_instructions_for_agent(agent_id)}"
     user_content = (
         f"Research question:\n{question}\n\n"
-        "Answer this exact question. Tailor every section to what was asked — "
-        "do not repeat a generic template from your examples."
+        "Answer this exact question. Be specific and concise (within the length limit). "
+        "Tailor every section to what was asked — do not repeat a generic template."
     )
 
     for attempt in range(settings.openai_max_retries + 1):
@@ -111,8 +112,8 @@ async def ask_agent_slot(
                     {"role": "system", "content": full_prompt},
                     {"role": "user", "content": user_content},
                 ],
-                temperature=0.5,
-                max_tokens=2200,
+                temperature=0.4,
+                max_tokens=1100,
             )
             text = completion.choices[0].message.content or ""
             latency_ms = int((time.perf_counter() - started) * 1000)

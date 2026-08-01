@@ -8,8 +8,8 @@ export const translations = {
   en: {
     app: {
       subtitle: "Research Application",
-      title: "São Paulo Dropout Agents",
-      workflow: "Agents → Models → Question → Report → Compare",
+      title: "PerspectiveLab",
+      workflow: "Workspace → Compare → Report → Present",
       footer: "Sanni Pöntinen, Sadia Bibi, Jari Stenvall — HAMK Research",
       stage: "Stage",
       language: "Language",
@@ -46,7 +46,7 @@ export const translations = {
       lede: "A multi-agent workspace that keeps competing perspectives visible—from ask to brief to presentation.",
       sampleLabel: "Sample framing",
       sampleText:
-        "São Paulo secondary schools face rising dropout after grade 9. Which interventions should the city prioritize—and what trade-offs do four theories reveal?",
+        "A public service faces uneven outcomes across neighborhoods. With limited budget, which actions should leaders prioritize in the next 90 days—and what trade-offs do four theories reveal?",
       ctaPrimary: "Enter workspace",
       ctaSecondary: "See how it works",
       problemKicker: "The challenge",
@@ -458,7 +458,7 @@ export const translations = {
       apiMissing:
         "API key not configured. Open Settings → API key, paste your OpenRouter or OpenAI key, then try again.",
       openSettings: "Open Settings → API key",
-      placeholder: "How do we solve school dropout in São Paulo?",
+      placeholder: "Describe your problem and what you need decided…",
       workflowMode: "Workflow mode",
       mode: {
         parallel: "Parallel",
@@ -785,7 +785,8 @@ export const translations = {
   pt: {
     app: {
       subtitle: "Aplicação de Pesquisa",
-      title: "Agentes de Evasão Escolar — São Paulo",
+      title: "PerspectiveLab",
+      workflow: "Espaço de trabalho → Comparar → Relatório → Apresentar",
       workflow: "Agentes → Modelos → Pergunta → Relatório → Comparar",
       footer: "Sanni Pöntinen, Sadia Bibi, Jari Stenvall — Pesquisa HAMK",
       stage: "Etapa",
@@ -823,7 +824,7 @@ export const translations = {
       lede: "Um espaço multi-agente que mantém perspectivas concorrentes visíveis—da pergunta ao brief e à apresentação.",
       sampleLabel: "Exemplo de enquadramento",
       sampleText:
-        "Escolas secundárias em São Paulo enfrentam abandono crescente após o 9.º ano. Que intervenções priorizar—e que trade-offs revelam as quatro teorias?",
+        "Um serviço público enfrenta resultados desiguais entre bairros. Com orçamento limitado, quais ações priorizar nos próximos 90 dias—e que trade-offs revelam as quatro teorias?",
       ctaPrimary: "Entrar na área de trabalho",
       ctaSecondary: "Ver como funciona",
       problemKicker: "O desafio",
@@ -1235,7 +1236,7 @@ export const translations = {
       apiMissing:
         "Chave API não configurada. Abra Configurações → Chave de API, cole sua chave OpenRouter ou OpenAI e tente de novo.",
       openSettings: "Abrir Configurações → Chave de API",
-      placeholder: "Como resolvemos a evasão escolar em São Paulo?",
+      placeholder: "Descreva o problema e o que precisa ser decidido…",
       workflowMode: "Modo de fluxo",
       mode: {
         parallel: "Paralelo",
@@ -1561,7 +1562,8 @@ export const translations = {
   fi: {
     app: {
       subtitle: "Tutkimussovellus",
-      title: "São Paulon koulupudokkuusagentit",
+      title: "PerspectiveLab",
+      workflow: "Työtila → Vertaa → Raportti → Esitys",
       workflow: "Agentit → Mallit → Kysymys → Raportti → Vertailu",
       footer: "Sanni Pöntinen, Sadia Bibi, Jari Stenvall — HAMK-tutkimus",
       stage: "Vaihe",
@@ -1599,7 +1601,7 @@ export const translations = {
       lede: "Moniagenttinen työtila, joka pitää kilpailevat näkökulmat näkyvissä—kysymyksestä briefiin ja esitykseen.",
       sampleLabel: "Esimerkkikehystys",
       sampleText:
-        "São Paulon yläkouluissa keskeyttäminen kasvaa 9. luokan jälkeen. Mitä toimenpiteitä priorisoida—ja mitä vaihtokauppoja neljä teoriaa paljastavat?",
+        "Julkinen palvelu tuottaa epätasaisia tuloksia eri alueilla. Rajoitetulla budjetilla: mitä toimia priorisoida 90 päivässä—ja mitä vaihtokauppoja neljä teoriaa paljastavat?",
       ctaPrimary: "Siirry työtilaan",
       ctaSecondary: "Näin se toimii",
       problemKicker: "Haaste",
@@ -2011,7 +2013,7 @@ export const translations = {
       apiMissing:
         "API-avainta ei ole asetettu. Avaa Asetukset → API-avain, liitä OpenRouter- tai OpenAI-avain ja yritä uudelleen.",
       openSettings: "Avaa Asetukset → API-avain",
-      placeholder: "Miten ratkaisemme koulupudokkuuden São Paulossa?",
+      placeholder: "Kuvaile ongelma ja mitä pitää päättää…",
       workflowMode: "Työnkulun tila",
       mode: {
         parallel: "Rinnakkainen",

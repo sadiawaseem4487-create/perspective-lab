@@ -18,7 +18,7 @@ def _format_theory_native_instructions(schema: dict) -> str:
     return f"""
 THEORY-NATIVE OUTPUT FORMAT (follow exactly):
 
-Length: 300-450 words maximum. Short paragraphs and bullets only.
+Length: 280-400 words maximum. Short paragraphs and bullets only. Prefer speed and clarity over length.
 
 Language: Write ALL content in the same language as the user's question.
 Section titles below must appear exactly as written (in English).

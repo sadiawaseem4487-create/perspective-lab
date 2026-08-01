@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { askQuestion, checkHealth } from "../api";
 
-const EXAMPLE = "How do we solve school dropout in São Paulo?";
+const EXAMPLE =
+  "A public service faces uneven outcomes. With limited budget, what should leaders do in the next 90 days?";
 
 function AgentCard({ agent }) {
   const label = agent.agent_label || `Agent ${agent.agent_number || "?"}`;
@@ -87,7 +88,7 @@ export default function AskPage() {
             onChange={(e) => setQuestion(e.target.value)}
             rows={4}
             className="w-full rounded-xl border border-stone-300 px-4 py-3 text-stone-900 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
-            placeholder="Write a question about school dropout..."
+            placeholder="Describe your problem and what you need decided…"
             required
           />
           <button
