@@ -24,6 +24,7 @@ Welcome to the project wiki. This is the single source of truth for architecture
 | [GitHub Setup](GitHub-Setup.md) | First-time repo + push instructions |
 | [Sprint Plan](Sprints/README.md) | All sprints, tasks, exit criteria |
 | [Remaining Work](Remaining-Work.md) | Prioritized backlog — next: Sprint 8 Desktop |
+| [User accounts](User-Accounts.md) | Login + per-user API keys (admin vs lab users) |
 | [Progress Log](Progress-Log.md) | Dated implementation history |
 
 ---

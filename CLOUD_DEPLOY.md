@@ -88,3 +88,20 @@ Save → Render redeploys once.
 - Local Mac ZIP is separate; cloud does not need the desktop app
 
 [← Free hosting wiki](docs/wiki/Free-Hosting.md) · [CLIENT_HANDOVER](CLIENT_HANDOVER.md)
+
+## User accounts (API key protection)
+
+Set on **Render** (and local `.env`):
+
+```
+AUTH_SECRET=long-random-string
+ADMIN_EMAIL=admin@perspectivelab.local
+ADMIN_PASSWORD=your-admin-password
+AUTH_REQUIRED=true
+```
+
+- **Admin** (you): login with admin email; may use server `OPENROUTER_API_KEY` / `OPENAI_API_KEY`
+- **Users**: register → paste **their own** key in Settings → Ask agents
+- **Guests** (`/invite/...`): no login, no LLM key
+
+See [docs/wiki/User-Accounts.md](docs/wiki/User-Accounts.md).

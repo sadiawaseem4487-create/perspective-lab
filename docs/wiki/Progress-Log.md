@@ -4,6 +4,7 @@ Newest entries at the top.
 
 | Date | Sprint | Event |
 |------|--------|-------|
+| 2026-08-01 | Auth | User accounts: register/login, per-user API keys, admin keeps server key; guests stay public. |
 | 2026-08-01 | 8 | Desktop polish: Gatekeeper fix in DMG, regenerated app icons, Sprint 8 marked complete. |
 | 2026-08-01 | P5 | Typography system: shared type tokens (kicker/title/section/body/meta) across app UI. |
 | 2026-08-01 | P5 | Final polish: Present scrubber/guest slides, Invite CTAs, Matrix i18n/emerald, landing tags, guest collapse. |

@@ -1,6 +1,7 @@
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 const API = `${API_BASE}/api`;
 const EXPORT_KEY_STORAGE = "perspective_lab_export_key";
+const AUTH_TOKEN_STORAGE = "perspective_lab_auth_token";
 
 export function getExportKey() {
   return sessionStorage.getItem(EXPORT_KEY_STORAGE) || "";
@@ -9,6 +10,22 @@ export function getExportKey() {
 export function setExportKey(key) {
   if (key) sessionStorage.setItem(EXPORT_KEY_STORAGE, key);
   else sessionStorage.removeItem(EXPORT_KEY_STORAGE);
+}
+
+export function getAuthToken() {
+  return localStorage.getItem(AUTH_TOKEN_STORAGE) || "";
+}
+
+export function setAuthToken(token) {
+  if (token) localStorage.setItem(AUTH_TOKEN_STORAGE, token);
+  else localStorage.removeItem(AUTH_TOKEN_STORAGE);
+}
+
+function authHeaders(extra = {}) {
+  const headers = { ...extra };
+  const token = getAuthToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
 }
 
 async function parseResponse(res) {
@@ -82,7 +99,7 @@ export async function fetchQuestions(lang = "en") {
 export async function askQuestion(question, model, language = "en", mode = "parallel", uiMode = "live") {
   const res = await fetch(`${API}/ask`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({
       question,
       model: model || undefined,
@@ -97,7 +114,7 @@ export async function askQuestion(question, model, language = "en", mode = "para
 export async function startSequentialRun(question, model, language = "en", uiMode = "live") {
   const res = await fetch(`${API}/sequential/start`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({
       question,
       model: model || undefined,
@@ -109,14 +126,14 @@ export async function startSequentialRun(question, model, language = "en", uiMod
 }
 
 export async function fetchSequentialRun(runId) {
-  const res = await fetch(`${API}/sequential/${runId}`);
+  const res = await fetch(`${API}/sequential/${runId}`, { headers: authHeaders() });
   return parseResponse(res);
 }
 
 export async function advanceSequentialRun(runId, humanNote = "") {
   const res = await fetch(`${API}/sequential/${runId}/advance`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ human_note: humanNote, approved: true }),
   });
   return parseResponse(res);
@@ -240,21 +257,70 @@ export async function runTheoryJudge(agentId, text, model) {
 }
 
 export async function checkHealth() {
-  const res = await fetch(`${API}/health`);
+  const res = await fetch(`${API}/health`, { headers: authHeaders() });
   return parseResponse(res);
 }
 
 export async function fetchSetupStatus() {
-  const res = await fetch(`${API}/setup/status`);
+  const res = await fetch(`${API}/setup/status`, { headers: authHeaders() });
   return parseResponse(res);
 }
 
 export async function saveSetupKeys({ provider, api_key, model }) {
   const res = await fetch(`${API}/setup/keys`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ provider, api_key, model }),
   });
+  return parseResponse(res);
+}
+
+export async function saveUserLlmKey({ provider, api_key, model }) {
+  const res = await fetch(`${API}/auth/llm-key`, {
+    method: "PUT",
+    headers: authHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify({ provider, api_key, model }),
+  });
+  return parseResponse(res);
+}
+
+export async function fetchAuthMe() {
+  const res = await fetch(`${API}/auth/me`, { headers: authHeaders() });
+  if (res.status === 401) {
+    setAuthToken("");
+    return { authenticated: false, user: null, auth_required: true };
+  }
+  return parseResponse(res);
+}
+
+export async function login(email, password) {
+  const res = await fetch(`${API}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  const data = await parseResponse(res);
+  if (data.token) setAuthToken(data.token);
+  return data;
+}
+
+export async function register(email, password, name = "") {
+  const res = await fetch(`${API}/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password, name }),
+  });
+  const data = await parseResponse(res);
+  if (data.token) setAuthToken(data.token);
+  return data;
+}
+
+export async function logout() {
+  const res = await fetch(`${API}/auth/logout`, {
+    method: "POST",
+    headers: authHeaders(),
+  });
+  setAuthToken("");
   return parseResponse(res);
 }
 

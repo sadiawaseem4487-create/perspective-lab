@@ -5,6 +5,8 @@ import {
   GitCompare,
   KeyRound,
   Link2,
+  LogIn,
+  LogOut,
   MessageSquare,
   Presentation,
   Table2,
@@ -18,6 +20,7 @@ import SidebarWorkflowMode from "@/components/SidebarWorkflowMode";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 function NavItem({ to, icon: Icon, label, end = false }) {
@@ -42,6 +45,7 @@ function NavItem({ to, icon: Icon, label, end = false }) {
 
 export default function AppShell() {
   const { t } = useLanguage();
+  const { user, isAuthenticated, logout, isAdmin } = useAuth();
   const location = useLocation();
   const isWorkspace = location.pathname === "/question";
   const isPresent = location.pathname === "/present";
@@ -115,6 +119,30 @@ export default function AppShell() {
         </ScrollArea>
 
         <div className="border-t border-slate-800 p-4">
+          {isAuthenticated ? (
+            <div className="mb-3 space-y-2">
+              <p className="truncate px-1 text-[11px] text-slate-400" title={user?.email}>
+                {user?.email}
+                {isAdmin ? " · admin" : ""}
+              </p>
+              <button
+                type="button"
+                onClick={() => logout()}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign out
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className="mb-3 flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+            >
+              <LogIn className="h-4 w-4" />
+              Sign in
+            </Link>
+          )}
           <LanguageSwitcher variant="sidebar" />
           <p className="mt-4 text-[11px] leading-relaxed text-slate-500">{t("app.footer")}</p>
         </div>

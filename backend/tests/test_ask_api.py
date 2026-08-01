@@ -11,9 +11,40 @@ def _enable_llm(monkeypatch):
     main.settings = get_settings()
 
 
-def test_ask_requires_llm_key(client):
+def test_ask_requires_login_when_auth_on(client, monkeypatch):
+    monkeypatch.setenv("AUTH_REQUIRED", "true")
+    monkeypatch.setenv("AUTH_SECRET", "test-secret-for-ask")
+    from config import get_settings
+
+    get_settings.cache_clear()
+    import main
+
+    main.settings = get_settings()
+
     response = client.post(
         "/api/ask",
+        json={"question": "How should municipal education teams involve families and community partners to reduce secondary school dropout in São Paulo this year, and what measurable first steps should they take within ninety days?"},
+    )
+    assert response.status_code == 401
+    assert "Login" in response.json()["detail"]
+
+
+def test_ask_requires_personal_key(client, monkeypatch):
+    monkeypatch.setenv("AUTH_REQUIRED", "true")
+    monkeypatch.setenv("AUTH_SECRET", "test-secret-for-ask")
+    from config import get_settings
+    from auth_service import create_user, issue_token
+
+    get_settings.cache_clear()
+    import main
+
+    main.settings = get_settings()
+    user = create_user("tester@example.com", "password123", "Tester")
+    token = issue_token(user["id"])
+
+    response = client.post(
+        "/api/ask",
+        headers={"Authorization": f"Bearer {token}"},
         json={"question": "How should municipal education teams involve families and community partners to reduce secondary school dropout in São Paulo this year, and what measurable first steps should they take within ninety days?"},
     )
     assert response.status_code == 503

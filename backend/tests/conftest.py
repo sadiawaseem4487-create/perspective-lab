@@ -22,7 +22,9 @@ def client(tmp_path, monkeypatch):
     monkeypatch.setenv("ENVIRONMENT", "development")
     monkeypatch.setenv("OPENAI_API_KEY", "")
     monkeypatch.setenv("OPENROUTER_API_KEY", "")
+    monkeypatch.setenv("AUTH_REQUIRED", "false")
     monkeypatch.delenv("EXPORT_API_KEY", raising=False)
+    monkeypatch.delenv("AUTH_SECRET", raising=False)
 
     from config import get_settings
 

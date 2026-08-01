@@ -22,6 +22,20 @@ from agents.prompts import AGENT_DEFINITIONS, AGENT_ORDER
 from agents.service import ask_all_agents
 from config import get_settings, refresh_settings
 from setup_keys import apply_llm_keys, setup_allowed
+from auth_service import (
+    auth_required,
+    create_user,
+    get_user_llm_key_meta,
+    issue_token,
+    public_user,
+    resolve_llm_credentials,
+    revoke_token,
+    set_user_llm_key,
+    user_from_token,
+    verify_password,
+    get_user_by_email,
+)
+from llm_context import set_request_llm_credentials
 from application import (
     append_human_respondent,
     build_comparison,
@@ -227,6 +241,59 @@ class SetupKeysRequest(BaseModel):
     model: Optional[str] = None
 
 
+class AuthRegisterRequest(BaseModel):
+    email: str = Field(..., min_length=5, max_length=200)
+    password: str = Field(..., min_length=8, max_length=200)
+    name: str = Field(default="", max_length=120)
+
+
+class AuthLoginRequest(BaseModel):
+    email: str = Field(..., min_length=5, max_length=200)
+    password: str = Field(..., min_length=8, max_length=200)
+
+
+class UserLlmKeyRequest(BaseModel):
+    provider: str = Field(pattern="^(openrouter|openai)$")
+    api_key: str = Field(min_length=8, max_length=512)
+    model: Optional[str] = None
+
+
+def _extract_bearer(
+    authorization: Optional[str] = Header(default=None),
+    x_auth_token: Optional[str] = Header(default=None),
+) -> Optional[str]:
+    if x_auth_token and x_auth_token.strip():
+        return x_auth_token.strip()
+    if authorization and authorization.lower().startswith("bearer "):
+        return authorization[7:].strip()
+    return None
+
+
+def get_optional_user(token: Optional[str] = Depends(_extract_bearer)) -> Optional[dict]:
+    if not token:
+        return None
+    return user_from_token(token)
+
+
+def require_user(user: Optional[dict] = Depends(get_optional_user)) -> Optional[dict]:
+    if not auth_required():
+        return user
+    if not user:
+        raise HTTPException(status_code=401, detail="Login required")
+    return user
+
+
+def require_llm_ready(user: Optional[dict] = Depends(require_user)) -> Optional[dict]:
+    creds = resolve_llm_credentials(user)
+    if not creds.get("configured"):
+        raise HTTPException(
+            status_code=503,
+            detail="Add your own API key in Settings before asking agents.",
+        )
+    set_request_llm_credentials(creds)
+    return user
+
+
 def _question_with_language(question: str, lang: str) -> str:
     lang_names = {"en": "English", "pt": "Brazilian Portuguese", "fi": "Finnish"}
     lang_label = lang_names.get(lang, "English")
@@ -245,32 +312,43 @@ def require_export_key(x_export_key: str = Header(default="")) -> None:
 
 
 @app.get("/api/health")
-async def health():
+async def health(user: Optional[dict] = Depends(get_optional_user)):
     current = get_settings()
     db_ok = check_db()
     status = "ok" if db_ok else "degraded"
     code = 200 if db_ok else 503
+    creds = resolve_llm_credentials(user)
     payload = {
         "status": status,
         "version": current.app_version,
         "environment": current.environment,
-        "llm_configured": current.llm_configured,
-        "llm_provider": current.resolved_llm_provider,
-        "openai_configured": current.llm_configured,
+        "llm_configured": bool(creds.get("configured")),
+        "llm_provider": creds.get("provider") or current.resolved_llm_provider,
+        "llm_source": creds.get("source"),
+        "openai_configured": bool(creds.get("configured")),
         "database_ok": db_ok,
         "setup_allowed": setup_allowed(current),
+        "auth_required": auth_required(),
+        "authenticated": bool(user),
+        "user": public_user(user) if user else None,
     }
     return JSONResponse(content=payload, status_code=code)
 
 
 @app.get("/api/setup/status")
-async def setup_status():
+async def setup_status(user: Optional[dict] = Depends(get_optional_user)):
     current = get_settings()
+    creds = resolve_llm_credentials(user)
     return {
-        "llm_configured": current.llm_configured,
-        "llm_provider": current.resolved_llm_provider,
+        "llm_configured": bool(creds.get("configured")),
+        "llm_provider": creds.get("provider") or current.resolved_llm_provider,
+        "llm_source": creds.get("source"),
         "setup_allowed": setup_allowed(current),
         "environment": current.environment,
+        "auth_required": auth_required(),
+        "authenticated": bool(user),
+        "user": public_user(user) if user else None,
+        "personal_key": get_user_llm_key_meta(user["id"]) if user else None,
     }
 
 
@@ -297,6 +375,64 @@ async def setup_keys(body: SetupKeysRequest):
         "llm_configured": refreshed.llm_configured,
         "llm_provider": refreshed.resolved_llm_provider,
         "env_path": str(path.name),
+    }
+
+
+@app.post("/api/auth/register")
+async def auth_register(body: AuthRegisterRequest):
+    try:
+        user = create_user(body.email, body.password, body.name)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    token = issue_token(user["id"])
+    return {"ok": True, "token": token, "user": public_user(user)}
+
+
+@app.post("/api/auth/login")
+async def auth_login(body: AuthLoginRequest):
+    row = get_user_by_email(body.email)
+    if not row or not verify_password(body.password, row["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    token = issue_token(row["id"])
+    return {"ok": True, "token": token, "user": public_user(row)}
+
+
+@app.post("/api/auth/logout")
+async def auth_logout(token: Optional[str] = Depends(_extract_bearer)):
+    if token:
+        revoke_token(token)
+    return {"ok": True}
+
+
+@app.get("/api/auth/me")
+async def auth_me(user: dict = Depends(require_user)):
+    if not user:
+        # auth disabled — anonymous
+        return {"authenticated": False, "user": None, "auth_required": False, "personal_key": None}
+    return {
+        "authenticated": True,
+        "user": public_user(user),
+        "auth_required": auth_required(),
+        "personal_key": get_user_llm_key_meta(user["id"]),
+        "llm": {
+            "configured": resolve_llm_credentials(user).get("configured"),
+            "source": resolve_llm_credentials(user).get("source"),
+        },
+    }
+
+
+@app.put("/api/auth/llm-key")
+async def auth_save_llm_key(body: UserLlmKeyRequest, user: dict = Depends(require_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Login required")
+    try:
+        set_user_llm_key(user["id"], body.provider, body.api_key, body.model or "")
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return {
+        "ok": True,
+        "personal_key": get_user_llm_key_meta(user["id"]),
+        "llm_configured": True,
     }
 
 
@@ -799,10 +935,12 @@ async def save_rubric(session_id: int, body: RubricScoresRequest):
 
 @app.post("/api/theory-judge")
 @limiter.limit(settings.rate_limit_ask)
-async def theory_judge(request: Request, body: TheoryJudgeRequest):
+async def theory_judge(
+    request: Request,
+    body: TheoryJudgeRequest,
+    _user: Optional[dict] = Depends(require_llm_ready),
+):
     """On-demand LLM theory fidelity check (does not mutate stored reports)."""
-    if not get_settings().llm_configured:
-        raise HTTPException(status_code=503, detail="LLM API key not configured.")
     from engine.llm_theory_judge import llm_theory_fidelity_check
 
     profile = load_theory_profile(body.agent_id) or {}
@@ -817,10 +955,11 @@ async def theory_judge(request: Request, body: TheoryJudgeRequest):
 
 @app.post("/api/sequential/start")
 @limiter.limit(settings.rate_limit_ask)
-async def sequential_start(request: Request, body: SequentialStartRequest):
-    if not get_settings().llm_configured:
-        raise HTTPException(status_code=503, detail="LLM API key not configured.")
-
+async def sequential_start(
+    request: Request,
+    body: SequentialStartRequest,
+    _user: Optional[dict] = Depends(require_llm_ready),
+):
     from application.sequential_hitl import start_sequential_hitl
 
     question = _question_with_language(body.question.strip(), body.language or "en")
@@ -850,10 +989,12 @@ async def sequential_status(run_id: int):
 
 @app.post("/api/sequential/{run_id}/advance")
 @limiter.limit(settings.rate_limit_ask)
-async def sequential_advance(request: Request, run_id: int, body: SequentialAdvanceRequest):
-    if not get_settings().llm_configured:
-        raise HTTPException(status_code=503, detail="LLM API key not configured.")
-
+async def sequential_advance(
+    request: Request,
+    run_id: int,
+    body: SequentialAdvanceRequest,
+    _user: Optional[dict] = Depends(require_llm_ready),
+):
     from application.sequential_hitl import advance_sequential_hitl
 
     try:
@@ -884,13 +1025,8 @@ async def ask_question(
     request: Request,
     body: AskRequest,
     mode: Optional[str] = None,
+    _user: Optional[dict] = Depends(require_llm_ready),
 ):
-    if not get_settings().llm_configured:
-        raise HTTPException(
-            status_code=503,
-            detail="LLM API key not configured. Add OPENROUTER_API_KEY or OPENAI_API_KEY to backend/.env",
-        )
-
     workflow_mode = (mode or body.mode or "parallel").strip().lower()
     if workflow_mode not in ("parallel", "sequential"):
         raise HTTPException(status_code=422, detail="mode must be parallel or sequential")

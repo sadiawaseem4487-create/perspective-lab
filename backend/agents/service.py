@@ -15,17 +15,29 @@ logger = logging.getLogger(__name__)
 
 
 def get_client() -> AsyncOpenAI:
+    from llm_context import get_request_llm_credentials
+
     settings = get_settings()
-    if not settings.llm_configured:
-        raise RuntimeError("No LLM API key configured (OPENROUTER_API_KEY or OPENAI_API_KEY)")
+    creds = get_request_llm_credentials()
+    if creds and creds.get("api_key"):
+        api_key = creds["api_key"]
+        provider = creds.get("provider") or "openai"
+        base_url = creds.get("base_url")
+    else:
+        if not settings.llm_configured:
+            raise RuntimeError("No LLM API key configured (OPENROUTER_API_KEY or OPENAI_API_KEY)")
+        api_key = settings.llm_api_key
+        provider = settings.resolved_llm_provider
+        base_url = settings.llm_base_url
+
     kwargs = {
-        "api_key": settings.llm_api_key,
+        "api_key": api_key,
         "timeout": settings.openai_timeout_seconds,
         "max_retries": settings.openai_max_retries,
     }
-    if settings.llm_base_url:
-        kwargs["base_url"] = settings.llm_base_url
-    if settings.resolved_llm_provider == "openrouter":
+    if base_url:
+        kwargs["base_url"] = base_url
+    if provider == "openrouter":
         kwargs["default_headers"] = {
             "HTTP-Referer": "https://github.com/perspective-lab",
             "X-Title": "PerspectiveLab",
@@ -52,11 +64,14 @@ async def ask_agent_slot(
     question: str,
     model: Optional[str] = None,
 ) -> dict:
+    from llm_context import get_request_llm_credentials
+
     settings = get_settings()
     catalog = load_agents_catalog()
     agent = catalog.get(agent_id) or AGENT_DEFINITIONS.get(agent_id, {})
     started = time.perf_counter()
-    active_model = model or settings.llm_model
+    creds = get_request_llm_credentials()
+    active_model = model or (creds.get("model") if creds else None) or settings.llm_model
     prompt = agent.get("system_prompt") or agent.get("prompt", "")
     profile_block = format_profile_instructions(agent_id)
     if profile_block:

@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { KeyRound, ShieldCheck } from "lucide-react";
-import { fetchSetupStatus, saveSetupKeys } from "@/api";
+import { fetchSetupStatus, saveSetupKeys, saveUserLlmKey } from "@/api";
 import { PageAlert, PageHero, PagePanel } from "@/components/PageChrome";
+import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 export default function SetupWizardPage({ embedded = false }) {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { isAuthenticated, isAdmin, refresh, personalKey } = useAuth();
   const [provider, setProvider] = useState("openrouter");
   const [apiKey, setApiKey] = useState("");
   const [model, setModel] = useState("openai/gpt-4o-mini");
@@ -22,22 +24,51 @@ export default function SetupWizardPage({ embedded = false }) {
         setStatus(data);
         if (data.llm_provider) setProvider(data.llm_provider);
         if (data.llm_configured) setDone(true);
+        if (data.personal_key?.model) setModel(data.personal_key.model);
       })
       .catch((err) => setError(err.message));
   }, []);
+
+  useEffect(() => {
+    if (personalKey?.configured) setDone(true);
+  }, [personalKey]);
 
   async function handleSave(e) {
     e.preventDefault();
     setError("");
     setSaving(true);
     try {
-      await saveSetupKeys({
-        provider,
-        api_key: apiKey.trim(),
-        model: model.trim() || undefined,
-      });
+      if (isAuthenticated) {
+        // Every logged-in user (including admin) can store a personal key.
+        // Admin may also write the shared server .env when setup_allowed.
+        await saveUserLlmKey({
+          provider,
+          api_key: apiKey.trim(),
+          model: model.trim() || undefined,
+        });
+        if (isAdmin && status?.setup_allowed) {
+          try {
+            await saveSetupKeys({
+              provider,
+              api_key: apiKey.trim(),
+              model: model.trim() || undefined,
+            });
+          } catch {
+            // Personal key is enough; server .env write is optional for admin.
+          }
+        }
+      } else if (status?.setup_allowed) {
+        await saveSetupKeys({
+          provider,
+          api_key: apiKey.trim(),
+          model: model.trim() || undefined,
+        });
+      } else {
+        throw new Error("Sign in to save your API key.");
+      }
       setDone(true);
       setApiKey("");
+      await refresh();
       navigate("/question");
     } catch (err) {
       setError(err.message);
@@ -45,6 +76,11 @@ export default function SetupWizardPage({ embedded = false }) {
       setSaving(false);
     }
   }
+
+  const canSave =
+    Boolean(apiKey.trim()) &&
+    (isAuthenticated || status?.setup_allowed) &&
+    !saving;
 
   return (
     <div className={embedded ? "space-y-4" : "mx-auto max-w-xl space-y-6"}>
@@ -56,7 +92,27 @@ export default function SetupWizardPage({ embedded = false }) {
         />
       )}
       {embedded && (
-        <p className="text-sm text-slate-400">{t("setup.desc")}</p>
+        <p className="text-sm text-slate-400">
+          {isAuthenticated
+            ? "Paste your own OpenRouter or OpenAI key. Agents will bill this key — not the lab admin key."
+            : t("setup.desc")}
+        </p>
+      )}
+
+      {!isAuthenticated && (
+        <PageAlert>
+          <span>
+            Create an account so your key stays private.{" "}
+            <Link to="/register" className="underline text-orange-300">
+              Register
+            </Link>{" "}
+            or{" "}
+            <Link to="/login" className="underline text-orange-300">
+              Sign in
+            </Link>
+            .
+          </span>
+        </PageAlert>
       )}
 
       {error && <PageAlert>{error}</PageAlert>}
@@ -122,15 +178,11 @@ export default function SetupWizardPage({ embedded = false }) {
 
           <button
             type="submit"
-            disabled={saving || !status?.setup_allowed}
+            disabled={!canSave}
             className="page-btn-primary w-full px-4 py-2.5 text-sm disabled:opacity-50"
           >
             {saving ? t("setup.saving") : t("setup.save")}
           </button>
-
-          {status && !status.setup_allowed && (
-            <p className="text-sm text-amber-300">{t("setup.blocked")}</p>
-          )}
         </form>
       </PagePanel>
     </div>

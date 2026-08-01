@@ -64,6 +64,12 @@ class Settings(BaseSettings):
     # Absolute public URL for invite links (e.g. https://your-app.onrender.com)
     public_app_url: str = ""
 
+    # Auth (user accounts)
+    auth_secret: str = ""
+    admin_email: str = "admin@perspectivelab.local"
+    admin_password: str = ""
+    auth_required: str = ""  # empty = auto; true/false to force
+
     log_level: str = "INFO"
 
     frontend_dist: Path = _BACKEND_DIR.parent / "frontend" / "dist"

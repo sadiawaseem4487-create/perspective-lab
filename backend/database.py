@@ -1,9 +1,12 @@
+import logging
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from typing import Optional
 
 from config import get_settings
+
+logger = logging.getLogger(__name__)
 
 
 def _db_path() -> str:
@@ -68,6 +71,15 @@ def init_db() -> None:
         )
         _migrate(conn)
         conn.commit()
+
+    # Auth tables + seeded admin (idempotent)
+    try:
+        from auth_service import ensure_auth_tables, seed_admin_user
+
+        ensure_auth_tables()
+        seed_admin_user()
+    except Exception:
+        logging.getLogger(__name__).exception("Auth init skipped")
 
 
 def _migrate(conn) -> None:
