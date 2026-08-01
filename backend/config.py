@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "PerspectiveLab"
-    app_version: str = "1.1.9"
+    app_version: str = "1.2.0"
     case_id: str = "sao-paulo-dropout"
     project_root: Path = _BACKEND_DIR.parent
     environment: str = Field(default="development", pattern="^(development|production|staging)$")
@@ -47,8 +47,8 @@ class Settings(BaseSettings):
     openrouter_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
     openai_base_url: str = ""
-    openai_timeout_seconds: int = 90
-    openai_max_retries: int = 2
+    openai_timeout_seconds: int = 120
+    openai_max_retries: int = 1
 
     database_path: Path = _BACKEND_DIR / "data" / "sessions.db"
     # When set (e.g. Render Postgres), accounts survive free-tier redeploys.
@@ -57,7 +57,7 @@ class Settings(BaseSettings):
     cors_origins: str = "*"
     allowed_hosts: str = "*"
 
-    rate_limit_ask: str = "10/minute"
+    rate_limit_ask: str = "20/minute"
     export_api_key: str = ""
 
     # Optional semantic theory judge (extra LLM call per agent when true)

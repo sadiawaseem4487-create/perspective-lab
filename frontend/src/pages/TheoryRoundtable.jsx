@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -73,6 +73,7 @@ export default function TheoryRoundtable() {
   const [checkpointNote, setCheckpointNote] = useState("");
   const [revealed, setRevealed] = useState(new Set());
   const [selectedKey, setSelectedKey] = useState(null);
+  const askInFlightRef = useRef(false);
 
   useEffect(() => {
     if (personalKey?.model) setModel(personalKey.model);
@@ -299,20 +300,11 @@ export default function TheoryRoundtable() {
   const allDone = revealed.size >= 4 && result?.responses?.length >= 4;
 
   async function handleRun() {
+    if (askInFlightRef.current || loading || restoring) return;
     if (!assessQuestionQuality(question).ok) return;
 
-    // Always allow the click — if key missing, take user to Settings instead of a dead button
-    const me = await refreshAuth().catch(() => null);
-    const ready = Boolean(
-      me?.llm?.configured || llmConfigured || apiReady || personalKey?.configured
-    );
-    setApiReady(ready);
-    if (!ready) {
-      setError(t("stage3.apiMissing"));
-      navigate("/settings?tab=api");
-      return;
-    }
-
+    // Lock + UI feedback immediately so double-clicks cannot fire a second ask
+    askInFlightRef.current = true;
     setLoading(true);
     setError("");
     setResult(null);
@@ -321,6 +313,21 @@ export default function TheoryRoundtable() {
     setSelectedKey(null);
 
     try {
+      const alreadyReady = Boolean(llmConfigured || apiReady || personalKey?.configured);
+      let ready = alreadyReady;
+      if (!alreadyReady) {
+        const me = await refreshAuth().catch(() => null);
+        ready = Boolean(
+          me?.llm?.configured || llmConfigured || apiReady || personalKey?.configured
+        );
+        setApiReady(ready);
+      }
+      if (!ready) {
+        setError(t("stage3.apiMissing"));
+        navigate("/settings?tab=api");
+        return;
+      }
+
       if (workflowMode === "sequential_hitl") {
         const run = await startSequentialRun(question.trim(), model, lang, uiMode);
         setSequentialRun(run);
@@ -336,27 +343,25 @@ export default function TheoryRoundtable() {
         const keys = (data.responses || [])
           .map((r) => (r.agent_key || "").toLowerCase())
           .filter(Boolean);
+        const failed = (data.responses || []).filter((r) => r.error);
+        if (failed.length) {
+          setError(
+            t("roundtable.partialFail").replace("{count}", String(failed.length))
+          );
+        }
         if (workflowMode === "parallel") {
-          setRevealed(new Set());
-          let index = 0;
-          const timer = setInterval(() => {
-            if (index >= keys.length) {
-              clearInterval(timer);
-              return;
-            }
-            const key = keys[index];
-            setRevealed((prev) => new Set([...prev, key]));
-            if (index === 0) setSelectedKey(key);
-            index += 1;
-          }, 600);
+          // Reveal all at once — staged timers felt like the app was stuck / needed another click
+          setRevealed(new Set(keys));
+          setSelectedKey(keys[0] || null);
         } else {
           setRevealed(new Set(keys));
           setSelectedKey(keys[0] || null);
         }
       }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || t("roundtable.askFailed"));
     } finally {
+      askInFlightRef.current = false;
       setLoading(false);
     }
   }
@@ -515,7 +520,12 @@ export default function TheoryRoundtable() {
       <RunMetadataBar result={result} loading={loading} isDemo={isDemo} t={t} />
 
       {loading && !result?.responses?.length && (
-        <p className="text-center text-sm text-slate-500">{t("roundtable.running")}</p>
+        <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm text-slate-300">
+          <p className="font-medium text-slate-100">{t("roundtable.running")}</p>
+          <p className="mt-1 text-xs text-slate-500">
+            Four theory agents answer in parallel. Free cloud hosting can wake slowly on the first ask.
+          </p>
+        </div>
       )}
 
       <AnimatePresence mode="wait">

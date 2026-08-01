@@ -168,7 +168,9 @@ export const translations = {
       questionPlaceholder:
         "Describe the situation and what you need answered — context, constraints, and one or more focus questions (at least 8 words)…",
       run: "Ask agents",
-      running: "Agents are thinking…",
+      running: "Agents are working — usually 30–90 seconds. Please wait; one click is enough.",
+      askFailed: "Ask failed. Check your API key in Settings, wait a moment, then try once more.",
+      partialFail: "{count} agent(s) failed — open each card for details. Others completed.",
       progress: "{count} of {total} answers ready — click a card to read",
       insights: "Pinned insights",
       demoPrompt: "Try a sample framing…",
@@ -943,7 +945,9 @@ export const translations = {
       questionPlaceholder:
         "Descreva a situação e o que precisa ser respondido — contexto, limites e uma ou mais perguntas-foco…",
       run: "Perguntar aos agentes",
-      running: "Agentes estão pensando…",
+      running: "Agentes estão trabalhando — costuma levar 30–90 s. Espere; um clique basta.",
+      askFailed: "Falha ao perguntar. Confira a chave em Settings e tente de novo.",
+      partialFail: "{count} agente(s) falharam — abra cada card. Os outros concluíram.",
       progress: "{count} de {total} respostas prontas — clique em um cartão para ler",
       insights: "Insights fixados",
       demoPrompt: "Experimente um enquadramento de exemplo…",
@@ -1717,7 +1721,9 @@ export const translations = {
       questionPlaceholder:
         "Kuvaile tilanne ja mitä tarvitset vastaukseksi — konteksti, reunaehdot ja yksi tai useampi kohdekysymys…",
       run: "Kysy agenteilta",
-      running: "Agentit ajattelevat…",
+      running: "Agentit työskentelevät — yleensä 30–90 s. Odota; yksi klikkaus riittää.",
+      askFailed: "Kysely epäonnistui. Tarkista API-avain Settingsissä ja yritä uudelleen.",
+      partialFail: "{count} agenttia epäonnistui — avaa kortit. Muut valmiina.",
       progress: "{count} / {total} vastausta valmis — avaa kortista",
       insights: "Kiinnitetyt oivallukset",
       demoPrompt: "Kokeile esimerkkikehystystä…",

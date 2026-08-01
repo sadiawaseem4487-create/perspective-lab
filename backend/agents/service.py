@@ -111,8 +111,8 @@ async def ask_agent_slot(
                     {"role": "system", "content": full_prompt},
                     {"role": "user", "content": user_content},
                 ],
-                temperature=0.55,
-                max_tokens=750,
+                temperature=0.5,
+                max_tokens=2200,
             )
             text = completion.choices[0].message.content or ""
             latency_ms = int((time.perf_counter() - started) * 1000)
