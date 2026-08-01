@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { checkHealth } from "@/api";
 import { useAuth } from "@/context/AuthContext";
 import { PageAlert, PageHero, PagePanel } from "@/components/PageChrome";
 
@@ -19,21 +18,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [storageWarning, setStorageWarning] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    checkHealth()
-      .then((h) => {
-        if (!cancelled && h?.persistent_storage === false) {
-          setStorageWarning(true);
-        }
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   if (!loading && isAuthenticated) {
     return <Navigate to={llmConfigured ? "/question" : "/settings?tab=api"} replace />;
@@ -65,13 +49,6 @@ export default function LoginPage() {
           </p>
         }
       />
-      {storageWarning && (
-        <PageAlert>
-          Server storage is not persistent yet — accounts can disappear after each cloud redeploy.
-          Add a free Render Postgres and set <code className="text-slate-200">DATABASE_URL</code> on the web
-          service (see deploy docs), then redeploy. The warning disappears when storage is durable.
-        </PageAlert>
-      )}
       {error && <PageAlert>{error}</PageAlert>}
       <PagePanel>
         <form onSubmit={onSubmit} className="space-y-4">
