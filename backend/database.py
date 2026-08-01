@@ -15,6 +15,37 @@ def _db_path() -> str:
     return str(settings.database_path)
 
 
+def storage_is_persistent() -> bool:
+    """True when account data is expected to survive process restarts/redeploys.
+
+    Local and docker-compose keep SQLite on the host. On Render, only a disk
+    mounted under the database directory survives redeploys (free tier cannot).
+    """
+    import os
+
+    if os.environ.get("RENDER", "").lower() != "true":
+        return True
+
+    path = get_settings().database_path.parent.resolve()
+    cur = path
+    while True:
+        if os.path.ismount(str(cur)):
+            return str(cur) != "/"
+        parent = cur.parent
+        if parent == cur:
+            return False
+        cur = parent
+
+
+def count_users_safe() -> int:
+    try:
+        with get_connection() as conn:
+            row = conn.execute("SELECT COUNT(*) AS n FROM users").fetchone()
+            return int(row["n"] if row else 0)
+    except Exception:
+        return 0
+
+
 def init_db() -> None:
     with get_connection() as conn:
         conn.execute("PRAGMA journal_mode=WAL")

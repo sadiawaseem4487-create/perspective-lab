@@ -32,3 +32,18 @@ def test_register_login_and_personal_key(client, monkeypatch):
     )
     assert login.status_code == 200
     assert login.json()["token"]
+
+    # Re-register with same credentials signs in instead of 422 "already exists"
+    again = client.post(
+        "/api/auth/register",
+        json={"email": "lab.user@example.com", "password": "password123", "name": "Lab"},
+    )
+    assert again.status_code == 200
+    assert again.json()["token"]
+
+    conflict = client.post(
+        "/api/auth/register",
+        json={"email": "lab.user@example.com", "password": "wrong-password", "name": "Lab"},
+    )
+    assert conflict.status_code == 422
+    assert "already exists" in conflict.json()["detail"].lower()

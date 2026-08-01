@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { checkHealth } from "@/api";
 import { useAuth } from "@/context/AuthContext";
 import { PageAlert, PageHero, PagePanel } from "@/components/PageChrome";
 
@@ -18,6 +19,21 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [storageWarning, setStorageWarning] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    checkHealth()
+      .then((h) => {
+        if (!cancelled && h?.persistent_storage === false) {
+          setStorageWarning(true);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (!loading && isAuthenticated) {
     return <Navigate to={llmConfigured ? "/question" : "/settings?tab=api"} replace />;
@@ -46,10 +62,15 @@ export default function LoginPage() {
         description={
           <p className="text-slate-400">
             Use your PerspectiveLab account. Each person pastes their own API key in Settings before asking agents.
-            If Sign in fails after a cloud redeploy, create the account again — free Render disks reset without a persistent volume.
           </p>
         }
       />
+      {storageWarning && (
+        <PageAlert>
+          Server storage is not persistent — accounts can disappear after each cloud redeploy. Attach a Render disk at{" "}
+          <code className="text-slate-200">/app/backend/data</code> (Starter plan) so logins survive.
+        </PageAlert>
+      )}
       {error && <PageAlert>{error}</PageAlert>}
       <PagePanel>
         <form onSubmit={onSubmit} className="space-y-4">

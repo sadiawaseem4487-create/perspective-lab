@@ -1,11 +1,18 @@
+# Accounts live in SQLite under /app/backend/data. Free Render has an ephemeral
+# filesystem — every redeploy wiped users. Starter + disk keeps logins forever.
 services:
   - type: web
     name: perspectivelab-api
     runtime: docker
-    plan: free
+    # Persistent disks require a paid instance (not available on free).
+    plan: starter
     # Redeploy automatically when main (or the connected branch) receives a commit
     autoDeployTrigger: commit
     healthCheckPath: /api/health
+    disk:
+      name: perspectivelab-data
+      mountPath: /app/backend/data
+      sizeGB: 1
     envVars:
       - key: ENVIRONMENT
         value: production
@@ -19,6 +26,8 @@ services:
         value: "1"
       - key: AUTH_REQUIRED
         value: "true"
+      - key: DATABASE_PATH
+        value: /app/backend/data/sessions.db
       - key: EXPORT_API_KEY
         generateValue: true
       - key: AUTH_SECRET

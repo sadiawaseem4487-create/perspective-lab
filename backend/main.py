@@ -378,6 +378,10 @@ async def health(user: Optional[dict] = Depends(get_optional_user)):
     status = "ok" if db_ok else "degraded"
     code = 200 if db_ok else 503
     creds = resolve_llm_credentials(user)
+    from database import count_users_safe, storage_is_persistent
+
+    persistent = storage_is_persistent()
+    user_count = count_users_safe() if db_ok else 0
     payload = {
         "status": status,
         "version": current.app_version,
@@ -387,6 +391,9 @@ async def health(user: Optional[dict] = Depends(get_optional_user)):
         "llm_source": creds.get("source"),
         "openai_configured": bool(creds.get("configured")),
         "database_ok": db_ok,
+        "database_path": str(current.database_path),
+        "persistent_storage": persistent,
+        "user_count": user_count,
         "setup_allowed": setup_allowed(current),
         "auth_required": auth_required(),
         "authenticated": bool(user),
@@ -454,7 +461,7 @@ async def auth_login(body: AuthLoginRequest):
     if not row:
         raise HTTPException(
             status_code=401,
-            detail="No account for this email. Use Create one below — accounts reset if the server redeployed without a persistent disk.",
+            detail="No account for this email. Use Create one — if this keeps happening after every deploy, the server needs a persistent disk.",
         )
     if not verify_password(body.password, row["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")

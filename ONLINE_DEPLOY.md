@@ -8,23 +8,33 @@ Always **update this Render service** — do not create a new Web Service.
 
 ---
 
-## Keep accounts after redeploy (important)
+## Keep accounts after redeploy (required)
 
-User accounts and sessions are stored in **SQLite** on the server.
+User accounts live in **SQLite** at `/app/backend/data/sessions.db`.
 
-On Render’s free web service, the filesystem is **ephemeral**: every redeploy can wipe `sessions.db`, so emails you registered earlier stop working (“No account for this email”).
+Render **free** web services have an **ephemeral** filesystem: every redeploy or idle spin-down deletes that file, so Sign in fails and you are forced to Create account again.
 
-**Fix (one-time on the same `perspective-lab` service):**
+**Fix (one-time on the live `perspective-lab` service):**
 
-1. Render → service → **Disks** → **Add disk**
-2. Mount path: `/app/backend/data`
-3. Size: 1 GB is enough
-4. Environment → set `DATABASE_PATH=/app/backend/data/sessions.db`
-5. Redeploy
+1. Render Dashboard → your web service → **Settings** → change instance to **Starter** (disks are not available on Free)
+2. **Disks** → **Add disk**
+   - Name: `perspectivelab-data` (any name)
+   - Mount path: `/app/backend/data`
+   - Size: **1 GB**
+3. **Environment** → set `DATABASE_PATH=/app/backend/data/sessions.db` (Blueprint already sets this)
+4. **Manual Deploy** → deploy
 
-After that, accounts survive deploys. Until then: use **Create one** again after each wipe.
+Confirm after deploy:
 
-Admin seed account (if `ADMIN_*` env vars are set): `ADMIN_EMAIL` / `ADMIN_PASSWORD` — not your personal Gmail unless you registered that address again.
+https://perspective-lab.onrender.com/api/health
+
+Must show `"persistent_storage": true` and `"version": "1.1.5"` (or newer). Then create your account **once** — it will survive future deploys.
+
+`render.yaml` now declares `plan: starter` + disk so Blueprint sync can apply the same config.
+
+**Do not** create a brand-new Web Service (that starts with an empty disk and new `AUTH_SECRET`).
+
+Admin seed: `ADMIN_EMAIL` / `ADMIN_PASSWORD` — only if those env vars are set.
 
 ---
 

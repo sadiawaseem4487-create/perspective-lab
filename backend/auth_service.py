@@ -181,6 +181,11 @@ def seed_admin_user() -> None:
 
 
 def create_user(email: str, password: str, name: str = "") -> Dict[str, Any]:
+    """Create a user, or return the existing user when email+password already match.
+
+    Matching credentials after a confused re-register attempt signs the person in
+    instead of failing with 'already exists'. Wrong password still errors.
+    """
     ensure_auth_tables()
     email_n = email.strip().lower()
     if "@" not in email_n or len(password) < 8:
@@ -188,10 +193,14 @@ def create_user(email: str, password: str, name: str = "") -> Dict[str, Any]:
     now = datetime.now(timezone.utc).isoformat()
     with get_connection() as conn:
         existing = conn.execute(
-            "SELECT id FROM users WHERE email = ?", (email_n,)
+            "SELECT id, password_hash FROM users WHERE email = ?", (email_n,)
         ).fetchone()
         if existing:
-            raise ValueError("An account with this email already exists")
+            if verify_password(password, existing["password_hash"]):
+                return get_user_by_id(int(existing["id"]))
+            raise ValueError(
+                "An account with this email already exists. Sign in instead."
+            )
         cur = conn.execute(
             """
             INSERT INTO users (email, password_hash, role, name, created_at)
@@ -201,6 +210,13 @@ def create_user(email: str, password: str, name: str = "") -> Dict[str, Any]:
         )
         conn.commit()
         return get_user_by_id(cur.lastrowid)
+
+
+def count_users() -> int:
+    ensure_auth_tables()
+    with get_connection() as conn:
+        row = conn.execute("SELECT COUNT(*) AS n FROM users").fetchone()
+        return int(row["n"] if row else 0)
 
 
 def get_user_by_id(user_id: int) -> Optional[Dict[str, Any]]:

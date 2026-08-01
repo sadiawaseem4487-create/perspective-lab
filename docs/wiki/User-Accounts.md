@@ -68,7 +68,12 @@ flowchart TD
 
 ## Persistence warning (Render)
 
-Accounts live in SQLite (`DATABASE_PATH`). Without a **persistent disk** on Render, redeploys wipe users — old emails will not sign in until you **Create one** again. See [ONLINE_DEPLOY.md](../../ONLINE_DEPLOY.md).
+Accounts live in SQLite (`DATABASE_PATH=/app/backend/data/sessions.db`).
+
+- **Free Render** cannot attach a disk → every redeploy wipes users.
+- **Starter + disk** mounted at `/app/backend/data` → accounts survive (see [ONLINE_DEPLOY.md](../../ONLINE_DEPLOY.md)).
+- Health must report `"persistent_storage": true`.
+- Creating an account again with the **same email + password** signs you in (no “already exists” dead-end).
 
 ---
 

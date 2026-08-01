@@ -39,7 +39,7 @@ export default function RegisterPage() {
         description={
           <p className="text-slate-400">
             After signing up, paste <strong className="text-slate-200">your own</strong> OpenRouter
-            or OpenAI key. The lab admin key is not shared.
+            or OpenAI key. If this email already has an account and the password matches, you will be signed in.
           </p>
         }
       />
