@@ -388,7 +388,7 @@ export const translations = {
     setup: {
       badge: "First run",
       title: "API key setup",
-      desc: "Add an OpenRouter or OpenAI key so agents can answer. Keys stay on this machine in backend/.env.",
+      desc: "Paste your own OpenRouter or OpenAI key. Agents bill your key — not a shared lab key.",
       provider: "Provider",
       apiKey: "API key",
       apiKeyPh: "Paste your key",
@@ -397,7 +397,7 @@ export const translations = {
       saving: "Saving…",
       done: "API key saved. You can ask the agents.",
       blocked: "Setup is disabled in production. Set keys via environment variables.",
-      banner: "API key missing — open Settings to continue.",
+      banner: "API key missing — open Settings → API key and paste yours.",
     },
     common: {
       back: "← Back",
@@ -446,7 +446,9 @@ export const translations = {
       title: "Question — run agents",
       desc: "Choose parallel (independent answers) or sequential (Freire → Weber → Montessori → Rogers). Optional human review between sequential stages.",
       usingModel: "Using model",
-      apiMissing: "API key not configured. Add your key to",
+      apiMissing:
+        "API key not configured. Open Settings → API key, paste your OpenRouter or OpenAI key, then try again.",
+      openSettings: "Open Settings → API key",
       placeholder: "How do we solve school dropout in São Paulo?",
       workflowMode: "Workflow mode",
       mode: {
@@ -1154,7 +1156,7 @@ export const translations = {
     setup: {
       badge: "Primeira execução",
       title: "Configurar chave de API",
-      desc: "Adicione uma chave OpenRouter ou OpenAI. As chaves ficam neste computador em backend/.env.",
+      desc: "Cole sua própria chave OpenRouter ou OpenAI. Os agentes usam a sua chave — não a chave compartilhada do laboratório.",
       provider: "Provedor",
       apiKey: "Chave de API",
       apiKeyPh: "Cole a chave",
@@ -1163,7 +1165,7 @@ export const translations = {
       saving: "Salvando…",
       done: "Chave salva. Você pode perguntar aos agentes.",
       blocked: "Configuração desativada em produção. Defina as chaves via variáveis de ambiente.",
-      banner: "Chave de API ausente — abra Configurações para continuar.",
+      banner: "Chave de API ausente — abra Configurações → Chave de API e cole a sua.",
     },
     common: {
       back: "← Voltar",
@@ -1212,7 +1214,9 @@ export const translations = {
       title: "Pergunta — executar agentes",
       desc: "Escolha paralelo (respostas independentes) ou sequencial (Freire → Weber → Montessori → Rogers). Revisão humana opcional entre etapas.",
       usingModel: "Usando modelo",
-      apiMissing: "Chave API não configurada. Adicione em",
+      apiMissing:
+        "Chave API não configurada. Abra Configurações → Chave de API, cole sua chave OpenRouter ou OpenAI e tente de novo.",
+      openSettings: "Abrir Configurações → Chave de API",
       placeholder: "Como resolvemos a evasão escolar em São Paulo?",
       workflowMode: "Modo de fluxo",
       mode: {
@@ -1919,7 +1923,7 @@ export const translations = {
     setup: {
       badge: "Ensimmäinen käynnistys",
       title: "API-avaimen asetus",
-      desc: "Lisää OpenRouter- tai OpenAI-avain. Avaimet pysyvät tällä koneella tiedostossa backend/.env.",
+      desc: "Liitä oma OpenRouter- tai OpenAI-avaimesi. Agentit käyttävät sinun avaintasi — ei jaettua labra-avainta.",
       provider: "Palvelu",
       apiKey: "API-avain",
       apiKeyPh: "Liitä avain",
@@ -1928,7 +1932,7 @@ export const translations = {
       saving: "Tallennetaan…",
       done: "Avain tallennettu. Voit kysyä agenteilta.",
       blocked: "Asetus on pois käytöstä tuotannossa. Aseta avaimet ympäristömuuttujilla.",
-      banner: "API-avain puuttuu — avaa Asetukset jatkaaksesi.",
+      banner: "API-avain puuttuu — avaa Asetukset → API-avain ja liitä omasi.",
     },
     common: {
       back: "← Takaisin",
@@ -1977,7 +1981,9 @@ export const translations = {
       title: "Kysymys — aja agentit",
       desc: "Valitse rinnakkainen (itsenäiset vastaukset) tai peräkkäinen (Freire → Weber → Montessori → Rogers). Valinnainen ihmisen tarkistus vaiheiden välissä.",
       usingModel: "Käytettävä malli",
-      apiMissing: "API-avainta ei ole asetettu. Lisää tiedostoon",
+      apiMissing:
+        "API-avainta ei ole asetettu. Avaa Asetukset → API-avain, liitä OpenRouter- tai OpenAI-avain ja yritä uudelleen.",
+      openSettings: "Avaa Asetukset → API-avain",
       placeholder: "Miten ratkaisemme koulupudokkuuden São Paulossa?",
       workflowMode: "Työnkulun tila",
       mode: {

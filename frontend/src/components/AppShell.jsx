@@ -166,7 +166,12 @@ export default function AppShell() {
                 </p>
               )}
               {needsSetup && (
-                <p className="mt-1 text-xs text-amber-300">{t("setup.banner")}</p>
+                <p className="mt-1 text-xs text-amber-300">
+                  {t("setup.banner")}{" "}
+                  <Link to="/settings?tab=api" className="underline hover:text-amber-200">
+                    {t("nav.settings")}
+                  </Link>
+                </p>
               )}
               <p className="mt-1 text-xs text-slate-400">{t("shell.flowHint")}</p>
             </div>

@@ -310,9 +310,7 @@ export default function TheoryRoundtable() {
       const ready = Boolean(health.llm_configured ?? health.openai_configured);
       setApiReady(ready);
       if (!ready) {
-        throw new Error(
-          "API key not configured. Open Settings → API key, save your OpenRouter key, then try again."
-        );
+        throw new Error(t("stage3.apiMissing"));
       }
 
       if (workflowMode === "sequential_hitl") {
@@ -396,7 +394,7 @@ export default function TheoryRoundtable() {
   const wordCount = quality.wordCount;
   const framingReady = quality.ok;
   const canAsk =
-    !loading && !restoring && framingReady && !sequentialRun;
+    !loading && !restoring && framingReady && !sequentialRun && apiReady !== false;
 
   const qualityHint = (() => {
     if (framingReady) {
@@ -423,9 +421,15 @@ export default function TheoryRoundtable() {
       </header>
 
       {apiReady === false && (
-        <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
-          {t("stage3.apiMissing")} <code>backend/.env</code>
-        </p>
+        <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+          <p>{t("stage3.apiMissing")}</p>
+          <Link
+            to="/settings?tab=api"
+            className="mt-2 inline-flex page-btn-primary px-3 py-1.5 text-xs"
+          >
+            {t("stage3.openSettings")}
+          </Link>
+        </div>
       )}
 
       {restoring && (
