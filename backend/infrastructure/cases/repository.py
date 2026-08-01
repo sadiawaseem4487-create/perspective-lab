@@ -304,6 +304,7 @@ class CaseRepository:
             "question": session["question"],
             "model": session.get("model", self.get_selected_model()),
             "workflow_mode": session.get("workflow_mode", "parallel"),
+            "ui_mode": session.get("ui_mode") or "live",
             "created_at": session.get("created_at") or datetime.now(timezone.utc).isoformat(),
             "summary": {
                 "total_agents": len(session.get("responses", [])),
@@ -315,12 +316,19 @@ class CaseRepository:
         _write_json(path, report)
         return path
 
-    def list_reports(self, limit: int = 50) -> List[dict]:
+    def list_reports(self, limit: int = 50, ui_mode: Optional[str] = None) -> List[dict]:
         self.paths.reports_dir.mkdir(parents=True, exist_ok=True)
-        files = sorted(self.paths.reports_dir.glob("report_session_*.json"), reverse=True)[:limit]
+        files = sorted(self.paths.reports_dir.glob("report_session_*.json"), reverse=True)
+        demo_keys = self._demo_question_keys()
         reports = []
+        mode_filter = (ui_mode or "").strip().lower() or None
+        if mode_filter and mode_filter not in ("live", "demo"):
+            mode_filter = None
         for path in files:
             data = _read_json(path)
+            report_mode = self._resolve_report_ui_mode(data, demo_keys)
+            if mode_filter and report_mode != mode_filter:
+                continue
             reports.append(
                 {
                     "report_id": data.get("report_id", path.stem),
@@ -329,9 +337,45 @@ class CaseRepository:
                     "model": data.get("model"),
                     "created_at": data.get("created_at"),
                     "summary": data.get("summary", {}),
+                    "ui_mode": report_mode,
+                    "workflow_mode": data.get("workflow_mode", "parallel"),
                 }
             )
+            if len(reports) >= limit:
+                break
         return reports
+
+    def _demo_question_keys(self) -> set:
+        keys = set()
+        try:
+            for lang in ("en", "pt", "fi"):
+                payload = self.load_questions(lang)
+                for item in payload.get("questions") or []:
+                    text = (item.get("text") or "").strip().lower()
+                    if text:
+                        keys.add(" ".join(text.split()))
+                main_q = (payload.get("main_question") or "").strip().lower()
+                if main_q:
+                    keys.add(" ".join(main_q.split()))
+        except Exception:
+            return keys
+        return keys
+
+    def _resolve_report_ui_mode(self, data: dict, demo_keys: Optional[set] = None) -> str:
+        explicit = (data.get("ui_mode") or "").strip().lower()
+        if explicit in ("live", "demo"):
+            return explicit
+        question = (data.get("question") or "").strip().lower()
+        # Strip language instruction suffix used by ask API
+        marker = "\n\nimportant: respond entirely in"
+        idx = question.find(marker)
+        if idx >= 0:
+            question = question[:idx].strip()
+        key = " ".join(question.split())
+        keys = demo_keys if demo_keys is not None else self._demo_question_keys()
+        if key and key in keys:
+            return "demo"
+        return "live"
 
     def get_report(self, session_id: int) -> Optional[dict]:
         path = self.paths.reports_dir / f"report_session_{session_id}.json"
@@ -352,11 +396,108 @@ class CaseRepository:
         _write_json(path, payload)
         return payload
 
+    def append_human_respondent(self, session_id: int, question: str, respondent: dict) -> dict:
+        """Append one guest answer without wiping existing respondents."""
+        from core.constants import MAX_HUMAN_ANSWERS_PER_SESSION
+
+        existing = self.get_human_answers(session_id) or {
+            "session_id": session_id,
+            "question": question,
+            "respondents": [],
+        }
+        respondents = list(existing.get("respondents") or [])
+        if len(respondents) >= MAX_HUMAN_ANSWERS_PER_SESSION:
+            raise ValueError(
+                f"Maximum number of human answers reached for this session ({MAX_HUMAN_ANSWERS_PER_SESSION})"
+            )
+        # Stable id so UI can list/export each person separately
+        if not respondent.get("response_id"):
+            import secrets
+
+            respondent = {
+                **respondent,
+                "response_id": secrets.token_hex(8),
+            }
+        respondents.append(respondent)
+        return self.save_human_answers(
+            session_id,
+            question or existing.get("question", ""),
+            respondents,
+        )
+
     def get_human_answers(self, session_id: int) -> Optional[dict]:
         path = self.paths.human_answers_dir / f"session_{session_id}.json"
         if path.is_file():
             return _read_json(path)
         return None
+
+    def create_invite(
+        self,
+        session_id: int,
+        question: str,
+        *,
+        label: str = "",
+        days_valid: int = 14,
+        max_responses: int = 100,
+        token: Optional[str] = None,
+    ) -> dict:
+        import secrets
+        from datetime import timedelta
+
+        from core.constants import DEFAULT_INVITE_MAX_RESPONSES, MAX_HUMAN_ANSWERS_PER_SESSION
+
+        self.paths.invites_dir.mkdir(parents=True, exist_ok=True)
+        invite_token = token or secrets.token_urlsafe(16)
+        now = datetime.now(timezone.utc)
+        expires = now + timedelta(days=max(1, min(days_valid, 90)))
+        cap = max(1, min(max_responses or DEFAULT_INVITE_MAX_RESPONSES, MAX_HUMAN_ANSWERS_PER_SESSION))
+        payload = {
+            "token": invite_token,
+            "session_id": session_id,
+            "case_id": self.case_id,
+            "question": question,
+            "label": (label or "").strip()[:120],
+            "created_at": now.isoformat(),
+            "expires_at": expires.isoformat(),
+            "max_responses": cap,
+            "response_count": 0,
+            "active": True,
+        }
+        _write_json(self.paths.invites_dir / f"{invite_token}.json", payload)
+        return payload
+
+    def get_invite(self, token: str) -> Optional[dict]:
+        path = self.paths.invites_dir / f"{token}.json"
+        if path.is_file():
+            return _read_json(path)
+        return None
+
+    def list_invites(self, session_id: int) -> List[dict]:
+        self.paths.invites_dir.mkdir(parents=True, exist_ok=True)
+        invites: List[dict] = []
+        for path in sorted(self.paths.invites_dir.glob("*.json")):
+            data = _read_json(path)
+            if data.get("session_id") == session_id:
+                invites.append(data)
+        return invites
+
+    def record_invite_response(self, token: str) -> dict:
+        invite = self.get_invite(token)
+        if not invite:
+            raise FileNotFoundError("Invite not found")
+        invite["response_count"] = int(invite.get("response_count") or 0) + 1
+        invite["updated_at"] = datetime.now(timezone.utc).isoformat()
+        _write_json(self.paths.invites_dir / f"{token}.json", invite)
+        return invite
+
+    def deactivate_invite(self, token: str) -> Optional[dict]:
+        invite = self.get_invite(token)
+        if not invite:
+            return None
+        invite["active"] = False
+        invite["updated_at"] = datetime.now(timezone.utc).isoformat()
+        _write_json(self.paths.invites_dir / f"{token}.json", invite)
+        return invite
 
     def save_rubric_scores(self, session_id: int, payload: dict) -> dict:
         self.paths.rubric_scores_dir.mkdir(parents=True, exist_ok=True)

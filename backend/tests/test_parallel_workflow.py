@@ -97,7 +97,7 @@ def test_ask_parallel_mode_query_param(client):
         ]
         response = client.post(
             "/api/ask?mode=parallel",
-            json={"question": "How can we reduce school dropout in São Paulo?"},
+            json={"question": "How should municipal education teams involve families and community partners to reduce secondary school dropout in São Paulo this year, and what measurable first steps should they take within ninety days?"},
         )
     assert response.status_code == 503
     mock_ask.assert_not_called()
@@ -144,7 +144,7 @@ def test_ask_parallel_mode_with_llm(client, monkeypatch):
 
         response = client.post(
             "/api/ask?mode=parallel",
-            json={"question": "How can we reduce school dropout in São Paulo?"},
+            json={"question": "How should municipal education teams involve families and community partners to reduce secondary school dropout in São Paulo this year, and what measurable first steps should they take within ninety days?"},
         )
     assert response.status_code == 200
     mock_ask.assert_awaited_once()

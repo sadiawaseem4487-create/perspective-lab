@@ -29,7 +29,7 @@ Key stays on her laptop in `backend/.env`.
 
 ## Flow
 
-Setup → Workspace → Report → Compare / Study → Presentation → Export → Guide
+Setup → Workspace → Report → Invite → Compare → Presentation → Export → Guide
 
 Languages: EN / PT / FI.
 

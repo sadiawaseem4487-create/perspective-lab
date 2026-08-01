@@ -5,7 +5,7 @@ import { PageHero, PagePanel } from "../components/PageChrome";
 import { useLanguage } from "../i18n/LanguageContext";
 import { cn } from "@/lib/utils";
 
-export default function Stage2Models() {
+export default function Stage2Models({ embedded = false }) {
   const { t } = useLanguage();
   const [models, setModels] = useState([]);
   const [selected, setSelected] = useState("");
@@ -37,20 +37,23 @@ export default function Stage2Models() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
-      <PageHero
-        badge={t("stage2.badge")}
-        title={t("stage2.title")}
-        description={
-          <p>
-            {t("stage2.desc")}{" "}
-            <code className="rounded bg-slate-900/80 px-1 text-slate-300">
-              cases/&lt;case&gt;/models/available_models.json
-            </code>
-            .
-          </p>
-        }
-      />
+    <div className={embedded ? "space-y-4" : "mx-auto max-w-6xl space-y-6"}>
+      {!embedded && (
+        <PageHero
+          badge={t("stage2.badge")}
+          title={t("stage2.title")}
+          description={
+            <p>
+              {t("stage2.desc")}{" "}
+              <code className="rounded bg-slate-900/80 px-1 text-slate-300">
+                cases/&lt;case&gt;/models/available_models.json
+              </code>
+              .
+            </p>
+          }
+        />
+      )}
+      {embedded && <p className="text-sm text-slate-400">{t("stage2.desc")}</p>}
 
       <PagePanel>
         <label className="block text-sm font-semibold text-slate-200">{t("stage2.selected")}</label>
@@ -99,14 +102,16 @@ export default function Stage2Models() {
         ))}
       </div>
 
-      <div className="flex justify-between">
-        <Link to="/agents" className="page-btn-secondary">
-          {t("common.back")}
-        </Link>
-        <Link to="/question" className="page-btn-primary">
-          {t("stage2.next")}
-        </Link>
-      </div>
+      {!embedded && (
+        <div className="flex justify-between">
+          <Link to="/settings?tab=agents" className="page-btn-secondary">
+            {t("common.back")}
+          </Link>
+          <Link to="/question" className="page-btn-primary">
+            {t("stage2.next")}
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

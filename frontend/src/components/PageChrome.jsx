@@ -1,13 +1,30 @@
 import { cn } from "@/lib/utils";
 
-export function PageHero({ badge, title, description, children, className }) {
+export function PageHero({ badge, title, description, children, className, size = "default" }) {
+  const compact = size === "sm";
   return (
-    <section className={cn("page-panel", className)}>
+    <section className={cn("page-panel", compact && "py-4", className)}>
       {badge && (
-        <p className="text-sm font-semibold uppercase tracking-wide text-orange-400">{badge}</p>
+        <p
+          className={cn(
+            "font-semibold uppercase tracking-wide text-orange-400",
+            compact ? "text-xs" : "text-sm"
+          )}
+        >
+          {badge}
+        </p>
       )}
-      <h2 className="font-display text-3xl font-bold text-white">{title}</h2>
-      {description && <div className="mt-2 text-slate-400">{description}</div>}
+      <h2
+        className={cn(
+          "font-display font-bold text-white",
+          compact ? "mt-1 text-xl sm:text-2xl" : "text-3xl"
+        )}
+      >
+        {title}
+      </h2>
+      {description && (
+        <div className={cn("mt-1.5 text-slate-400", compact ? "text-sm" : "mt-2")}>{description}</div>
+      )}
       {children}
     </section>
   );

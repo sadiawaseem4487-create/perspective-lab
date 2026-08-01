@@ -1,4 +1,9 @@
 {
+  "case_title": {
+    "en": "School dropout in São Paulo",
+    "pt": "Evasão escolar em São Paulo",
+    "fi": "Koulupudokkuus São Paulossa"
+  },
   "topic": {
     "en": "Multi-theory agentic problem-solving",
     "pt": "Resolução de problemas com IA multi-teoria",
@@ -15,7 +20,7 @@
       "bullets": [
         "The same research question is answered by Freire, Weber, Montessori, and Rogers — independently.",
         "Each agent follows a different diagnostic process, so solutions are comparable, not interchangeable.",
-        "Live mode calls the AI model in real time; Demo version only suggests sample questions (answers are still live)."
+        "Use the discussion prompts to decide what to pilot first with schools and communities."
       ]
     },
     "pt": {

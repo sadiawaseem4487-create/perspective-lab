@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
@@ -23,13 +23,18 @@ from agents.service import ask_all_agents
 from config import get_settings
 from setup_keys import apply_llm_keys, setup_allowed
 from application import (
+    append_human_respondent,
     build_comparison,
     build_comparison_matrix,
     clear_case_cache,
+    create_invite,
+    deactivate_invite,
     get_agents_by_category,
     get_custom_agents,
     get_human_answers,
+    get_invite,
     get_rubric_scores,
+    list_invites,
     list_rubric_scores,
     get_main_agents,
     get_optional_agents_by_category,
@@ -47,6 +52,7 @@ from application import (
     load_questions,
     load_theory_profile,
     load_tools_config,
+    record_invite_response,
     save_human_answers,
     save_rubric_scores,
     save_report,
@@ -113,12 +119,27 @@ app.add_middleware(
 )
 
 
+from application.question_quality import validate_question_framing
+
+
+MIN_QUESTION_WORDS = 8  # kept for docs / parity; enforcement lives in question_quality
+
+
+def _validate_question_framing(question: str) -> str:
+    return validate_question_framing(question)
+
+
 class AskRequest(BaseModel):
-    question: str = Field(..., min_length=5, max_length=2000)
+    question: str = Field(..., min_length=5, max_length=6000)
     model: Optional[str] = None
     language: Optional[str] = Field(default="en", pattern="^(en|pt|fi)$")
     mode: Optional[str] = Field(default="parallel", pattern="^(parallel|sequential)$")
+    ui_mode: Optional[str] = Field(default="live", pattern="^(live|demo)$")
 
+    @field_validator("question")
+    @classmethod
+    def question_has_enough_words(cls, value: str) -> str:
+        return _validate_question_framing(value)
 
 class ModelSelectRequest(BaseModel):
     model: str = Field(..., min_length=3)
@@ -127,11 +148,27 @@ class ModelSelectRequest(BaseModel):
 class HumanRespondent(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     role: str = Field(default="", max_length=100)
+    organization: str = Field(default="", max_length=120)
+    email: str = Field(default="", max_length=200)
     answer: str = Field(..., min_length=5, max_length=8000)
 
 
 class HumanAnswersRequest(BaseModel):
     respondents: List[HumanRespondent] = Field(..., min_length=1, max_length=20)
+
+
+class CreateInviteRequest(BaseModel):
+    label: str = Field(default="", max_length=120)
+    days_valid: int = Field(default=14, ge=1, le=90)
+    max_responses: int = Field(default=100, ge=1, le=100)
+
+
+class InviteAnswerRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    role: str = Field(default="", max_length=100)
+    organization: str = Field(default="", max_length=120)
+    email: str = Field(default="", max_length=200)
+    answer: str = Field(..., min_length=5, max_length=8000)
 
 
 class RubricScoresRequest(BaseModel):
@@ -169,10 +206,15 @@ class AskResponse(BaseModel):
 
 
 class SequentialStartRequest(BaseModel):
-    question: str = Field(..., min_length=5, max_length=2000)
+    question: str = Field(..., min_length=5, max_length=6000)
     model: Optional[str] = None
     language: Optional[str] = Field(default="en", pattern="^(en|pt|fi)$")
+    ui_mode: Optional[str] = Field(default="live", pattern="^(live|demo)$")
 
+    @field_validator("question")
+    @classmethod
+    def question_has_enough_words(cls, value: str) -> str:
+        return _validate_question_framing(value)
 
 class SequentialAdvanceRequest(BaseModel):
     human_note: str = Field(default="", max_length=2000)
@@ -359,8 +401,8 @@ async def post_model_selected(body: ModelSelectRequest):
 
 
 @app.get("/api/reports")
-async def reports(limit: int = 50):
-    return list_reports(limit=limit)
+async def reports(limit: int = 50, ui_mode: Optional[str] = None):
+    return list_reports(limit=limit, ui_mode=ui_mode)
 
 
 @app.get("/api/reports/{session_id}")
@@ -412,19 +454,98 @@ async def get_comparison_matrix(session_id: int):
             "model": get_selected_model(),
             "responses": data["responses"],
         }
-    return build_comparison_matrix(report)
+    human = get_human_answers(session_id) or {}
+    return build_comparison_matrix(report, human_answers=human.get("respondents") or [])
 
 
 @app.get("/api/comparison/{session_id}/human")
 async def get_human(session_id: int):
+    from core.constants import MAX_HUMAN_ANSWERS_PER_SESSION
+
     data = get_human_answers(session_id)
     if not data:
-        return {"session_id": session_id, "respondents": []}
-    return data
+        return {
+            "session_id": session_id,
+            "respondents": [],
+            "count": 0,
+            "capacity": MAX_HUMAN_ANSWERS_PER_SESSION,
+        }
+    respondents = data.get("respondents") or []
+    return {
+        **data,
+        "count": len(respondents),
+        "capacity": MAX_HUMAN_ANSWERS_PER_SESSION,
+    }
+
+
+@app.get("/api/comparison/{session_id}/guests")
+async def list_session_guests(session_id: int):
+    """List every guest/human answer for a session (shared invite + manual)."""
+    from core.constants import MAX_HUMAN_ANSWERS_PER_SESSION
+
+    _session_question(session_id)
+    data = get_human_answers(session_id) or {}
+    respondents = list(data.get("respondents") or [])
+    return {
+        "session_id": session_id,
+        "question": data.get("question") or _session_question(session_id),
+        "count": len(respondents),
+        "capacity": MAX_HUMAN_ANSWERS_PER_SESSION,
+        "remaining": max(0, MAX_HUMAN_ANSWERS_PER_SESSION - len(respondents)),
+        "respondents": respondents,
+    }
+
+
+@app.get("/api/comparison/{session_id}/guests.csv")
+async def export_session_guests_csv(session_id: int):
+    """CSV of all guest answers for one session (one row per person)."""
+    _session_question(session_id)
+    data = get_human_answers(session_id) or {}
+    respondents = list(data.get("respondents") or [])
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(
+        [
+            "session_id",
+            "response_id",
+            "name",
+            "role",
+            "organization",
+            "email",
+            "answer",
+            "source",
+            "invite_token",
+            "submitted_at",
+        ]
+    )
+    for index, person in enumerate(respondents, start=1):
+        writer.writerow(
+            [
+                session_id,
+                person.get("response_id") or f"row-{index}",
+                person.get("name", ""),
+                person.get("role", ""),
+                person.get("organization", ""),
+                person.get("email", ""),
+                person.get("answer", ""),
+                person.get("source", ""),
+                person.get("invite_token", ""),
+                person.get("submitted_at", ""),
+            ]
+        )
+    return StreamingResponse(
+        io.BytesIO(output.getvalue().encode("utf-8-sig")),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename=session-{session_id}-guests.csv"
+        },
+    )
 
 
 @app.post("/api/comparison/{session_id}/human")
 async def save_human(session_id: int, body: HumanAnswersRequest):
+    from core.constants import MAX_HUMAN_ANSWERS_PER_SESSION
+
     report = get_report(session_id)
     if not report:
         session = get_session(session_id)
@@ -433,9 +554,174 @@ async def save_human(session_id: int, body: HumanAnswersRequest):
         question = session["question"]
     else:
         question = report["question"]
+
     respondents = [r.model_dump() for r in body.respondents]
-    saved = save_human_answers(session_id, question, respondents)
-    return saved
+    existing = get_human_answers(session_id) or {}
+    existing_rows = list(existing.get("respondents") or [])
+
+    # Never drop invite-collected answers when facilitator saves a short manual list
+    body_ids = {r.get("response_id") for r in respondents if r.get("response_id")}
+    body_names = {(r.get("name") or "").strip().lower() for r in respondents if (r.get("name") or "").strip()}
+    preserved_invites = [
+        row
+        for row in existing_rows
+        if row.get("source") == "invite"
+        and row.get("response_id")
+        and row.get("response_id") not in body_ids
+        and (row.get("name") or "").strip().lower() not in body_names
+    ]
+    merged = preserved_invites + respondents
+    if len(merged) > MAX_HUMAN_ANSWERS_PER_SESSION:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Maximum {MAX_HUMAN_ANSWERS_PER_SESSION} human answers per session",
+        )
+    saved = save_human_answers(session_id, question, merged)
+    return {
+        **saved,
+        "count": len(saved.get("respondents") or []),
+        "capacity": MAX_HUMAN_ANSWERS_PER_SESSION,
+    }
+
+
+def _session_question(session_id: int) -> str:
+    report = get_report(session_id)
+    if report:
+        return report.get("question", "")
+    session = get_session(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return session.get("question", "")
+
+
+def _invite_public_url(token: str, request: Request) -> str:
+    settings = get_settings()
+    base = (settings.public_app_url or "").rstrip("/")
+    if not base:
+        # Prefer the browser Origin (Vite :5173) over the API host (:8000)
+        origin = (request.headers.get("origin") or "").rstrip("/")
+        referer = (request.headers.get("referer") or "").rstrip("/")
+        if origin and "://" in origin:
+            base = origin
+        elif referer and "://" in referer:
+            from urllib.parse import urlsplit
+
+            parts = urlsplit(referer)
+            base = f"{parts.scheme}://{parts.netloc}"
+        else:
+            base = str(request.base_url).rstrip("/")
+    return f"{base}/invite/{token}"
+
+
+def _invite_is_open(invite: dict) -> tuple[bool, str]:
+    from datetime import datetime, timezone
+
+    if not invite.get("active", True):
+        return False, "This invite link has been closed."
+    expires = invite.get("expires_at")
+    if expires:
+        try:
+            exp = datetime.fromisoformat(expires.replace("Z", "+00:00"))
+            if exp.tzinfo is None:
+                exp = exp.replace(tzinfo=timezone.utc)
+            if datetime.now(timezone.utc) > exp:
+                return False, "This invite link has expired."
+        except ValueError:
+            pass
+    count = int(invite.get("response_count") or 0)
+    max_r = int(invite.get("max_responses") or 100)
+    if count >= max_r:
+        return False, "This invite link has reached its response limit."
+    return True, ""
+
+
+@app.post("/api/comparison/{session_id}/invites")
+async def create_session_invite(session_id: int, body: CreateInviteRequest, request: Request):
+    question = _session_question(session_id)
+    invite = create_invite(
+        session_id,
+        question,
+        label=body.label,
+        days_valid=body.days_valid,
+        max_responses=body.max_responses,
+    )
+    return {
+        **invite,
+        "invite_url": _invite_public_url(invite["token"], request),
+    }
+
+
+@app.get("/api/comparison/{session_id}/invites")
+async def list_session_invites(session_id: int, request: Request):
+    _session_question(session_id)  # 404 if missing
+    invites = list_invites(session_id)
+    return {
+        "session_id": session_id,
+        "invites": [
+            {**inv, "invite_url": _invite_public_url(inv["token"], request)} for inv in invites
+        ],
+    }
+
+
+@app.post("/api/invites/{token}/close")
+async def close_invite(token: str):
+    invite = deactivate_invite(token)
+    if not invite:
+        raise HTTPException(status_code=404, detail="Invite not found")
+    return invite
+
+
+@app.get("/api/invites/{token}")
+async def get_public_invite(token: str):
+    invite = get_invite(token)
+    if not invite:
+        raise HTTPException(status_code=404, detail="Invite not found")
+    open_ok, reason = _invite_is_open(invite)
+    case = load_case_manifest()
+    return {
+        "token": token,
+        "question": invite.get("question", ""),
+        "label": invite.get("label", ""),
+        "case_title": case.get("title", ""),
+        "expires_at": invite.get("expires_at"),
+        "open": open_ok,
+        "closed_reason": reason if not open_ok else "",
+    }
+
+
+@app.post("/api/invites/{token}/answer")
+@limiter.limit("20/minute")
+async def submit_invite_answer(request: Request, token: str, body: InviteAnswerRequest):
+    invite = get_invite(token)
+    if not invite:
+        raise HTTPException(status_code=404, detail="Invite not found")
+    open_ok, reason = _invite_is_open(invite)
+    if not open_ok:
+        raise HTTPException(status_code=410, detail=reason)
+
+    from datetime import datetime, timezone
+
+    respondent = {
+        **body.model_dump(),
+        "source": "invite",
+        "invite_token": token,
+        "submitted_at": datetime.now(timezone.utc).isoformat(),
+    }
+    try:
+        saved = append_human_respondent(
+            int(invite["session_id"]),
+            invite.get("question", ""),
+            respondent,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    record_invite_response(token)
+    return {
+        "ok": True,
+        "session_id": invite["session_id"],
+        "respondent_count": len(saved.get("respondents") or []),
+    }
 
 
 RUBRIC_DIMENSIONS = [
@@ -540,7 +826,12 @@ async def sequential_start(request: Request, body: SequentialStartRequest):
     question = _question_with_language(body.question.strip(), body.language or "en")
     model = body.model or get_selected_model()
     try:
-        return await start_sequential_hitl(question, model=model, language=body.language or "en")
+        return await start_sequential_hitl(
+            question,
+            model=model,
+            language=body.language or "en",
+            ui_mode=body.ui_mode or "live",
+        )
     except Exception as exc:
         logger.exception("Sequential start failed")
         raise HTTPException(status_code=502, detail=str(exc)) from exc
@@ -626,6 +917,9 @@ async def ask_question(
 
     session_id = save_session(question, responses, workflow_mode=workflow_mode)
     session = get_session(session_id)
+    ui_mode = (body.ui_mode or "live").strip().lower()
+    if ui_mode not in ("live", "demo"):
+        ui_mode = "live"
     save_report(
         {
             "session_id": session_id,
@@ -633,6 +927,7 @@ async def ask_question(
             "created_at": session["created_at"],
             "model": model,
             "workflow_mode": workflow_mode,
+            "ui_mode": ui_mode,
             "responses": responses,
         }
     )
@@ -792,11 +1087,26 @@ async def serve_present():
     return _serve_index()
 
 
+@app.get("/invite/{token}")
+async def serve_invite(token: str):
+    return _serve_index()
+
+
+@app.get("/share")
+async def serve_share():
+    return _serve_index()
+
+
 @app.get("/agents")
 @app.get("/models")
 @app.get("/question")
 @app.get("/report")
 @app.get("/compare")
+@app.get("/share")
+@app.get("/guide")
+@app.get("/export")
+@app.get("/matrix")
+@app.get("/setup")
 async def serve_spa_routes():
     return _serve_index()
 

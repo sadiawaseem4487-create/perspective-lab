@@ -48,8 +48,14 @@ def serialize_run(row: dict) -> dict:
     }
 
 
-async def start_sequential_hitl(question: str, model: Optional[str], language: str = "en") -> dict:
+async def start_sequential_hitl(
+    question: str,
+    model: Optional[str],
+    language: str = "en",
+    ui_mode: str = "live",
+) -> dict:
     now = _now()
+    mode = ui_mode if ui_mode in ("live", "demo") else "live"
     run_id = create_sequential_run(
         {
             "question": question,
@@ -59,7 +65,7 @@ async def start_sequential_hitl(question: str, model: Optional[str], language: s
             "status": "running",
             "stage_outputs": "{}",
             "responses": "[]",
-            "human_checkpoints": "[]",
+            "human_checkpoints": json.dumps([{"event": "meta", "ui_mode": mode}]),
             "created_at": now,
             "updated_at": now,
         }
@@ -151,6 +157,11 @@ async def advance_sequential_hitl(
 
 def _finalize_run(run_id: int, row: dict, responses: List[dict], checkpoints: List[dict]) -> dict:
     session_id = save_session(row["question"], responses, workflow_mode="sequential")
+    ui_mode = "live"
+    for item in checkpoints or []:
+        if isinstance(item, dict) and item.get("event") == "meta" and item.get("ui_mode") in ("live", "demo"):
+            ui_mode = item["ui_mode"]
+            break
     save_report(
         {
             "session_id": session_id,
@@ -158,6 +169,7 @@ def _finalize_run(run_id: int, row: dict, responses: List[dict], checkpoints: Li
             "created_at": _now(),
             "model": row.get("model"),
             "workflow_mode": "sequential",
+            "ui_mode": ui_mode,
             "human_checkpoints": checkpoints,
             "responses": responses,
         }

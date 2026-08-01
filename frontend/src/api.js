@@ -1,4 +1,5 @@
-const API = "/api";
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+const API = `${API_BASE}/api`;
 const EXPORT_KEY_STORAGE = "perspective_lab_export_key";
 
 export function getExportKey() {
@@ -78,20 +79,31 @@ export async function fetchQuestions(lang = "en") {
   return parseResponse(res);
 }
 
-export async function askQuestion(question, model, language = "en", mode = "parallel") {
+export async function askQuestion(question, model, language = "en", mode = "parallel", uiMode = "live") {
   const res = await fetch(`${API}/ask`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ question, model: model || undefined, language, mode }),
+    body: JSON.stringify({
+      question,
+      model: model || undefined,
+      language,
+      mode,
+      ui_mode: uiMode === "demo" ? "demo" : "live",
+    }),
   });
   return parseResponse(res);
 }
 
-export async function startSequentialRun(question, model, language = "en") {
+export async function startSequentialRun(question, model, language = "en", uiMode = "live") {
   const res = await fetch(`${API}/sequential/start`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ question, model: model || undefined, language }),
+    body: JSON.stringify({
+      question,
+      model: model || undefined,
+      language,
+      ui_mode: uiMode === "demo" ? "demo" : "live",
+    }),
   });
   return parseResponse(res);
 }
@@ -119,8 +131,9 @@ export async function finalizeSequentialRun(runId, humanNote = "") {
   return parseResponse(res);
 }
 
-export async function fetchReports() {
-  const res = await fetch(`${API}/reports`);
+export async function fetchReports(uiMode) {
+  const qs = uiMode ? `?ui_mode=${encodeURIComponent(uiMode)}` : "";
+  const res = await fetch(`${API}/reports${qs}`);
   return parseResponse(res);
 }
 
@@ -146,6 +159,61 @@ export async function saveHumanAnswers(sessionId, respondents) {
     body: JSON.stringify({ respondents }),
   });
   return parseResponse(res);
+}
+
+export async function createInvite(sessionId, payload = {}) {
+  const res = await fetch(`${API}/comparison/${sessionId}/invites`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return parseResponse(res);
+}
+
+export async function listInvites(sessionId) {
+  const res = await fetch(`${API}/comparison/${sessionId}/invites`);
+  return parseResponse(res);
+}
+
+export async function closeInvite(token) {
+  const res = await fetch(`${API}/invites/${token}/close`, { method: "POST" });
+  return parseResponse(res);
+}
+
+export async function fetchInvite(token) {
+  const res = await fetch(`${API}/invites/${token}`);
+  return parseResponse(res);
+}
+
+export async function submitInviteAnswer(token, payload) {
+  const res = await fetch(`${API}/invites/${token}/answer`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return parseResponse(res);
+}
+
+export async function listSessionGuests(sessionId) {
+  const res = await fetch(`${API}/comparison/${sessionId}/guests`);
+  return parseResponse(res);
+}
+
+export async function downloadGuestsCsv(sessionId) {
+  const res = await fetch(`${API}/comparison/${sessionId}/guests.csv`);
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.detail || "Guest export failed");
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `session-${sessionId}-guests.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 export async function fetchRubricScores(sessionId) {

@@ -1,79 +1,51 @@
 {
-  "description": "Research and demo questions in multiple languages.",
+  "description": "Demo problem framings — fuller scenarios with context and focus questions (not one-line prompts).",
   "main_question": {
-    "en": "How do we solve school dropout in São Paulo?",
-    "pt": "Como resolvemos a evasão escolar em São Paulo?",
-    "fi": "Miten ratkaisemme koulupudokkuuden São Paulossa?"
+    "en": "How do we reduce school dropout in São Paulo with community participation?",
+    "pt": "Como reduzir a evasão escolar em São Paulo com participação da comunidade?",
+    "fi": "Miten vähennämme koulupudokkuutta São Paulossa yhteisön osallistumisella?"
   },
   "questions": [
     {
-      "id": "q1",
+      "id": "frame-community",
       "category": "problem_solving",
-      "label": { "en": "Main research question", "pt": "Pergunta principal", "fi": "Pääkysymys" },
+      "label": {
+        "en": "Community & dropout",
+        "pt": "Comunidade e evasão",
+        "fi": "Yhteisö ja pudokkuus"
+      },
       "text": {
-        "en": "How do we solve school dropout in São Paulo?",
-        "pt": "Como resolvemos a evasão escolar em São Paulo?",
-        "fi": "Miten ratkaisemme koulupudokkuuden São Paulossa?"
+        "en": "Context\nSão Paulo’s public schools face persistent secondary-school dropout. Families often feel disconnected from school decisions, and local community groups have energy but no clear role in prevention.\n\nConstraints\n- Limited new budget this year\n- Must work with existing school teams and municipal social services\n- Solutions should be realistic for a typical district, not only elite pilots\n\nFocus questions\n1. How can community participation reduce dropout in a concrete, measurable way this school year?\n2. Who must be involved (students, families, schools, social services, local organizations), and with what roles?\n3. What first actions should a municipal team take in the next 90 days?",
+        "pt": "Contexto\nAs escolas públicas de São Paulo enfrentam evasão persistente no ensino médio. Famílias muitas vezes se sentem afastadas das decisões escolares, e grupos comunitários têm energia, mas sem papel claro na prevenção.\n\nLimites\n- Pouco orçamento novo neste ano\n- Precisa funcionar com equipes escolares e serviços sociais já existentes\n- Soluções realistas para um distrito típico, não só pilotos privilegiados\n\nPerguntas-foco\n1. Como a participação da comunidade pode reduzir a evasão de forma concreta e mensurável neste ano letivo?\n2. Quem deve participar (estudantes, famílias, escolas, serviços sociais, organizações locais) e com quais papéis?\n3. Quais primeiras ações uma equipe municipal deve tomar nos próximos 90 dias?",
+        "fi": "Konteksti\nSão Paulon julkisissa kouluissa toisen asteen pudokkuus on pysyvää. Perheet kokevat usein jäävänsä sivuun koulun päätöksistä, ja paikallisilla yhteisöryhmillä on energiaa mutta epäselvä rooli ehkäisyssä.\n\nReunaehdot\n- Vähän uutta budjettia tänä vuonna\n- Toimittava nykyisten koulutiimien ja kunnallisten sosiaalipalvelujen kanssa\n- Ratkaisujen on oltava realistisia tyypilliselle alueelle, ei vain eliittipiloteille\n\nKohdekysymykset\n1. Miten yhteisön osallistuminen voi vähentää pudokkuutta konkreettisesti ja mitattavasti tämän lukuvuoden aikana?\n2. Keitä tarvitaan (oppilaat, perheet, koulut, sosiaalipalvelut, paikallisjärjestöt) ja millä rooleilla?\n3. Mitkä ensimmäiset toimet kunnallisen tiimin tulisi tehdä seuraavien 90 päivän aikana?"
       }
     },
     {
-      "id": "q2",
-      "category": "diagnosis",
-      "label": { "en": "Root causes", "pt": "Causas principais", "fi": "Juurisyyt" },
-      "text": {
-        "en": "What are the main reasons young people drop out of school in São Paulo?",
-        "pt": "Quais são as principais razões para jovens abandonarem a escola em São Paulo?",
-        "fi": "Mitkä ovat tärkeimmät syyt nuorten koulupudokkuuteen São Paulossa?"
-      }
-    },
-    {
-      "id": "q3",
-      "category": "policy",
-      "label": { "en": "Municipal coordination", "pt": "Coordenação municipal", "fi": "Kunnallinen koordinointi" },
-      "text": {
-        "en": "How should São Paulo's municipal education department coordinate schools, families, and social services to reduce dropout?",
-        "pt": "Como a secretaria municipal de educação de São Paulo deve coordenar escolas, famílias e serviços sociais para reduzir a evasão?",
-        "fi": "Miten São Paulon koulutusviraston tulisi koordinoida kouluja, perheitä ja sosiaalipalveluja pudokkuuden vähentämiseksi?"
-      }
-    },
-    {
-      "id": "q4",
+      "id": "frame-school-day",
       "category": "pedagogy",
-      "label": { "en": "School-day redesign", "pt": "Redesenho do dia escolar", "fi": "Koulupäivän uudistus" },
+      "label": {
+        "en": "School day at risk",
+        "pt": "Dia escolar em risco",
+        "fi": "Riskissä oleva koulupäivä"
+      },
       "text": {
-        "en": "How can a typical public school in São Paulo redesign the school day so students at risk of dropping out stay engaged?",
-        "pt": "Como uma escola pública típica em São Paulo pode redesenhar o dia escolar para manter engajados os alunos em risco de evasão?",
-        "fi": "Miten tavallinen São Paulon julkinen koulu voi uudistaa koulupäivän niin, että pudokkuusuhan alaiset oppilaat pysyvät mukana?"
+        "en": "Context\nIn several São Paulo municipal schools, students at risk of dropping out disengage during long, fragmented school days. Attendance dips after lunch; teachers report that lessons feel disconnected from students’ lives and work realities.\n\nConstraints\n- Cannot fully redesign the official curriculum overnight\n- Class sizes remain large\n- Any change must be teachable by current staff with light training\n\nFocus questions\n1. How should a typical public school redesign parts of the school day so at-risk students stay engaged?\n2. What practices build student autonomy and belonging without ignoring accountability and basic skills?\n3. What small pilot (one grade or one shift) could start within one semester, and how would we know it worked?",
+        "pt": "Contexto\nEm várias escolas municipais de São Paulo, alunos em risco de evasão se desengajam em dias escolares longos e fragmentados. A frequência cai após o almoço; professores relatam que as aulas parecem desconectadas da vida e do trabalho dos estudantes.\n\nLimites\n- Não dá para redesenhar todo o currículo de uma vez\n- Turmas continuam grandes\n- Mudanças devem ser aplicáveis pela equipe atual com formação leve\n\nPerguntas-foco\n1. Como uma escola pública típica pode redesenhar partes do dia escolar para manter engajados os alunos em risco?\n2. Quais práticas fortalecem autonomia e pertencimento sem ignorar responsabilização e competências básicas?\n3. Que piloto pequeno (uma série ou um turno) pode começar em um semestre, e como saberemos se funcionou?",
+        "fi": "Konteksti\nUseissa São Paulon kunnallisissa kouluissa pudokkuusuhan alaiset oppilaat irtautuvat pitkän ja pirstaleisen koulupäivän aikana. Läsnäolo heikkenee lounaan jälkeen; opettajat kertovat, että opetus tuntuu irti oppilaiden elämästä ja työn arjesta.\n\nReunaehdot\n- Virallista opetussuunnitelmaa ei voi uudistaa kokonaan kerralla\n- Ryhmäkoot pysyvät suurina\n- Muutosten on oltava nykyhenkilöstön toteutettavissa kevyellä koulutuksella\n\nKohdekysymykset\n1. Miten tyypillinen julkinen koulu voi uudistaa osia koulupäivästä niin, että riskissä olevat oppilaat pysyvät mukana?\n2. Mitkä käytännöt rakentavat autonomiaa ja yhteenkuuluvuutta ilman, että vastuullisuus ja perustaidot jäävät sivuun?\n3. Mikä pieni pilotti (yksi vuosiluokka tai vuoro) voisi alkaa yhden lukukauden aikana, ja miten tietäisimme sen toimivan?"
       }
     },
     {
-      "id": "q5",
+      "id": "frame-scale-pilot",
       "category": "scaling",
-      "label": { "en": "Scale a pilot", "pt": "Escalar um piloto", "fi": "Pilottihankkeen laajennus" },
+      "label": {
+        "en": "Scale a working pilot",
+        "pt": "Escalar um piloto",
+        "fi": "Laajenna toimiva pilotti"
+      },
       "text": {
-        "en": "A pilot program reduced dropout in 12 São Paulo schools. How should the city scale it to 500 schools without losing quality?",
-        "pt": "Um programa piloto reduziu a evasão em 12 escolas de São Paulo. Como a cidade deve escalá-lo para 500 escolas sem perder qualidade?",
-        "fi": "Pilottiohjelma vähensi pudokkuutta 12 São Paulon koulussa. Miten kaupunki voi laajentaa sen 500 kouluun laadusta tinkimättä?"
-      }
-    },
-    {
-      "id": "q6",
-      "category": "stakeholders",
-      "label": { "en": "Student voice", "pt": "Voz dos estudantes", "fi": "Opiskelijoiden ääni" },
-      "text": {
-        "en": "How do we bring students and families into dropout prevention decisions in São Paulo's public schools?",
-        "pt": "Como incluímos estudantes e famílias nas decisões de prevenção à evasão nas escolas públicas de São Paulo?",
-        "fi": "Miten saamme oppilaat ja perheet mukaan pudokkuuden ehkäisyä koskeviin päätöksiin São Paulon julkisissa kouluissa?"
-      }
-    },
-    {
-      "id": "q7",
-      "category": "quick_test",
-      "label": { "en": "One-semester action", "pt": "Ação em um semestre", "fi": "Toimenpide yhdeksi lukukaudeksi" },
-      "text": {
-        "en": "What is one actionable step to reduce school dropout in São Paulo this semester?",
-        "pt": "Qual é uma ação prática para reduzir a evasão escolar em São Paulo neste semestre?",
-        "fi": "Mikä on yksi konkreettinen askel koulupudokkuuden vähentämiseksi São Paulossa tällä lukukaudella?"
+        "en": "Context\nA municipal pilot in 12 São Paulo schools combined early-warning attendance tracking, family outreach, and community mentors. Dropout fell in the pilot schools, and district leaders want to expand.\n\nConstraints\n- Scaling toward hundreds of schools under uneven local capacity\n- Mentors and social workers are scarce\n- Political pressure for quick city-wide results\n\nFocus questions\n1. How should the city scale this pilot without losing quality?\n2. What must stay fixed versus what can adapt by neighborhood?\n3. How do we sequence expansion, train staff, and measure success so early gains survive growth?",
+        "pt": "Contexto\nUm piloto municipal em 12 escolas de São Paulo combinou alerta precoce de frequência, contato com famílias e mentores comunitários. A evasão caiu nas escolas do piloto, e a gestão quer expandir.\n\nLimites\n- Escala para centenas de escolas com capacidade local desigual\n- Mentores e assistentes sociais são escassos\n- Pressão política por resultados rápidos em toda a cidade\n\nPerguntas-foco\n1. Como a cidade deve escalar este piloto sem perder qualidade?\n2. O que deve permanecer fixo e o que pode se adaptar por bairro?\n3. Como sequenciar a expansão, capacitar equipes e medir sucesso para que os ganhos iniciais sobrevivam ao crescimento?",
+        "fi": "Konteksti\nKunnallinen pilotti 12 São Paulon koulussa yhdisti varhaisen poissaoloseurannan, perheyhteydenpidon ja yhteisömentorit. Pudokkuus väheni pilottikouluissa, ja hallinto haluaa laajentaa.\n\nReunaehdot\n- Laajennus kohti satoja kouluja epätasaisella paikallisella kapasiteetilla\n- Mentoreita ja sosiaalityöntekijöitä on niukasti\n- Poliittinen paine nopeisiin kaupunkilaajuisiin tuloksiin\n\nKohdekysymykset\n1. Miten kaupunki voi laajentaa tämän pilotin ilman laadun heikkenemistä?\n2. Mikä pitää pysyä samana ja mikä voi mukautua kaupunginosittain?\n3. Miten laajennus, henkilöstön koulutus ja mittaus kannattaa ajoittaa niin, että alkuvaiheen hyödyt säilyvät kasvussa?"
       }
     }
   ]

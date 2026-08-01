@@ -103,7 +103,7 @@ Get a key: https://openrouter.ai/keys
 | 1 | Setup | API key (once) |
 | 2 | Workspace | Ask agents |
 | 3 | Report | Read four theory answers |
-| 4 | Compare / Study | Humans + rubric / protocol |
+| 4 | Invite / Compare | Share link + guest answers + rubric |
 | 5 | Presentation | Academic deck |
 | 6 | Export | JSON / CSV / rubric CSV |
 | 7 | Guide | In-app checklist |
@@ -127,6 +127,20 @@ To go back: `CASE_ID=sao-paulo-dropout` or remove the line.
 
 ---
 
+## Remote guest answers (same question)
+
+1. Ask the agents once (Workspace)
+2. Open **Compare** for that question
+3. Under **Remote invite link** → choose max people (**100** default) → **Create invite link** → **Copy link**
+4. Send the **same link** to many people (WhatsApp / email). Each person submits separately.
+5. Answers are stored one-by-one (up to **100** per session) — they do not overwrite each other
+6. On **Compare**: use **All guest responses** to search the full list, or **Export CSV**
+7. On **Matrix**: agents + neutral guest summary table for everyone
+
+For people outside your Wi‑Fi / local Mac: deploy with [docs/wiki/Free-Hosting.md](docs/wiki/Free-Hosting.md) (Vercel + Render).
+
+---
+
 ## Optional: Mac installer (.dmg) — fully self-contained
 
 On your Desktop after `make desktop-dmg`: **`PerspectiveLab-Installer.dmg`**
@@ -135,10 +149,23 @@ On your Desktop after `make desktop-dmg`: **`PerspectiveLab-Installer.dmg`**
 
 1. Double-click the **.dmg**
 2. Drag **PerspectiveLab** into **Applications**
-3. Open **Applications → PerspectiveLab**
-4. If macOS blocks it: **right-click → Open → Open** (once — unsigned until Apple notarization)
-5. One-time prepare dialog → Terminal starts the server
-6. Browser → **Setup** → paste API key
+3. Open the app (see **Mac security warning** below if blocked)
+4. One-time prepare dialog → Terminal starts the server
+5. Browser → **Setup** → paste API key
+
+### Mac security warning (“Apple could not verify…”)
+
+This is **normal** until the app is Apple-notarized. It is **not** malware.
+
+**On the other laptop, do one of these once:**
+
+| Method | Steps |
+|--------|--------|
+| **Easiest** | In the DMG window, double-click **`Fix Mac Open.command`** |
+| Right-click | **Applications** → right-click **PerspectiveLab** → **Open** → **Open** |
+| Settings | **System Settings → Privacy & Security → Open Anyway** |
+
+**Permanent fix (no warning on any Mac):** [Apple Developer Program](https://developer.apple.com/programs/) (~$99/year) + sign/notarize — see `desktop/macos/GATEKEEPER.md`.
 
 Rebuild:
 
@@ -170,7 +197,7 @@ Most clients only need **browser + Start App**.
 | Cannot connect | Keep start window open |
 | Agents fail / no key | **Setup** → save key again |
 | First start slow | Normal once |
-| Mac blocks app | Right-click → Open |
+| Mac blocks app (“could not verify”) | DMG: **Fix Mac Open.command** · or right-click → Open · or Privacy & Security → Open Anyway |
 | Windows: python not found | Reinstall Python with PATH checked |
 | Linux: `python3-venv` missing | `sudo apt install python3-venv` |
 | `npm` not found | Install Node.js LTS |

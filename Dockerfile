@@ -26,11 +26,20 @@ RUN pip install --upgrade pip \
     && pip install -r backend/requirements.txt
 
 COPY backend/ ./backend/
+COPY cases/ ./cases/
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 COPY docker/entrypoint.sh /entrypoint.sh
 COPY docker/gunicorn.conf.py ./docker/gunicorn.conf.py
 
 RUN mkdir -p /app/backend/data \
+    && mkdir -p /app/cases/sao-paulo-dropout/human_answers \
+               /app/cases/sao-paulo-dropout/invites \
+               /app/cases/sao-paulo-dropout/rubric_scores \
+               /app/cases/sao-paulo-dropout/reports \
+               /app/cases/digital-inclusion/human_answers \
+               /app/cases/digital-inclusion/invites \
+               /app/cases/digital-inclusion/rubric_scores \
+               /app/cases/digital-inclusion/reports \
     && chown -R appuser:appuser /app /entrypoint.sh \
     && chmod +x /entrypoint.sh
 

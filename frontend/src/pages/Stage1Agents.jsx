@@ -72,7 +72,7 @@ function toDropdownValue(agentId, slotKey, slotDefaults, mainIds) {
   return agentId;
 }
 
-export default function Stage1Agents() {
+export default function Stage1Agents({ embedded = false }) {
   const { t } = useLanguage();
   const [agentMap, setAgentMap] = useState({});
   const [slotDefaults, setSlotDefaults] = useState({
@@ -228,8 +228,11 @@ export default function Stage1Agents() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
-      <PageHero badge={t("stage1.badge")} title={t("stage1.title")} description={t("stage1.desc")} />
+    <div className={embedded ? "space-y-4" : "mx-auto max-w-6xl space-y-6"}>
+      {!embedded && (
+        <PageHero badge={t("stage1.badge")} title={t("stage1.title")} description={t("stage1.desc")} />
+      )}
+      {embedded && <p className="text-sm text-slate-400">{t("stage1.desc")}</p>}
 
       <div className="space-y-6">
         {SLOTS.map((slot) => {
@@ -339,11 +342,13 @@ export default function Stage1Agents() {
         {message && <p className="text-sm text-slate-400">{message}</p>}
       </div>
 
-      <div className="flex justify-end">
-        <Link to="/models" className="page-btn-primary">
-          {t("stage1.next")}
-        </Link>
-      </div>
+      {!embedded && (
+        <div className="flex justify-end">
+          <Link to="/settings?tab=models" className="page-btn-primary">
+            {t("stage1.next")}
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

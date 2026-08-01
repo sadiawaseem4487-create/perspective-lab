@@ -5,7 +5,7 @@ import { fetchSetupStatus, saveSetupKeys } from "@/api";
 import { PageAlert, PageHero, PagePanel } from "@/components/PageChrome";
 import { useLanguage } from "@/i18n/LanguageContext";
 
-export default function SetupWizardPage() {
+export default function SetupWizardPage({ embedded = false }) {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [provider, setProvider] = useState("openrouter");
@@ -38,7 +38,7 @@ export default function SetupWizardPage() {
       });
       setDone(true);
       setApiKey("");
-      navigate("/question");
+      if (!embedded) navigate("/question");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -47,12 +47,17 @@ export default function SetupWizardPage() {
   }
 
   return (
-    <div className="mx-auto max-w-xl space-y-6">
-      <PageHero
-        badge={t("setup.badge")}
-        title={t("setup.title")}
-        description={<p className="text-slate-400">{t("setup.desc")}</p>}
-      />
+    <div className={embedded ? "space-y-4" : "mx-auto max-w-xl space-y-6"}>
+      {!embedded && (
+        <PageHero
+          badge={t("setup.badge")}
+          title={t("setup.title")}
+          description={<p className="text-slate-400">{t("setup.desc")}</p>}
+        />
+      )}
+      {embedded && (
+        <p className="text-sm text-slate-400">{t("setup.desc")}</p>
+      )}
 
       {error && <PageAlert>{error}</PageAlert>}
       {done && (

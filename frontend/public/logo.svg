@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" role="img" aria-label="PerspectiveLab">
+  <title>PerspectiveLab</title>
+  <circle cx="64" cy="40" r="26" stroke="#ea580c" stroke-width="9"/>
+  <circle cx="88" cy="64" r="26" stroke="#f59e0b" stroke-width="9"/>
+  <circle cx="64" cy="88" r="26" stroke="#64748b" stroke-width="9"/>
+  <circle cx="40" cy="64" r="26" stroke="#22d3ee" stroke-width="9"/>
+  <circle cx="64" cy="64" r="5.5" fill="#f8fafc"/>
+</svg>

@@ -1,109 +1,158 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchComparisonMatrix, fetchReports } from "@/api";
-import { PageAlert, PageHero } from "@/components/PageChrome";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { PageAlert, PageHero, PagePanel } from "@/components/PageChrome";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { useAppMode } from "@/context/AppModeContext";
+import { getAgentLens, getAgentTheorist } from "@/lib/agentIcons";
+import { cn } from "@/lib/utils";
+import { getActiveSessionId, setActiveSessionId } from "@/utils/sessionWorkspace";
 import {
   displayQuestion,
   resolvePreferredSessionId,
   uniqueReportsByQuestion,
 } from "@/utils/uniqueReports";
 
-function MatrixTable({ matrix, agents, legend }) {
-  if (!matrix?.length) {
-    return <p className="text-sm text-slate-400">No matrix data.</p>;
+/** Research-only rows — hide from the professional matrix view. */
+const HIDDEN_DIMENSIONS = new Set(["self_check_passed"]);
+
+function columnTitle(col, lang) {
+  if (col.kind === "guest") {
+    return col.guest_name || col.agent_label || "Guest";
+  }
+  const key = col.agent_key || "";
+  return getAgentTheorist(key) || col.agent_label || key || "Agent";
+}
+
+function columnSubtitle(col, lang) {
+  if (col.kind === "guest") {
+    return [col.guest_role, col.guest_organization].filter(Boolean).join(" · ") || "Guest";
+  }
+  return getAgentLens(col.agent_key, lang) || "";
+}
+
+function formatCell(value) {
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (value === "" || value == null) return "—";
+  return String(value);
+}
+
+function MatrixTable({ matrix, columns, lang, t }) {
+  const rows = (matrix || []).filter((row) => !HIDDEN_DIMENSIONS.has(row.dimension));
+
+  if (!rows.length) {
+    return <p className="text-sm text-slate-400">{t("matrixPage.empty")}</p>;
   }
 
   return (
-    <div className="space-y-3">
-      {legend && (
-        <p className="text-xs text-slate-400">
-          <span className="text-emerald-400">answer</span> = from agent text ·{" "}
-          <span className="text-amber-300">schema_default</span> = profile default (not from this answer) ·{" "}
-          <span className="text-slate-500">missing</span> = not found
-        </p>
-      )}
-      <div className="overflow-x-auto rounded-xl border border-white/10 bg-slate-900/50 backdrop-blur-sm">
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="bg-slate-900/60">
-            <tr>
-              <th className="px-4 py-3 font-semibold text-slate-200">Dimension</th>
-              {agents.map((agent) => (
-                <th key={agent.agent_key} className="px-4 py-3 font-semibold text-slate-200">
-                  <span className="inline-flex items-center gap-2">
+    <div className="overflow-x-auto rounded-xl border border-white/10">
+      <table className="w-full min-w-[720px] border-collapse text-left text-xs">
+        <thead>
+          <tr className="border-b border-white/10 bg-slate-950/80">
+            <th className="w-36 px-3 py-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+              {t("matrixPage.dimension")}
+            </th>
+            {columns.map((col) => {
+              const key = col.column_key || col.agent_key;
+              const isGuest = col.kind === "guest";
+              return (
+                <th key={key} className="min-w-[10rem] px-3 py-2.5 align-bottom">
+                  <div className="flex items-start gap-2">
                     <span
-                      className="inline-block h-2.5 w-2.5 rounded-full"
-                      style={{ backgroundColor: agent.color || "#78716c" }}
+                      className="mt-1 inline-block h-2 w-2 shrink-0 rounded-full"
+                      style={{ backgroundColor: isGuest ? "#34d399" : col.color || "#78716c" }}
                     />
-                    {agent.agent_label}
-                  </span>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {matrix.map((row) => (
-              <tr key={row.dimension} className="border-t border-white/10">
-                <td className="px-4 py-3 font-medium text-white">{row.label}</td>
-                {agents.map((agent) => {
-                  const value = row.values[agent.agent_key];
-                  const source = row.sources?.[agent.agent_key];
-                  const display =
-                    typeof value === "boolean" ? (value ? "yes" : "no") : value || "—";
-                  return (
-                    <td key={agent.agent_key} className="px-4 py-3 align-top text-slate-300">
-                      <div>{display}</div>
-                      {source && source !== "answer" && row.dimension !== "self_check_passed" && (
-                        <div
-                          className={`mt-1 text-[10px] uppercase tracking-wide ${
-                            source === "schema_default" ? "text-amber-300/80" : "text-slate-600"
-                          }`}
-                        >
-                          {source}
-                        </div>
+                    <span className="min-w-0">
+                      <span className={cn("block text-sm font-semibold", isGuest ? "text-emerald-100" : "text-white")}>
+                        {columnTitle(col, lang)}
+                      </span>
+                      {columnSubtitle(col, lang) && (
+                        <span className="mt-0.5 block text-[11px] font-normal text-slate-500">
+                          {columnSubtitle(col, lang)}
+                        </span>
                       )}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                    </span>
+                  </div>
+                </th>
+              );
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.dimension} className="border-b border-white/5 last:border-0">
+              <td className="px-3 py-2.5 align-top text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                {row.label}
+              </td>
+              {columns.map((col) => {
+                const key = col.column_key || col.agent_key;
+                const isGuest = col.kind === "guest";
+                const source = row.sources?.[key];
+                const display = formatCell(row.values[key]);
+                const isDefault = source === "schema_default";
+                return (
+                  <td
+                    key={key}
+                    className={cn(
+                      "px-3 py-2.5 align-top text-[13px] leading-snug whitespace-pre-wrap",
+                      isGuest ? "bg-emerald-950/20 text-slate-300" : "text-slate-200",
+                      isDefault && "text-slate-500"
+                    )}
+                  >
+                    {display}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
 
 export default function ComparisonMatrixPage() {
-  const { t } = useLanguage();
-  const [reports, setReports] = useState([]);
+  const { t, lang } = useLanguage();
+  const { isDemo } = useAppMode();
+  const uiMode = isDemo ? "demo" : "live";
   const [sessionId, setSessionId] = useState(null);
   const [matrixData, setMatrixData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const lastId = sessionStorage.getItem("last_session_id");
-    fetchReports()
-      .then((list) => {
+    async function hydrate() {
+      setLoading(true);
+      try {
+        const list = await fetchReports(uiMode);
         const unique = uniqueReportsByQuestion(list);
-        setReports(unique);
-        const id = resolvePreferredSessionId(list, lastId);
-        if (id) setSessionId(id);
-        else setLoading(false);
-      })
-      .catch((err) => {
+        const id =
+          resolvePreferredSessionId(list, getActiveSessionId(uiMode)) || unique[0]?.session_id;
+        if (!id) {
+          setSessionId(null);
+          setMatrixData(null);
+          return;
+        }
+        setSessionId(id);
+      } catch (err) {
         setError(err.message);
+      } finally {
         setLoading(false);
-      });
-  }, []);
+      }
+    }
+
+    hydrate();
+
+    function onFocus() {
+      hydrate();
+    }
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [uiMode]);
 
   useEffect(() => {
     if (!sessionId) return;
+    setActiveSessionId(sessionId, uiMode);
     setLoading(true);
     fetchComparisonMatrix(sessionId)
       .then((data) => {
@@ -112,72 +161,129 @@ export default function ComparisonMatrixPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [sessionId]);
+  }, [sessionId, uiMode]);
+
+  const columns = matrixData?.columns || matrixData?.agents || [];
+  const guestCount = matrixData?.guest_count || 0;
+
+  const guestNote = useMemo(() => {
+    if (!guestCount) return "";
+    const shown = matrixData?.guest_columns_shown || 0;
+    const limit = matrixData?.guest_column_limit || 8;
+    if (guestCount > limit) {
+      return t("shell.matrixGuestCap")
+        .replace("{shown}", String(shown))
+        .replace("{total}", String(guestCount));
+    }
+    return "";
+  }, [guestCount, matrixData, t]);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
-      <PageHero title={t("shell.matrixTitle")} description={t("shell.matrixDesc")} />
-
-      <Card className="border-white/10 bg-slate-900/50 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="font-display text-white">{t("shell.session")}</CardTitle>
-          <CardDescription>{t("shell.matrixDesc")}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <label className="text-sm font-medium text-slate-300" htmlFor="matrix-session">
-              {t("shell.session")}
-            </label>
-            <select
-              id="matrix-session"
-              value={sessionId || ""}
-              onChange={(e) => setSessionId(Number(e.target.value))}
-              className="page-select h-10"
-            >
-              {reports.map((r) => (
-                <option key={r.session_id} value={r.session_id}>
-                  #{r.session_id} — {r.question}
-                </option>
-              ))}
-            </select>
-            {matrixData?.workflow_mode && (
-              <Badge variant="outline" className="border-white/20 text-slate-300">
-                {matrixData.workflow_mode}
-              </Badge>
-            )}
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="border-white/20 bg-transparent text-slate-200 hover:bg-white/10"
-            >
-              <Link to="/report">{t("shell.openReport")}</Link>
-            </Button>
-          </div>
-
-          {matrixData?.question && (
-            <p className="rounded-lg border border-white/10 bg-slate-900/40 p-3 text-sm text-slate-300">
-              {displayQuestion(matrixData.question)}
-            </p>
-          )}
-        </CardContent>
-      </Card>
+    <div className="mx-auto max-w-6xl space-y-5">
+      <PageHero
+        badge={t("shell.matrix")}
+        title={t("shell.matrixTitle")}
+        size="sm"
+        description={<p className="max-w-xl text-slate-400">{t("shell.matrixDesc")}</p>}
+      />
 
       {error && <PageAlert>{error}</PageAlert>}
 
-      {loading ? (
-        <div className="space-y-3">
-          <Skeleton className="h-10 w-full bg-white/10" />
-          <Skeleton className="h-64 w-full bg-white/10" />
-        </div>
-      ) : matrixData ? (
-        <MatrixTable matrix={matrixData.matrix} agents={matrixData.agents} legend={matrixData.legend} />
-      ) : (
-        <Card className="border-white/10 bg-slate-900/50 backdrop-blur-sm">
-          <CardContent className="py-8 text-center text-sm text-slate-400">
-            {t("stage4.noReports")}
-          </CardContent>
-        </Card>
+      {loading && (
+        <PagePanel>
+          <p className="text-sm text-slate-400">{t("common.loading") || "Loading…"}</p>
+        </PagePanel>
+      )}
+
+      {!loading && !matrixData && (
+        <PagePanel>
+          <p className="text-sm text-slate-300">{t("stage4.noReports")}</p>
+          <Link to="/question" className="page-btn-primary mt-4 inline-flex px-4 py-2 text-sm">
+            {t("stage5.runFirst")}
+          </Link>
+        </PagePanel>
+      )}
+
+      {!loading && matrixData && (
+        <>
+          <section className="border-b border-white/10 pb-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+              {t("stage5.researchQuestion")}
+            </p>
+            <p className="mt-1.5 text-base font-medium leading-snug text-white sm:text-lg">
+              {displayQuestion(matrixData.question)}
+            </p>
+            <p className="mt-1.5 text-xs text-slate-500">
+              {columns.filter((c) => c.kind !== "guest").length} {t("stage5.agentsShort")}
+              {guestCount > 0 ? ` · ${guestCount} ${t("stage5.guestsShort")}` : ""}
+              {matrixData.workflow_mode ? ` · ${matrixData.workflow_mode}` : ""}
+            </p>
+          </section>
+
+          {guestNote && <p className="text-xs text-slate-500">{guestNote}</p>}
+
+          <MatrixTable matrix={matrixData.matrix} columns={columns} lang={lang} t={t} />
+
+          {(matrixData.guest_summaries || []).length > 0 && (
+            <section className="space-y-2">
+              <h3 className="text-sm font-semibold text-white">
+                {t("guests.listTitle")}
+                <span className="ml-2 text-xs font-normal text-slate-500">({guestCount})</span>
+              </h3>
+              <div className="overflow-x-auto rounded-xl border border-emerald-500/20">
+                <table className="w-full text-left text-xs">
+                  <thead className="border-b border-emerald-500/15 bg-emerald-950/30">
+                    <tr>
+                      <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-emerald-400/80">
+                        #
+                      </th>
+                      <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-emerald-400/80">
+                        {t("matrixPage.colName")}
+                      </th>
+                      <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-emerald-400/80">
+                        {t("matrixPage.colRole")}
+                      </th>
+                      <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-emerald-400/80">
+                        {t("matrixPage.colAnswer")}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {matrixData.guest_summaries.map((g, i) => (
+                      <tr key={g.response_id || i} className="border-b border-white/5 last:border-0">
+                        <td className="px-3 py-2 align-top text-slate-500">{i + 1}</td>
+                        <td className="px-3 py-2 align-top font-medium text-white">{g.name}</td>
+                        <td className="px-3 py-2 align-top text-slate-400">
+                          {[g.role, g.organization].filter(Boolean).join(" · ") || "—"}
+                        </td>
+                        <td className="px-3 py-2 align-top whitespace-pre-wrap leading-relaxed text-slate-300">
+                          {g.answer || g.values?.main_focus || "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4">
+            <Link to="/compare" className="page-btn-secondary px-4 py-2 text-xs">
+              {t("nav.compare")}
+            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                to={sessionId ? `/share?session=${sessionId}` : "/share"}
+                className="page-btn-secondary px-4 py-2 text-xs"
+              >
+                {t("nav.share")}
+              </Link>
+              <Link to="/report" className="page-btn-primary px-4 py-2 text-xs">
+                {t("nav.report")}
+              </Link>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

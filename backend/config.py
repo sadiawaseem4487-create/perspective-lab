@@ -47,6 +47,9 @@ class Settings(BaseSettings):
     # Optional semantic theory judge (extra LLM call per agent when true)
     theory_judge_llm: bool = False
 
+    # Absolute public URL for invite links (e.g. https://your-app.onrender.com)
+    public_app_url: str = ""
+
     log_level: str = "INFO"
 
     frontend_dist: Path = Path(__file__).parent.parent / "frontend" / "dist"

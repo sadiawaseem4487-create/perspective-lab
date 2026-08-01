@@ -1,5 +1,7 @@
 """Application layer facade for case operations (delegates to infrastructure)."""
 
+from typing import Optional
+
 from infrastructure.cases.repository import CaseRepository, clear_case_cache, get_case_repository
 
 # Re-export for agent orchestration
@@ -32,6 +34,12 @@ __all__ = [
     "load_tools_config",
     "load_presentation_config",
     "save_human_answers",
+    "append_human_respondent",
+    "create_invite",
+    "get_invite",
+    "list_invites",
+    "record_invite_response",
+    "deactivate_invite",
     "save_rubric_scores",
     "save_report",
     "set_selected_model",
@@ -117,8 +125,8 @@ def save_report(session: dict):
     return repo().save_report(session)
 
 
-def list_reports(limit: int = 50):
-    return repo().list_reports(limit)
+def list_reports(limit: int = 50, ui_mode: Optional[str] = None):
+    return repo().list_reports(limit, ui_mode=ui_mode)
 
 
 def get_report(session_id: int):
@@ -129,8 +137,32 @@ def save_human_answers(session_id: int, question: str, respondents):
     return repo().save_human_answers(session_id, question, respondents)
 
 
+def append_human_respondent(session_id: int, question: str, respondent: dict):
+    return repo().append_human_respondent(session_id, question, respondent)
+
+
 def get_human_answers(session_id: int):
     return repo().get_human_answers(session_id)
+
+
+def create_invite(session_id: int, question: str, **kwargs):
+    return repo().create_invite(session_id, question, **kwargs)
+
+
+def get_invite(token: str):
+    return repo().get_invite(token)
+
+
+def list_invites(session_id: int):
+    return repo().list_invites(session_id)
+
+
+def record_invite_response(token: str):
+    return repo().record_invite_response(token)
+
+
+def deactivate_invite(token: str):
+    return repo().deactivate_invite(token)
 
 
 def save_rubric_scores(session_id: int, payload: dict):
@@ -169,7 +201,7 @@ def list_theory_profiles():
     return repo().list_theory_profiles()
 
 
-def build_comparison_matrix(report: dict):
+def build_comparison_matrix(report: dict, human_answers=None):
     from engine.comparison_matrix import build_comparison_matrix as _build
 
-    return _build(report)
+    return _build(report, human_answers=human_answers)

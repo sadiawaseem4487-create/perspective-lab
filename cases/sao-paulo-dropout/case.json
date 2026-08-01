@@ -18,6 +18,7 @@
     "reports": "reports",
     "human_answers": "human_answers",
     "rubric_scores": "rubric_scores",
+    "invites": "invites",
     "presentation": "presentation.json"
   }
 }

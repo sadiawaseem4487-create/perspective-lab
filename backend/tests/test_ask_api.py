@@ -14,7 +14,7 @@ def _enable_llm(monkeypatch):
 def test_ask_requires_llm_key(client):
     response = client.post(
         "/api/ask",
-        json={"question": "How can we reduce school dropout in São Paulo?"},
+        json={"question": "How should municipal education teams involve families and community partners to reduce secondary school dropout in São Paulo this year, and what measurable first steps should they take within ninety days?"},
     )
     assert response.status_code == 503
     assert "API key" in response.json()["detail"]
@@ -64,7 +64,7 @@ def test_ask_success_creates_session_and_report(mock_ask, client, tmp_path, monk
 
     _enable_llm(monkeypatch)
 
-    question = "How can we reduce school dropout in São Paulo?"
+    question = "How should municipal education teams involve families and community partners to reduce secondary school dropout in São Paulo this year, and what measurable first steps should they take within ninety days?"
     response = client.post("/api/ask", json={"question": question, "language": "en"})
     assert response.status_code == 200
     payload = response.json()
@@ -94,6 +94,6 @@ def test_ask_all_agents_fail(mock_ask, client, monkeypatch):
 
     response = client.post(
         "/api/ask",
-        json={"question": "How can we reduce school dropout in São Paulo?"},
+        json={"question": "How should municipal education teams involve families and community partners to reduce secondary school dropout in São Paulo this year, and what measurable first steps should they take within ninety days?"},
     )
     assert response.status_code == 502

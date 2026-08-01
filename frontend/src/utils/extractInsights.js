@@ -54,6 +54,62 @@ export function extractInsight(response) {
   };
 }
 
+const HIGHLIGHT_SECTIONS = [
+  "Collective action",
+  "Priority Actions",
+  "Participatory action plan",
+  "Pilot design",
+  "Procedure and accountability plan",
+  "School-day learning plan",
+  "Concrete activity",
+  "Process design",
+  "Naming the problem",
+  "Problem Diagnosis",
+];
+
+/** Up to `max` plain bullets for the Workspace overview (not full theory dump). */
+export function extractHighlights(responseText, max = 4) {
+  if (!responseText) return [];
+  const { sections, fallback } = parseAgentResponse(responseText);
+  const points = [];
+  const seen = new Set();
+
+  function push(text) {
+    const cleaned = trimAtWord(cleanAgentText(text || ""), 180);
+    if (!cleaned || seen.has(cleaned)) return;
+    seen.add(cleaned);
+    points.push(cleaned);
+  }
+
+  for (const title of HIGHLIGHT_SECTIONS) {
+    if (points.length >= max) break;
+    const section = sections.find((s) => s.title === title);
+    if (!section) continue;
+    for (const bullet of section.bullets || []) {
+      if (points.length >= max) break;
+      if (bullet.type === "action" && bullet.action) push(bullet.action);
+      else if (bullet.text) push(bullet.text);
+    }
+  }
+
+  if (points.length < 2) {
+    for (const section of sections) {
+      if (points.length >= max) break;
+      for (const bullet of section.bullets || []) {
+        if (points.length >= max) break;
+        if (bullet.type === "action" && bullet.action) push(bullet.action);
+        else if (bullet.text) push(bullet.text);
+      }
+    }
+  }
+
+  if (points.length === 0 && fallback) {
+    push(fallback.split("\n").find((l) => l.trim().length > 40) || fallback);
+  }
+
+  return points.slice(0, max);
+}
+
 export function extractAllInsights(responses) {
   return (responses || []).map(extractInsight).filter(Boolean);
 }

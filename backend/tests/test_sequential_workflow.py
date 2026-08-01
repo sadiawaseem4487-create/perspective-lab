@@ -10,7 +10,7 @@ def test_sequential_stages_order():
 
 
 def test_build_stage_question_includes_prior_outputs():
-    question = "How can we reduce school dropout in São Paulo?"
+    question = "How should municipal education teams involve families and community partners to reduce secondary school dropout in São Paulo this year, and what measurable first steps should they take within ninety days?"
     freire_out = "Problem map: missing student voices in policy design."
     weber_input = build_stage_question(question, {"freire": freire_out}, "weber")
     assert question in weber_input
@@ -39,7 +39,7 @@ def test_sequential_workflow_runs_four_stages(mock_ask):
     mock_ask.side_effect = _fake_ask
 
     responses = asyncio.run(
-        run_sequential_workflow("How can we reduce school dropout in São Paulo?", model="openai/gpt-4o-mini")
+        run_sequential_workflow("How should municipal education teams involve families and community partners to reduce secondary school dropout in São Paulo this year, and what measurable first steps should they take within ninety days?", model="openai/gpt-4o-mini")
     )
     assert len(responses) == 4
     assert call_order == ["freire", "weber", "montessori", "rogers"]
@@ -92,7 +92,7 @@ def test_ask_sequential_mode_api(client, monkeypatch):
 
         response = client.post(
             "/api/ask?mode=sequential",
-            json={"question": "How can we reduce school dropout in São Paulo?", "mode": "sequential"},
+            json={"question": "How should municipal education teams involve families and community partners to reduce secondary school dropout in São Paulo this year, and what measurable first steps should they take within ninety days?", "mode": "sequential"},
         )
 
     assert response.status_code == 200

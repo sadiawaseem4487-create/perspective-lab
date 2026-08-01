@@ -14,7 +14,7 @@ Use this path for a research pilot or demo. In-app: **Guide** (`/guide`).
 |------|--------|------------|
 | 1 | **Workspace** | Enter one research question → Ask agents (parallel recommended for compare) |
 | 2 | **Report** | Open the latest unique question → skim theory answers |
-| 3 | **Compare** | Add human guest answers → save |
+| 3 | **Compare** | Create **remote invite link** (or type guest answers) → save |
 | 4 | **Compare** | Score pre/post solutions on the rubric (two coders if possible) |
 | 5 | **Matrix** | Check honest sources (`answer` vs `schema_default` / `missing`) |
 | 6 | **Presentation** | Academic deck: Topic → Intro → Key concepts → Case → Conclusion → Sources |

@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
-import { ChevronRight } from "lucide-react";
 import { AgentAvatar } from "@/components/AgentAvatar";
 import { getAgentLens, getAgentTheorist } from "@/lib/agentIcons";
 import { cn } from "@/lib/utils";
 
 function hexToRgb(hex) {
-  const normalized = hex.replace("#", "");
-  const bigint = parseInt(normalized, 16);
+  const normalized = (hex || "#78716c").replace("#", "");
+  const bigint = parseInt(normalized.length === 3 ? normalized.repeat(2) : normalized, 16);
+  if (Number.isNaN(bigint)) return { r: 120, g: 113, b: 108 };
   return {
     r: (bigint >> 16) & 255,
     g: (bigint >> 8) & 255,
@@ -14,6 +14,9 @@ function hexToRgb(hex) {
   };
 }
 
+/**
+ * Compact roundtable tile — theorist name + short lens words only.
+ */
 export function AgentPersona({
   agentKey,
   label,
@@ -21,78 +24,61 @@ export function AgentPersona({
   status = "idle",
   selected = false,
   lang = "en",
-  takeaway = "",
   onClick,
   index = 0,
-  readLabel = "Read answer",
 }) {
   const lens = getAgentLens(agentKey, lang);
   const theorist = getAgentTheorist(agentKey);
-  const canOpen = status === "done" && onClick;
+  const canOpen = (status === "done" || status === "error") && onClick;
   const rgb = hexToRgb(color);
-  const glow = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.45)`;
+  const glow = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.35)`;
 
   return (
     <motion.button
       type="button"
       onClick={canOpen ? onClick : undefined}
-      layout
-      initial={{ opacity: 0, y: 28, scale: 0.88 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay: index * 0.18, type: "spring", stiffness: 260, damping: 22 }}
-      whileHover={canOpen ? { y: -4 } : undefined}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.08, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "group relative w-full overflow-hidden rounded-2xl p-[1px] text-left transition-all",
-        canOpen ? "cursor-pointer" : "cursor-default",
-        selected && "ring-2 ring-white/60 ring-offset-2 ring-offset-slate-950"
+        "group relative flex w-full flex-col rounded-2xl border px-3 py-3 text-left transition-all",
+        canOpen ? "cursor-pointer hover:border-white/25" : "cursor-default",
+        selected
+          ? "border-orange-400/50 bg-orange-500/10 shadow-[0_0_24px_-8px_rgba(251,146,60,0.45)]"
+          : "border-white/10 bg-slate-950/55 hover:bg-slate-900/70",
+        status === "thinking" && "border-white/20"
       )}
-      style={{
-        background: `linear-gradient(145deg, ${color}, rgba(${rgb.r},${rgb.g},${rgb.b},0.15) 55%, rgba(255,255,255,0.08))`,
-        boxShadow: status === "thinking" ? `0 0 28px ${glow}` : selected ? `0 0 20px ${glow}` : undefined,
-      }}
+      style={
+        status === "thinking"
+          ? { boxShadow: `0 0 20px -6px ${glow}` }
+          : selected
+            ? { boxShadow: `inset 3px 0 0 ${color}` }
+            : undefined
+      }
     >
-      {status === "thinking" && (
-        <motion.span
-          className="pointer-events-none absolute inset-0 opacity-40"
-          animate={{ opacity: [0.2, 0.5, 0.2] }}
-          transition={{ duration: 1.6, repeat: Infinity }}
-          style={{ background: `radial-gradient(circle at 50% 0%, ${glow}, transparent 70%)` }}
+      <div className="flex items-center gap-3">
+        <AgentAvatar
+          agentKey={agentKey}
+          color={color}
+          status={status}
+          className="h-12 w-10 shrink-0"
         />
-      )}
-
-      <div className="relative flex h-full flex-col items-center rounded-[15px] bg-slate-950/90 px-4 pb-4 pt-5 text-center backdrop-blur-md">
-        <AgentAvatar agentKey={agentKey} color={color} status={status} className="h-20 w-16" />
-
-        <div className="mt-3 w-full min-w-0">
-          <p className="text-sm font-semibold leading-tight text-white">{label}</p>
-          <p className="mt-1 text-xs font-medium text-slate-200">{theorist}</p>
-          <p className="mt-1 text-[11px] leading-snug text-slate-400">{lens}</p>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-white">{theorist || label}</p>
+          <p className="truncate text-[11px] text-slate-400">{lens}</p>
         </div>
-
-        {status === "done" && takeaway && (
-          <p className="mt-3 w-full border-t border-white/10 pt-3 text-left text-sm leading-snug text-slate-200">
-            {takeaway}
-          </p>
-        )}
-
-        {status === "thinking" && (
-          <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-white/10">
-            <motion.div
-              className="h-full rounded-full"
-              style={{ backgroundColor: color }}
-              animate={{ x: ["-100%", "100%"] }}
-              transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
-            />
-          </div>
-        )}
-
-        {canOpen && (
-          <span className="mt-2 inline-flex items-center gap-1 text-[11px] text-slate-500 group-hover:text-white">
-            {readLabel}
-            <ChevronRight className="h-3 w-3" />
-          </span>
-        )}
       </div>
+
+      {status === "thinking" && (
+        <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-white/10">
+          <motion.div
+            className="h-full rounded-full"
+            style={{ backgroundColor: color }}
+            animate={{ x: ["-100%", "100%"] }}
+            transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+          />
+        </div>
+      )}
     </motion.button>
   );
 }

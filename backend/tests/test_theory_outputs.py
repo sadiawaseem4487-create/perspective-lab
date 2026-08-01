@@ -132,6 +132,87 @@ def test_self_check_passes_bullet_title_response():
     assert enriched["self_check"]["passed"] is True
 
 
+def test_comparison_matrix_guest_numbered_list_not_truncated():
+    """Numbered guest answers must not collapse to '1.' from sentence split."""
+    report = {
+        "session_id": 50,
+        "question": "What should we do?",
+        "workflow_mode": "parallel",
+        "responses": [
+            {
+                "agent_key": "freire",
+                "agent_label": "Agent 1",
+                "agent_name": "Freire Agent",
+                "title": "Sociocultural Inspirer",
+                "theory": "Paulo Freire",
+                "color": "#c2410c",
+                "response": BULLET_TITLE_RESPONSE,
+                "error": None,
+                "self_check": {"passed": True},
+            }
+        ],
+    }
+    guests = [
+        {
+            "name": "Abeeha",
+            "role": "Educator",
+            "organization": "FISTA",
+            "answer": (
+                "1. Redesign the school day\n"
+                "* Start with a short daily check-in.\n"
+                "* Use longer, interactive lessons instead of many short classes.\n"
+                "* Add project-based learning linked to real-life issues."
+            ),
+        }
+    ]
+    matrix = build_comparison_matrix(report, human_answers=guests)
+    guest_col = next(c for c in matrix["columns"] if c["kind"] == "guest")
+    focus = guest_col["values"]["main_focus"]
+    assert focus != "1."
+    assert "Redesign" in focus
+    assert matrix["guest_summaries"][0]["answer"].startswith("1. Redesign")
+
+
+def test_comparison_matrix_includes_guest_neutrally():
+    report = {
+        "session_id": 49,
+        "question": "What is one actionable step?",
+        "workflow_mode": "parallel",
+        "responses": [
+            {
+                "agent_key": "freire",
+                "agent_label": "Agent 1",
+                "agent_name": "Freire Agent",
+                "title": "Sociocultural Inspirer",
+                "theory": "Paulo Freire",
+                "color": "#c2410c",
+                "response": BULLET_TITLE_RESPONSE,
+                "error": None,
+                "self_check": {"passed": True},
+            }
+        ],
+    }
+    guests = [
+        {
+            "name": "Sadia",
+            "role": "Teacher",
+            "organization": "TUNI",
+            "answer": "Visit the individual houses to reconnect families with school.",
+        }
+    ]
+    matrix = build_comparison_matrix(report, human_answers=guests)
+    assert matrix["guest_count"] == 1
+    guest_col = next(c for c in matrix["columns"] if c["kind"] == "guest")
+    assert guest_col["agent_label"].startswith("Sadia")
+    assert guest_col["values"]["solution_type"] == "Human perspective"
+    assert guest_col["sources"]["solution_type"] == "neutral_label"
+    assert guest_col["sources"]["main_focus"] == "guest_answer"
+    assert "Visit" in guest_col["values"]["main_focus"] or "Visit" in guest_col["values"]["first_action"]
+    assert guest_col["values"]["stakeholder"] == "Teacher · TUNI"
+    row = next(r for r in matrix["matrix"] if r["dimension"] == "solution_type")
+    assert row["values"]["guest_0"] == "Human perspective"
+
+
 def test_comparison_matrix_marks_schema_defaults():
     report = {
         "session_id": 1,

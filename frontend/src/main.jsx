@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { LanguageProvider } from "./i18n/LanguageContext";
 import { AppModeProvider } from "./context/AppModeContext";
+import { WorkflowModeProvider } from "./context/WorkflowModeContext";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -11,7 +12,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <LanguageProvider>
         <AppModeProvider>
-          <App />
+          <WorkflowModeProvider>
+            <App />
+          </WorkflowModeProvider>
         </AppModeProvider>
       </LanguageProvider>
     </BrowserRouter>

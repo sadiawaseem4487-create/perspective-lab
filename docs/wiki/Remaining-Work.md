@@ -134,6 +134,20 @@ See [Sprint-08-Desktop.md](Sprints/Sprint-08-Desktop.md).
 
 ---
 
+## P5 — Remote guest invites + free cloud host
+
+**Status:** ✅ Core invite links implemented; cloud deploy is documented (manual)
+
+| ID | Task | Status |
+|----|------|--------|
+| P5.1 | Opaque invite tokens + guest form `/invite/:token` | [x] |
+| P5.2 | Append answers (name, role, org, email) to same session | [x] |
+| P5.3 | Compare: create / copy / close invite links | [x] |
+| P5.4 | Free hosting guide (Vercel UI + Render API) | [x] [Free-Hosting.md](Free-Hosting.md) |
+| P5.5 | Docker includes `cases/` for cloud persistence | [x] |
+
+---
+
 ## Explicitly out of scope (unless you ask)
 
 - Replacing the research tool with a Freire-only course website
@@ -144,7 +158,8 @@ See [Sprint-08-Desktop.md](Sprints/Sprint-08-Desktop.md).
 
 ## Suggested next action
 
-1. Zip the repo + send **[CLIENT_HANDOVER.md](../../CLIENT_HANDOVER.md)** to the client  
-2. Optional: signed store installers, `CASE_ID` UI switcher, repo rename  
+1. Create an invite on **Compare**, open `/invite/…` on another device (same Wi‑Fi or cloud)
+2. Optional: follow [Free-Hosting.md](Free-Hosting.md) for Vercel + Render
+3. Zip the repo + send **[CLIENT_HANDOVER.md](../../CLIENT_HANDOVER.md)** to the client  
 
-[← Home](Home.md) · [Sprint plan](Sprints/README.md) · [Sprint 8](Sprints/Sprint-08-Desktop.md)
+[← Home](Home.md) · [Sprint plan](Sprints/README.md) · [Sprint 8](Sprints/Sprint-08-Desktop.md) · [Free hosting](Free-Hosting.md)

@@ -1,4 +1,5 @@
 import { cleanAgentText, parseAgentResponse, firstActionBlock, firstTextBullet, getSectionBullets } from "./parseAgentResponse";
+import { getAgentTheorist } from "@/lib/agentIcons";
 
 const FOCUS_SECTIONS = [
   "Lived experience",
@@ -72,16 +73,18 @@ export function buildAgentComparison(responses, lang = "en") {
       const action = firstAction(sections);
       const metric = successMetric(sections);
       const theoryLink = firstTextBullet(sections, "Theory link");
+      const theorist =
+        getAgentTheorist(key) || r.agent_name || r.agent_label || `Agent ${r.agent_number}`;
 
       return {
-        agentLabel: r.agent_label || r.agent_name || `Agent ${r.agent_number}`,
+        agentLabel: theorist,
         agentKey: key,
         color: r.color || "#78716c",
-        mainFocus: focus.text.slice(0, 160),
-        firstAction: (action.text || "").slice(0, 160),
-        mainStakeholder: (action.owner || "").slice(0, 160),
-        solutionType: (theoryLink || "").slice(0, 160),
-        successMetric: (metric.text || "").slice(0, 160),
+        mainFocus: focus.text || "",
+        firstAction: action.text || "",
+        mainStakeholder: action.owner || "",
+        solutionType: theoryLink || "",
+        successMetric: metric.text || "",
         sources: {
           mainFocus: focus.source,
           firstAction: action.source,

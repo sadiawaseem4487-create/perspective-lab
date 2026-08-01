@@ -1,22 +1,20 @@
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   ClipboardList,
-  Cpu,
-  Download,
   FileText,
-  FlaskConical,
   GitCompare,
   KeyRound,
-  LayoutDashboard,
+  Link2,
   MessageSquare,
   Presentation,
   Table2,
-  Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { checkHealth, fetchAgentsCatalog } from "@/api";
+import BrandLogo from "@/components/BrandLogo";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ModeToggle from "@/components/ModeToggle";
+import SidebarWorkflowMode from "@/components/SidebarWorkflowMode";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -47,6 +45,8 @@ export default function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
   const isWorkspace = location.pathname === "/question";
+  const isPresent = location.pathname === "/present";
+  const fillCanvas = isWorkspace || isPresent;
   const [caseInfo, setCaseInfo] = useState(null);
   const [needsSetup, setNeedsSetup] = useState(false);
 
@@ -61,37 +61,33 @@ export default function AppShell() {
       .then((h) => {
         const missing = !h.llm_configured && h.setup_allowed !== false;
         setNeedsSetup(missing);
-        if (missing && location.pathname !== "/setup") {
-          navigate("/setup", { replace: true });
+        if (missing && !location.pathname.startsWith("/settings") && location.pathname !== "/setup") {
+          navigate("/settings?tab=api", { replace: true });
         }
       })
       .catch(() => {});
   }, [location.pathname, navigate]);
 
+  // Research flow: ask → analyze → invite → report → present → guide
   const nav = {
     research: [
       { to: "/question", icon: MessageSquare, label: t("shell.workspace"), end: true },
-      { to: "/report", icon: FileText, label: t("nav.report") },
       { to: "/compare", icon: GitCompare, label: t("nav.compare") },
-      { to: "/study", icon: FlaskConical, label: t("nav.study") },
       { to: "/matrix", icon: Table2, label: t("shell.matrix") },
+      { to: "/share", icon: Link2, label: t("nav.share") },
+      { to: "/report", icon: FileText, label: t("nav.report") },
       { to: "/present", icon: Presentation, label: t("nav.present") },
       { to: "/guide", icon: ClipboardList, label: t("nav.guide") },
-      { to: "/export", icon: Download, label: t("nav.export") },
     ],
-    configure: [
-      { to: "/setup", icon: KeyRound, label: t("nav.setup") },
-      { to: "/agents", icon: Users, label: t("nav.agents") },
-      { to: "/models", icon: Cpu, label: t("nav.models") },
-    ],
+    configure: [{ to: "/settings", icon: KeyRound, label: t("nav.settings") }],
   };
 
   return (
     <div className="flex min-h-screen">
       <aside className="flex w-64 shrink-0 flex-col border-r border-slate-800 bg-slate-950 text-slate-200">
         <div className="border-b border-slate-800 p-5">
-          <div className="flex items-center gap-2">
-            <LayoutDashboard className="h-5 w-5 text-orange-500" />
+          <Link to="/" className="flex items-center gap-3 rounded-lg outline-none focus-visible:ring-1 focus-visible:ring-orange-500/50">
+            <BrandLogo className="h-9 w-9 shrink-0" />
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                 {t("shell.product")}
@@ -100,11 +96,12 @@ export default function AppShell() {
                 {t("shell.productName")}
               </h1>
             </div>
-          </div>
+          </Link>
           <p className="mt-2 text-xs leading-relaxed text-slate-400">{t("shell.tagline")}</p>
         </div>
 
         <ModeToggle />
+        <SidebarWorkflowMode />
 
         <ScrollArea className="flex-1 px-3 py-2">
           <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
@@ -119,7 +116,7 @@ export default function AppShell() {
           <Separator className="my-4 bg-slate-800" />
 
           <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-            {t("shell.setup")}
+            {t("shell.settings")}
           </p>
           <nav className="space-y-1">
             {nav.configure.map((item) => (
@@ -134,8 +131,8 @@ export default function AppShell() {
         </div>
       </aside>
 
-      <div className="app-canvas flex min-w-0 flex-1 flex-col">
-        {!isWorkspace && (
+      <div className="app-canvas flex min-h-0 min-w-0 flex-1 flex-col">
+        {!fillCanvas && (
           <header className="shrink-0 border-b border-white/10 px-6 py-4">
             <div className="min-w-0">
               {caseInfo && (
@@ -159,8 +156,8 @@ export default function AppShell() {
 
         <main
           className={cn(
-            "flex-1 text-white",
-            isWorkspace ? "min-h-screen" : "px-6 py-8"
+            "min-h-0 flex-1 text-white",
+            fillCanvas ? "flex flex-col" : "px-6 py-8"
           )}
         >
           <Outlet />

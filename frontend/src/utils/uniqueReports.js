@@ -45,7 +45,7 @@ export function uniqueReportsByQuestion(reports = []) {
   return unique;
 }
 
-/** Prefer latest unique report that matches lastSessionId's question. */
+/** Prefer the exact active session when it still exists (guests/invites are per session). */
 export function resolvePreferredSessionId(reports, lastSessionId) {
   const unique = uniqueReportsByQuestion(reports);
   if (!unique.length) return null;
@@ -53,10 +53,9 @@ export function resolvePreferredSessionId(reports, lastSessionId) {
   const lastId = lastSessionId ? Number(lastSessionId) : null;
   if (!lastId) return unique[0].session_id;
 
-  const original = reports.find((r) => r.session_id === lastId);
-  if (!original) return unique[0].session_id;
+  // Exact id wins — never silently migrate to a newer twin of the same question.
+  if (reports.some((r) => Number(r.session_id) === lastId)) return lastId;
 
-  const key = normalizeQuestionKey(original.question);
-  const match = unique.find((r) => normalizeQuestionKey(r.question) === key);
-  return match?.session_id || unique[0].session_id;
+  // Stale/missing id → newest unique report (same question if we can recover it).
+  return unique[0].session_id;
 }

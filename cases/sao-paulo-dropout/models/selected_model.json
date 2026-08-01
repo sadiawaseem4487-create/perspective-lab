@@ -1,1 +1,4 @@
-{"model":"openai/gpt-4o-mini"}
+{
+  "model": "openai/gpt-4o",
+  "updated_at": "2026-07-25T10:46:15.037092+00:00"
+}

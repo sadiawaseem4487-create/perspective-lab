@@ -1,447 +1,385 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, ExternalLink, Presentation, X } from "lucide-react";
-import { fetchPresentationConfig, fetchReport, fetchReports } from "@/api";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { fetchComparison, fetchPresentationConfig, fetchReport, fetchReports } from "@/api";
 import { AgentAvatar } from "@/components/AgentAvatar";
-import { buildPresentationSlides } from "@/utils/buildPresentationSlides";
+import { PresentPlaylistBar } from "@/components/QuestionSessionBar";
+import {
+  buildMultiSessionPresentationSlides,
+  buildPresentationSlides,
+} from "@/utils/buildPresentationSlides";
+import {
+  getActiveSessionId,
+  setActiveSessionId,
+  setPresentPlaylist,
+} from "@/utils/sessionWorkspace";
 import {
   displayQuestion,
   resolvePreferredSessionId,
   uniqueReportsByQuestion,
 } from "@/utils/uniqueReports";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { Button } from "@/components/ui/button";
+import { useAppMode } from "@/context/AppModeContext";
 import { cn } from "@/lib/utils";
+import { parseGuestAnswerBlocks } from "@/utils/guestAnswer";
 
 const ease = [0.22, 1, 0.36, 1];
 
 const slideVariants = {
-  enter: (dir) => ({
-    opacity: 0,
-    x: dir >= 0 ? 56 : -56,
-    scale: 0.985,
-  }),
-  center: {
-    opacity: 1,
-    x: 0,
-    scale: 1,
-    transition: { duration: 0.45, ease },
-  },
+  enter: (dir) => ({ opacity: 0, x: dir >= 0 ? 28 : -28 }),
+  center: { opacity: 1, x: 0, transition: { duration: 0.28, ease } },
   exit: (dir) => ({
     opacity: 0,
-    x: dir >= 0 ? -40 : 40,
-    scale: 0.99,
-    transition: { duration: 0.28, ease },
+    x: dir >= 0 ? -20 : 20,
+    transition: { duration: 0.2, ease },
   }),
 };
 
 const stagger = {
   hidden: {},
-  show: {
-    transition: { staggerChildren: 0.08, delayChildren: 0.12 },
-  },
+  show: { transition: { staggerChildren: 0.05, delayChildren: 0.04 } },
 };
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease },
-  },
+  hidden: { opacity: 0, y: 8 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.28, ease } },
 };
 
-function SlideFrame({ children, align = "start", className }) {
+/** Resolve fixed header fields so every content slide uses the same title band. */
+function slideChrome(slide) {
+  if (!slide) return { eyebrow: "", title: "", kicker: "" };
+  if (slide.kind === "title") {
+    return { eyebrow: slide.eyebrow || "", title: slide.title || "", kicker: "" };
+  }
+  if (slide.kind === "agent") {
+    return {
+      eyebrow: slide.eyebrow || "",
+      title: slide.theorist || slide.title || "",
+      kicker: slide.lens || "",
+    };
+  }
+  if (slide.kind === "guest") {
+    return {
+      eyebrow: slide.eyebrow || "",
+      title: slide.guest?.name || slide.title || "",
+      kicker: slide.guest?.role || slide.subtitle || "",
+    };
+  }
+  return {
+    eyebrow: slide.eyebrow || "",
+    title: slide.title || "",
+    kicker: slide.subtitle || "",
+  };
+}
+
+function SlideShell({
+  slide,
+  index,
+  total,
+  brand,
+  footnote,
+  isTitle = false,
+  accentColor,
+  children,
+}) {
+  const chrome = slideChrome(slide);
+  const tFootnote = footnote || brand;
   return (
-    <div
-      className={cn(
-        "mx-auto flex h-full w-full max-w-4xl flex-col justify-center",
-        align === "center" && "items-center text-center",
-        align === "start" && "items-stretch text-left",
-        className
-      )}
-    >
-      {children}
+    <div className={cn("pptx-slide", isTitle && "pptx-title-slide")}>
+      <div
+        className="pptx-slide-accent"
+        style={accentColor ? { background: accentColor } : undefined}
+      />
+      <header className="pptx-header">
+        {chrome.eyebrow ? (
+          <p className="pptx-eyebrow">{chrome.eyebrow}</p>
+        ) : (
+          <p className="pptx-eyebrow" style={{ color: "transparent" }}>
+            —
+          </p>
+        )}
+        <h2 className="pptx-header-title">{chrome.title}</h2>
+        {chrome.kicker ? (
+          <p className="pptx-kicker">{chrome.kicker}</p>
+        ) : (
+          <p className="pptx-kicker-spacer" aria-hidden />
+        )}
+      </header>
+      <div className="pptx-body">
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          animate="show"
+          className="pptx-body-inner"
+        >
+          {children}
+        </motion.div>
+      </div>
+      <footer className="pptx-footer">
+        <span className="justify-self-start truncate">{brand}</span>
+        <span className="pptx-footer-page justify-self-center">
+          {total ? `${index + 1} / ${total}` : "—"}
+        </span>
+        <span className="justify-self-end truncate text-right">{tFootnote}</span>
+      </footer>
     </div>
   );
 }
 
-function Eyebrow({ children, className }) {
+function TitleBody({ slide }) {
   return (
-    <motion.p
-      variants={fadeUp}
-      className={cn(
-        "text-[11px] font-bold uppercase tracking-[0.22em] text-orange-400",
-        className
-      )}
-    >
-      {children}
-    </motion.p>
-  );
-}
-
-function BulletList({ items, numbered = true }) {
-  return (
-    <ul className="mt-6 space-y-2.5 text-left">
-      {(items || []).map((item, index) => (
-        <motion.li
-          key={`${index}-${String(item).slice(0, 24)}`}
-          variants={fadeUp}
-          className="flex items-start gap-3 rounded-xl border border-white/10 bg-slate-950/45 px-4 py-3"
-        >
-          {numbered ? (
-            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-orange-500/20 text-[11px] font-bold text-orange-300">
-              {index + 1}
-            </span>
-          ) : (
-            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-400" />
-          )}
-          <p className="min-w-0 flex-1 text-pretty text-base leading-relaxed text-slate-200">{item}</p>
-        </motion.li>
-      ))}
-    </ul>
-  );
-}
-
-function TopicSlide({ slide }) {
-  return (
-    <SlideFrame align="center">
-      <motion.div variants={stagger} initial="hidden" animate="show" className="w-full max-w-3xl">
-        <Eyebrow>{slide.eyebrow}</Eyebrow>
-        {slide.caseTitle && (
-          <motion.p variants={fadeUp} className="mt-4 text-sm font-medium uppercase tracking-wider text-slate-400">
-            {slide.caseTitle}
-          </motion.p>
-        )}
-        <motion.h1
-          variants={fadeUp}
-          className="font-display mt-4 text-balance text-3xl font-bold leading-[1.15] text-white sm:text-5xl"
-        >
-          {slide.title}
-        </motion.h1>
-        {slide.subtitle && (
-          <motion.p
-            variants={fadeUp}
-            className="mx-auto mt-5 max-w-xl text-pretty text-base leading-relaxed text-slate-400 sm:text-lg"
-          >
-            {slide.subtitle}
-          </motion.p>
-        )}
-        {slide.question && (
-          <motion.blockquote
-            variants={fadeUp}
-            className="mx-auto mt-8 max-w-2xl rounded-2xl border border-orange-500/25 bg-orange-500/10 px-5 py-4 text-left"
-          >
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-orange-300/90">
-              {slide.questionLabel || "Research question"}
-            </p>
-            <p className="mt-2 text-pretty text-lg leading-snug text-white sm:text-xl">{slide.question}</p>
-          </motion.blockquote>
-        )}
-        <motion.div
-          variants={fadeUp}
-          className="mx-auto mt-10 h-px w-24 bg-gradient-to-r from-transparent via-orange-400/70 to-transparent"
-        />
-      </motion.div>
-    </SlideFrame>
-  );
-}
-
-function IntroductionSlide({ slide }) {
-  return (
-    <SlideFrame>
-      <motion.div variants={stagger} initial="hidden" animate="show" className="w-full">
-        <Eyebrow>{slide.eyebrow}</Eyebrow>
-        <motion.h2
-          variants={fadeUp}
-          className="font-display mt-3 text-balance text-3xl font-bold text-white sm:text-4xl"
-        >
-          {slide.title}
-        </motion.h2>
-        <BulletList items={slide.bullets} />
-      </motion.div>
-    </SlideFrame>
-  );
-}
-
-function AgendaSlide({ slide }) {
-  return (
-    <SlideFrame>
-      <motion.div variants={stagger} initial="hidden" animate="show" className="w-full">
-        <Eyebrow>{slide.eyebrow}</Eyebrow>
-        <motion.h2
-          variants={fadeUp}
-          className="font-display mt-3 text-balance text-3xl font-bold text-white sm:text-4xl"
-        >
-          {slide.title}
-        </motion.h2>
-        <motion.div variants={fadeUp} className="mt-8 grid gap-3 sm:grid-cols-2">
-          {slide.items.map((item, index) => (
-            <motion.div
-              key={item.agentKey}
-              variants={fadeUp}
-              whileHover={{ y: -2, transition: { duration: 0.2 } }}
-              className="flex min-h-[92px] items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 backdrop-blur-sm"
-              style={{ borderTopWidth: 3, borderTopColor: item.color }}
-            >
-              <span className="w-7 shrink-0 font-mono text-xs text-slate-500">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <AgentAvatar
-                agentKey={item.agentKey}
-                color={item.color}
-                status="done"
-                className="h-14 w-12 shrink-0"
-              />
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold text-white">{item.theorist}</p>
-                <p className="mt-0.5 truncate text-sm text-slate-400">{item.lens}</p>
-              </div>
-            </motion.div>
+    <>
+      <motion.p variants={fadeUp} className="pptx-eyebrow">
+        {slide.eyebrow}
+      </motion.p>
+      <motion.h1 variants={fadeUp} className="pptx-title-hero">
+        {slide.title}
+      </motion.h1>
+      {slide.list?.length ? (
+        <motion.ol variants={fadeUp} className="pptx-list mt-5 max-w-2xl space-y-2.5">
+          {slide.list.map((item, i) => (
+            <li key={item} className="pptx-list-item">
+              <span className="pptx-list-num">{i + 1}.</span>
+              <span className="pptx-copy">{item}</span>
+            </li>
           ))}
-        </motion.div>
-      </motion.div>
-    </SlideFrame>
+        </motion.ol>
+      ) : null}
+    </>
   );
 }
 
-function AgentSlide({ slide, keyPointsLabel }) {
+function FramingBody({ slide }) {
+  const focusItems = slide.focus || [];
+  const constraints = slide.constraints || [];
   return (
-    <SlideFrame>
-      <motion.div variants={stagger} initial="hidden" animate="show" className="w-full">
-        <motion.div variants={fadeUp} className="grid gap-5 sm:grid-cols-[auto_1fr] sm:items-start">
+    <div className="space-y-5">
+      {slide.context ? (
+        <motion.p variants={fadeUp} className="pptx-copy max-w-3xl">
+          {slide.context}
+        </motion.p>
+      ) : null}
+      {constraints.length ? (
+        <motion.div variants={fadeUp}>
+          <p className="pptx-label">{slide.constraintsLabel}</p>
+          <ul className="mt-2.5 flex flex-wrap gap-2">
+            {constraints.map((item) => (
+              <li key={item} className="pptx-chip">
+                {item}
+              </li>
+            ))}
+          </ul>
+        </motion.div>
+      ) : null}
+      {focusItems.length ? (
+        <motion.div variants={fadeUp}>
+          <p className="pptx-label">{slide.focusLabel}</p>
+          <ol className="pptx-list mt-3 space-y-2.5">
+            {focusItems.map((item, i) => (
+              <li key={item} className="pptx-list-item">
+                <span className="pptx-list-num">{i + 1}.</span>
+                <span className="pptx-copy">{item}</span>
+              </li>
+            ))}
+          </ol>
+        </motion.div>
+      ) : null}
+    </div>
+  );
+}
+
+function AgendaBody({ slide }) {
+  return (
+    <motion.ul variants={fadeUp} className="pptx-agenda">
+      {(slide.items || []).map((item, index) => (
+        <li key={item.agentKey}>
+          <span className="pptx-list-num w-7">{String(index + 1).padStart(2, "0")}</span>
+          <span
+            className="h-2.5 w-2.5 shrink-0 rounded-full"
+            style={{ backgroundColor: item.color }}
+          />
+          <div className="min-w-0 flex-1">
+            <p className="pptx-agenda-name">{item.theorist}</p>
+            <p className="pptx-agenda-lens truncate">{item.lens}</p>
+          </div>
+        </li>
+      ))}
+    </motion.ul>
+  );
+}
+
+function AgentBody({ slide }) {
+  return (
+    <div className="flex gap-4">
+      <div
+        className="mt-1 hidden w-1 shrink-0 self-stretch rounded-full sm:block"
+        style={{ backgroundColor: slide.color, minHeight: "5.5rem" }}
+      />
+      <div className="min-w-0 flex-1">
+        <div className="mb-4">
           <AgentAvatar
             agentKey={slide.agentKey}
             color={slide.color}
             status="done"
-            className="h-28 w-24 justify-self-start"
+            className="h-11 w-9 shrink-0"
           />
-          <div className="min-w-0">
-            <Eyebrow>{slide.eyebrow}</Eyebrow>
-            <h2 className="font-display mt-2 text-balance text-3xl font-bold text-white sm:text-4xl">
-              {slide.theorist}
-            </h2>
-            {slide.lens && <p className="mt-1 text-sm text-slate-400">{slide.lens}</p>}
-            {slide.takeaway && (
-              <p className="mt-4 text-pretty text-lg leading-relaxed text-slate-100 sm:text-xl">
-                {slide.takeaway}
-              </p>
-            )}
-          </div>
-        </motion.div>
-
-        <motion.div variants={fadeUp} className="mt-8">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-            {keyPointsLabel}
-          </p>
-          <ul className="mt-4 space-y-2.5">
-            {(slide.points || []).map((point, index) => (
-              <motion.li
-                key={`${index}-${point.slice(0, 24)}`}
-                variants={fadeUp}
-                className="flex items-start gap-3 rounded-xl border border-white/10 bg-slate-950/45 px-4 py-3"
-              >
-                <span
-                  className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
-                  style={{ backgroundColor: slide.color || "#c2410c" }}
-                >
-                  {index + 1}
-                </span>
-                <p className="min-w-0 flex-1 text-pretty text-base leading-relaxed text-slate-200 sm:text-[17px]">
-                  {point}
-                </p>
-              </motion.li>
-            ))}
-          </ul>
-        </motion.div>
-      </motion.div>
-    </SlideFrame>
-  );
-}
-
-function CaseStudySlide({ slide }) {
-  return (
-    <SlideFrame>
-      <motion.div variants={stagger} initial="hidden" animate="show" className="w-full">
-        <Eyebrow>{slide.eyebrow}</Eyebrow>
-        <motion.h2
-          variants={fadeUp}
-          className="font-display mt-3 text-balance text-3xl font-bold text-white sm:text-4xl"
-        >
-          {slide.title}
-        </motion.h2>
-        <div className="mt-6 space-y-4">
-          {(slide.paragraphs || []).map((p) => (
-            <motion.p
-              key={p.slice(0, 40)}
-              variants={fadeUp}
-              className="text-pretty text-base leading-relaxed text-slate-300 sm:text-lg"
-            >
-              {p}
-            </motion.p>
-          ))}
         </div>
-        {slide.question && (
-          <motion.p
-            variants={fadeUp}
-            className="mt-6 rounded-xl border border-sky-500/25 bg-sky-500/10 px-4 py-3 text-sm leading-relaxed text-sky-100"
-          >
-            <span className="font-semibold text-sky-300">Q: </span>
-            {slide.question}
-          </motion.p>
-        )}
-        {(slide.bullets || []).length > 0 && <BulletList items={slide.bullets} numbered={false} />}
-      </motion.div>
-    </SlideFrame>
-  );
-}
-
-function SynthesisSlide({ slide }) {
-  return (
-    <SlideFrame>
-      <motion.div variants={stagger} initial="hidden" animate="show" className="w-full">
-        <Eyebrow>{slide.eyebrow}</Eyebrow>
-        <motion.h2
-          variants={fadeUp}
-          className="font-display mt-3 text-balance text-3xl font-bold text-white sm:text-4xl"
-        >
-          {slide.title}
-        </motion.h2>
-        <motion.div variants={fadeUp} className="mt-8 grid gap-3 sm:grid-cols-2">
-          {slide.cards.map((card) => (
-            <motion.article
-              key={card.agentKey}
-              variants={fadeUp}
-              whileHover={{ y: -2 }}
-              className="flex min-h-[140px] flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-4"
-              style={{ boxShadow: `inset 3px 0 0 ${card.color}` }}
-            >
-              <div className="flex items-center gap-3">
-                <AgentAvatar
-                  agentKey={card.agentKey}
-                  color={card.color}
-                  status="done"
-                  className="h-12 w-10 shrink-0"
-                />
-                <p className="truncate font-semibold text-white">{card.theorist}</p>
-              </div>
-              <p className="mt-3 flex-1 text-pretty text-sm leading-relaxed text-slate-300">
-                {card.takeaway}
-              </p>
-            </motion.article>
+        <motion.dl variants={fadeUp} className="space-y-4">
+          {(slide.rows || []).map((row) => (
+            <div key={row.key} className="pptx-row">
+              <dt className="pptx-row-label">{row.label}</dt>
+              <dd className="pptx-row-value">{row.text}</dd>
+            </div>
           ))}
-        </motion.div>
-      </motion.div>
-    </SlideFrame>
+        </motion.dl>
+      </div>
+    </div>
   );
 }
 
-function ConclusionSlide({ slide }) {
-  return (
-    <SlideFrame align="center">
-      <motion.div variants={stagger} initial="hidden" animate="show" className="w-full max-w-2xl">
-        <Eyebrow>{slide.eyebrow}</Eyebrow>
-        <motion.h2
-          variants={fadeUp}
-          className="font-display mt-5 text-balance text-3xl font-bold leading-tight text-white sm:text-5xl"
-        >
-          {slide.title}
-        </motion.h2>
-        <motion.ul variants={fadeUp} className="mt-10 space-y-3 text-left">
-          {(slide.prompts || []).map((prompt, index) => (
-            <motion.li
-              key={prompt}
-              variants={fadeUp}
-              className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3.5"
-            >
-              <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-orange-500/20 text-[11px] font-bold text-orange-300">
-                {index + 1}
-              </span>
-              <span className="text-pretty text-base leading-relaxed text-slate-200">{prompt}</span>
-            </motion.li>
-          ))}
-        </motion.ul>
-      </motion.div>
-    </SlideFrame>
-  );
-}
+function GuestAnswerFormatted({ answer }) {
+  const blocks = useMemo(() => parseGuestAnswerBlocks(answer), [answer]);
+  const structured = blocks.some((b) => b.type === "heading" || b.type === "bullet");
 
-function SourcesSlide({ slide }) {
-  return (
-    <SlideFrame>
-      <motion.div variants={stagger} initial="hidden" animate="show" className="w-full">
-        <Eyebrow>{slide.eyebrow}</Eyebrow>
-        <motion.h2
-          variants={fadeUp}
-          className="font-display mt-3 text-balance text-3xl font-bold text-white sm:text-4xl"
-        >
-          {slide.title}
-        </motion.h2>
-        <motion.ul variants={fadeUp} className="mt-8 space-y-3">
-          {(slide.sources || []).map((source) => (
-            <motion.li key={source.url} variants={fadeUp}>
-              <a
-                href={source.url}
-                target="_blank"
-                rel="noreferrer"
-                className="group flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3.5 transition-colors hover:border-orange-500/40 hover:bg-orange-500/5"
-              >
-                <ExternalLink className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" />
-                <div className="min-w-0">
-                  <p className="font-semibold text-white group-hover:text-orange-100">{source.label}</p>
-                  {source.note && <p className="mt-1 text-sm text-slate-400">{source.note}</p>}
-                  <p className="mt-1 truncate text-xs text-slate-500">{source.url}</p>
-                </div>
-              </a>
-            </motion.li>
-          ))}
-        </motion.ul>
-      </motion.div>
-    </SlideFrame>
-  );
-}
-
-function renderSlide(current, t) {
-  if (!current) {
-    return (
-      <SlideFrame align="center">
-        <p className="text-slate-400">{t("stage4.noReports")}</p>
-      </SlideFrame>
-    );
+  if (!structured) {
+    return <p className="pptx-guest-text">{answer}</p>;
   }
-  switch (current.kind) {
+
+  return (
+    <div className="pptx-guest-text">
+      {blocks.map((block, i) => {
+        if (block.type === "gap") return <div key={`g-${i}`} className="pptx-guest-gap" />;
+        if (block.type === "heading") {
+          return (
+            <p key={`h-${i}`} className="pptx-guest-heading">
+              <span className="pptx-guest-num">{block.n}.</span>
+              {block.text}
+            </p>
+          );
+        }
+        if (block.type === "bullet") {
+          return (
+            <p key={`b-${i}`} className="pptx-guest-bullet">
+              <span className="pptx-guest-dot" aria-hidden />
+              <span>{block.text}</span>
+            </p>
+          );
+        }
+        return (
+          <p key={`p-${i}`} className="pptx-guest-para">
+            {block.text}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
+function GuestRosterBody({ slide }) {
+  const { t } = useLanguage();
+  const guests = slide.guests || [];
+  const omitted = slide.omitted || 0;
+  return (
+    <motion.div variants={fadeUp}>
+      <ul className="pptx-guest-roster">
+        {guests.map((guest, index) => (
+          <li key={`${guest.name}-${index}`}>
+            <span className="pptx-list-num w-7">{String(index + 1).padStart(2, "0")}</span>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-emerald-400/40 bg-emerald-950/70 text-sm font-semibold text-emerald-100">
+              {(guest.name || "?").slice(0, 1).toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="pptx-agenda-name">{guest.name}</p>
+              {guest.role ? <p className="pptx-agenda-lens truncate">{guest.role}</p> : null}
+            </div>
+          </li>
+        ))}
+      </ul>
+      {omitted > 0 ? (
+        <p className="mt-3 text-sm text-slate-400">
+          {t("present.guestsMore").replace("{n}", String(omitted))}
+        </p>
+      ) : null}
+    </motion.div>
+  );
+}
+
+function GuestBody({ slide }) {
+  const guest = slide.guest;
+  if (!guest) return null;
+  return (
+    <motion.div variants={fadeUp} className="pptx-guest-card">
+      <div className="pptx-guest-card-rail" />
+      <div className="pptx-guest-card-body">
+        <GuestAnswerFormatted answer={guest.answer} />
+      </div>
+    </motion.div>
+  );
+}
+
+function ConclusionBody({ slide }) {
+  return (
+    <motion.ol variants={fadeUp} className="pptx-list space-y-4">
+      {(slide.prompts || []).map((prompt, index) => (
+        <li key={prompt} className="pptx-list-item">
+          <span className="pptx-list-num pt-0.5">{index + 1}.</span>
+          <span className="pptx-copy">{prompt}</span>
+        </li>
+      ))}
+    </motion.ol>
+  );
+}
+
+function SlideContent({ slide }) {
+  if (!slide) {
+    return <p className="text-sm text-slate-400">No presentation yet.</p>;
+  }
+  switch (slide.kind) {
+    case "title":
+      return <TitleBody slide={slide} />;
+    case "framing":
     case "topic":
-      return <TopicSlide slide={current} />;
-    case "introduction":
-      return <IntroductionSlide slide={current} />;
+      return <FramingBody slide={slide} />;
     case "agenda":
-      return <AgendaSlide slide={current} />;
+      return <AgendaBody slide={slide} />;
     case "agent":
-      return <AgentSlide slide={current} keyPointsLabel={t("present.keyPoints")} />;
-    case "case_study":
-      return <CaseStudySlide slide={current} />;
-    case "synthesis":
-      return <SynthesisSlide slide={current} />;
+      return <AgentBody slide={slide} />;
+    case "guest-roster":
+      return <GuestRosterBody slide={slide} />;
+    case "guest":
+    case "guests":
+      // Legacy "guests" batch slide: show first guest formatted if present
+      if (slide.kind === "guests" && slide.guests?.length) {
+        return (
+          <GuestBody
+            slide={{ guest: slide.guests[0], eyebrow: slide.eyebrow, title: slide.guests[0].name }}
+          />
+        );
+      }
+      return <GuestBody slide={slide} />;
     case "conclusion":
-      return <ConclusionSlide slide={current} />;
-    case "sources":
-      return <SourcesSlide slide={current} />;
+      return <ConclusionBody slide={slide} />;
     default:
-      return <ConclusionSlide slide={current} />;
+      return <ConclusionBody slide={slide} />;
   }
 }
 
 export default function PresentPage() {
   const { t, lang } = useLanguage();
+  const { isDemo } = useAppMode();
+  const navigate = useNavigate();
+  const uiMode = isDemo ? "demo" : "live";
   const [params] = useSearchParams();
   const [reports, setReports] = useState([]);
-  const [sessionId, setSessionId] = useState(null);
-  const [report, setReport] = useState(null);
+  const [playlist, setPlaylist] = useState([]);
+  const [sessionsPayload, setSessionsPayload] = useState([]);
   const [presentation, setPresentation] = useState(null);
+  const [showPicker, setShowPicker] = useState(false);
   const [slide, setSlide] = useState(0);
   const [direction, setDirection] = useState(1);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
   const slideRef = useRef(0);
 
   useEffect(() => {
@@ -452,40 +390,109 @@ export default function PresentPage() {
 
   useEffect(() => {
     const fromQuery = Number(params.get("session"));
-    const lastId = sessionStorage.getItem("last_session_id");
-    fetchReports()
+    setLoading(true);
+    fetchReports(uiMode)
       .then((list) => {
         const unique = uniqueReportsByQuestion(list);
         setReports(unique);
-        if (fromQuery) {
-          const match = unique.find((r) => r.session_id === fromQuery);
-          setSessionId(match?.session_id || resolvePreferredSessionId(list, fromQuery));
-        } else {
-          setSessionId(resolvePreferredSessionId(list, lastId));
+        const preferred =
+          fromQuery ||
+          resolvePreferredSessionId(list, getActiveSessionId(uiMode)) ||
+          unique[0]?.session_id;
+        const next = preferred ? [preferred] : [];
+        setPlaylist(next);
+        if (next[0]) {
+          setActiveSessionId(next[0], uiMode);
+          setPresentPlaylist(next, uiMode);
         }
       })
-      .catch((err) => setError(err.message));
-  }, [params]);
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [params, uiMode]);
 
   useEffect(() => {
-    if (!sessionId) return;
-    fetchReport(sessionId)
-      .then((data) => {
-        setReport({ ...data, question: displayQuestion(data.question) });
-        setDirection(1);
-        setSlide(0);
-        slideRef.current = 0;
-        setError("");
-      })
-      .catch((err) => setError(err.message));
-  }, [sessionId]);
+    if (!playlist.length) {
+      setSessionsPayload([]);
+      return;
+    }
+    setPresentPlaylist(playlist, uiMode);
+    let cancelled = false;
 
-  const slides = useMemo(
-    () => buildPresentationSlides(report, t, lang, presentation),
-    [report, t, lang, presentation]
-  );
+    async function loadDeck({ resetSlide = false } = {}) {
+      try {
+        const payload = await Promise.all(
+          playlist.map(async (id) => {
+            const [report, comparison] = await Promise.all([
+              fetchReport(id),
+              fetchComparison(id).catch(() => ({ human_answers: [] })),
+            ]);
+            return {
+              report: { ...report, question: displayQuestion(report.question) },
+              humanAnswers: comparison.human_answers || [],
+            };
+          })
+        );
+        if (cancelled) return;
+        setSessionsPayload(payload);
+        if (resetSlide) {
+          setDirection(1);
+          setSlide(0);
+          slideRef.current = 0;
+        }
+        setError("");
+      } catch (err) {
+        if (!cancelled) setError(err.message);
+      }
+    }
+
+    loadDeck({ resetSlide: true });
+
+    function onFocus() {
+      const fromQuery = Number(params.get("session"));
+      fetchReports(uiMode)
+        .then((list) => {
+          if (cancelled) return;
+          const unique = uniqueReportsByQuestion(list);
+          setReports(unique);
+          const preferred =
+            fromQuery ||
+            resolvePreferredSessionId(list, getActiveSessionId(uiMode)) ||
+            unique[0]?.session_id;
+          if (preferred && preferred !== playlist[0]) {
+            const next = [preferred];
+            setPlaylist(next);
+            setActiveSessionId(preferred, uiMode);
+            setPresentPlaylist(next, uiMode);
+            return;
+          }
+          return loadDeck({ resetSlide: false });
+        })
+        .catch(() => {});
+    }
+
+    window.addEventListener("focus", onFocus);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [playlist, uiMode, params]);
+
+  const slides = useMemo(() => {
+    if (!sessionsPayload.length) return [];
+    if (sessionsPayload.length === 1) {
+      return buildPresentationSlides(
+        sessionsPayload[0].report,
+        t,
+        lang,
+        presentation,
+        sessionsPayload[0].humanAnswers
+      );
+    }
+    return buildMultiSessionPresentationSlides(sessionsPayload, t, lang, presentation);
+  }, [sessionsPayload, t, lang, presentation]);
+
   const current = slides[slide];
-  const progress = slides.length ? ((slide + 1) / slides.length) * 100 : 0;
+  const brand = t("present.brandLine");
 
   function goTo(nextIndex) {
     const clamped = Math.max(0, Math.min(nextIndex, slides.length - 1));
@@ -493,6 +500,12 @@ export default function PresentPage() {
     setDirection(clamped > slideRef.current ? 1 : -1);
     slideRef.current = clamped;
     setSlide(clamped);
+  }
+
+  function updatePlaylist(ids) {
+    const clean = ids.length ? ids.slice(0, 1) : playlist.slice(0, 1);
+    setPlaylist(clean);
+    if (clean[0]) setActiveSessionId(clean[0], uiMode);
   }
 
   useEffect(() => {
@@ -506,121 +519,113 @@ export default function PresentPage() {
         goTo(slideRef.current - 1);
       }
       if (e.key === "Escape") {
-        window.history.back();
+        if (showPicker) setShowPicker(false);
+        else navigate("/question");
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [slides.length]);
+  }, [slides.length, showPicker, navigate]);
 
   return (
-    <div className="present-stage relative min-h-screen overflow-hidden text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(194,65,12,0.18),transparent_55%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_40%_40%_at_90%_80%,rgba(14,116,144,0.12),transparent_50%)]" />
-
-      <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col px-5 py-4 sm:px-8 sm:py-5">
-        <header className="grid grid-cols-[1fr_auto] items-center gap-3 sm:grid-cols-[1fr_auto_1fr]">
-          <div className="flex items-center gap-2 text-sm text-slate-400">
-            <Presentation className="h-4 w-4 shrink-0 text-orange-400" />
-            <span className="truncate">{t("present.title")}</span>
-            {sessionId ? (
-              <span className="hidden font-mono text-slate-500 sm:inline">· #{sessionId}</span>
-            ) : null}
-          </div>
-
-          <div className="hidden justify-center sm:flex">
+    <div className="present-stage relative flex min-h-0 flex-1 flex-col overflow-hidden text-white">
+      <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-4 py-3 sm:px-6">
+        <div className="mb-2 flex shrink-0 items-center justify-between gap-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+            {t("present.title")}
+          </p>
+          <div className="hidden flex-1 justify-center sm:flex">
             {slides.length > 0 && (
-              <div className="flex items-center gap-1.5">
-                {slides.map((s, index) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    aria-label={`Go to slide ${index + 1}`}
-                    onClick={() => goTo(index)}
-                    className={cn(
-                      "h-1.5 rounded-full transition-all duration-300",
-                      index === slide
-                        ? "w-7 bg-orange-400"
-                        : "w-1.5 bg-white/20 hover:bg-white/45"
-                    )}
+              <div className="flex w-full max-w-xs items-center gap-3">
+                <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/15">
+                  <div
+                    className="h-full rounded-full bg-orange-400 transition-[width] duration-300"
+                    style={{
+                      width: `${((slide + 1) / Math.max(slides.length, 1)) * 100}%`,
+                    }}
                   />
-                ))}
+                </div>
+                <span className="shrink-0 text-[11px] tabular-nums text-slate-500">
+                  {slide + 1}/{slides.length}
+                </span>
               </div>
             )}
           </div>
-
-          <div className="flex items-center justify-end gap-2">
-            <select
-              className="page-select h-9 max-w-[11rem] sm:max-w-[14rem]"
-              value={sessionId || ""}
-              onChange={(e) => setSessionId(Number(e.target.value))}
-              aria-label={t("stage5.pickSession")}
-            >
-              {reports.map((r) => (
-                <option key={r.session_id} value={r.session_id}>
-                  #{r.session_id}
-                  {r.question ? ` — ${r.question.slice(0, 28)}${r.question.length > 28 ? "…" : ""}` : ""}
-                </option>
-              ))}
-            </select>
-            <Button asChild variant="outline" size="sm" className="border-white/20 bg-transparent text-white">
-              <Link to="/question">
-                <X className="mr-1 h-4 w-4" />
-                {t("present.exit")}
-              </Link>
-            </Button>
-          </div>
-        </header>
-
-        <div className="mt-4 h-[2px] overflow-hidden rounded-full bg-white/10">
-          <motion.div
-            className="h-full origin-left rounded-full bg-gradient-to-r from-orange-500 to-amber-300"
-            initial={false}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.35, ease }}
-          />
+          <button
+            type="button"
+            onClick={() => setShowPicker((v) => !v)}
+            className="text-xs text-slate-400 underline-offset-2 hover:text-white hover:underline"
+          >
+            {t("present.playlistToggle")}
+          </button>
         </div>
 
-        {error && <p className="mt-4 rounded-lg bg-red-500/10 p-3 text-sm text-red-300">{error}</p>}
+        {showPicker && (
+          <div className="mb-2 shrink-0 rounded-xl border border-white/10 bg-slate-950/70 p-3">
+            <PresentPlaylistBar
+              reports={reports}
+              selectedIds={playlist}
+              onChange={updatePlaylist}
+              label={t("present.playlistLabel")}
+              hint={t("present.playlistHint")}
+            />
+          </div>
+        )}
 
-        <main className="relative flex min-h-0 flex-1 items-center py-6 sm:py-8">
-          <AnimatePresence mode="wait" custom={direction}>
-            <motion.div
-              key={current?.id || "empty"}
-              custom={direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              className="absolute inset-x-0 top-0 bottom-0 flex items-center"
+        {loading && <p className="mb-2 text-sm text-slate-400">{t("workspace.restoring")}</p>}
+        {error && <p className="mb-2 text-sm text-red-300">{error}</p>}
+
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2">
+          <div className="pptx-deck relative w-full">
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={current?.id || "empty"}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                className="absolute inset-0"
+              >
+                <SlideShell
+                  slide={current}
+                  index={slide}
+                  total={slides.length}
+                  brand={brand}
+                  footnote={t("present.deckFootnote")}
+                  isTitle={current?.kind === "title"}
+                  accentColor={
+                    current?.color ||
+                    (current?.kind === "guest" || current?.kind === "guest-roster"
+                      ? "#34d399"
+                      : undefined)
+                  }
+                >
+                  <SlideContent slide={current} />
+                </SlideShell>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          <div className="grid w-full max-w-3xl shrink-0 grid-cols-2 items-center px-1">
+            <button
+              type="button"
+              className="pptx-nav-btn justify-self-start"
+              disabled={slide <= 0}
+              onClick={() => goTo(slide - 1)}
             >
-              {renderSlide(current, t)}
-            </motion.div>
-          </AnimatePresence>
-        </main>
-
-        <footer className="grid grid-cols-3 items-center border-t border-white/10 pt-4">
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 justify-self-start text-sm text-slate-400 transition-colors hover:text-white disabled:opacity-30"
-            disabled={slide <= 0}
-            onClick={() => goTo(slide - 1)}
-          >
-            <ChevronLeft className="h-4 w-4" /> {t("present.prev")}
-          </button>
-          <p className="justify-self-center text-center text-xs tabular-nums text-slate-500">
-            {slides.length ? `${slide + 1} / ${slides.length}` : "0 / 0"}
-            <span className="hidden sm:inline"> · ← → Space · Esc</span>
-          </p>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 justify-self-end text-sm text-slate-400 transition-colors hover:text-white disabled:opacity-30"
-            disabled={slide >= slides.length - 1}
-            onClick={() => goTo(slide + 1)}
-          >
-            {t("present.next")} <ChevronRight className="h-4 w-4" />
-          </button>
-        </footer>
+              <ChevronLeft className="h-3.5 w-3.5" /> {t("present.prev")}
+            </button>
+            <button
+              type="button"
+              className="pptx-nav-btn justify-self-end"
+              disabled={slide >= slides.length - 1}
+              onClick={() => goTo(slide + 1)}
+            >
+              {t("present.next")} <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

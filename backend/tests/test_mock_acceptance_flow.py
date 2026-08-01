@@ -98,7 +98,7 @@ def test_mock_full_pilot_flow(mock_ask, client, tmp_path, monkeypatch):
     assert questions.status_code == 200
 
     # 4) Ask (mocked)
-    question = "How can we reduce school dropout with community participation?"
+    question = "How should municipal education teams involve families and community partners to reduce secondary school dropout in São Paulo this year, and what measurable first steps should they take within ninety days?"
     ask = client.post("/api/ask?mode=parallel", json={"question": question, "language": "en"})
     assert ask.status_code == 200, ask.text
     ask_payload = ask.json()
@@ -217,7 +217,7 @@ def test_mock_sequential_hitl_flow(client, monkeypatch):
         _enable_llm(monkeypatch)
         start = client.post(
             "/api/sequential/start",
-            json={"question": "Mock sequential question for acceptance testing."},
+            json={"question": "Mock sequential acceptance test: describe context, constraints, and ask how teams should reduce secondary school dropout in São Paulo over ninety days with community partners."},
         )
         assert start.status_code == 200
         run_id = start.json()["run_id"]

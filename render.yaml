@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: perspectivelab-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: CASE_ID
+        value: sao-paulo-dropout
+      - key: CORS_ORIGINS
+        sync: false
+      - key: PUBLIC_APP_URL
+        sync: false
+      - key: EXPORT_API_KEY
+        generateValue: true
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: ALLOWED_HOSTS
+        value: "*"

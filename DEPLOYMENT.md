@@ -4,6 +4,15 @@ Deploy **PerspectiveLab** for research and presentation use. The default case pa
 
 ---
 
+## Free cloud (remote invites)
+
+See **[docs/wiki/Free-Hosting.md](docs/wiki/Free-Hosting.md)** — Vercel (UI) + Render (API).  
+Set `PUBLIC_APP_URL` and `CORS_ORIGINS` to your Vercel domain, and `VITE_API_BASE_URL` to your Render API URL.
+
+Docker images now include `cases/` so invite answers and reports can persist when a volume is mounted.
+
+---
+
 ## Recommended: Docker (production)
 
 ### 1. Configure environment

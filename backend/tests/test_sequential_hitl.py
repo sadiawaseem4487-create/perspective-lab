@@ -48,7 +48,7 @@ def test_sequential_start_runs_vaihe_one(client, monkeypatch, mock_stage_runner)
 
     response = client.post(
         "/api/sequential/start",
-        json={"question": "How can we reduce school dropout in São Paulo?"},
+        json={"question": "How should municipal education teams involve families and community partners to reduce secondary school dropout in São Paulo this year, and what measurable first steps should they take within ninety days?"},
     )
 
     assert response.status_code == 200
@@ -71,7 +71,7 @@ def test_sequential_advance_runs_next_stage(client, monkeypatch, mock_stage_runn
 
     start = client.post(
         "/api/sequential/start",
-        json={"question": "How can we reduce school dropout in São Paulo?"},
+        json={"question": "How should municipal education teams involve families and community partners to reduce secondary school dropout in São Paulo this year, and what measurable first steps should they take within ninety days?"},
     ).json()
     run_id = start["run_id"]
 
@@ -100,7 +100,7 @@ def test_sequential_finalize_completes_run(client, monkeypatch, mock_stage_runne
 
     start = client.post(
         "/api/sequential/start",
-        json={"question": "How can we reduce school dropout in São Paulo?"},
+        json={"question": "How should municipal education teams involve families and community partners to reduce secondary school dropout in São Paulo this year, and what measurable first steps should they take within ninety days?"},
     ).json()
     run_id = start["run_id"]
 

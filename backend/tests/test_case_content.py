@@ -8,10 +8,12 @@ def test_questions_load_for_each_language(client, lang):
     payload = response.json()
     assert payload["language"] == lang
     assert len(payload["main_question"]) > 20
-    assert len(payload["questions"]) >= 6
-    categories = {item["category"] for item in payload["questions"]}
-    assert "quick_test" in categories
-    assert "policy" in categories
+    assert len(payload["questions"]) >= 3
+    ids = {item["id"] for item in payload["questions"]}
+    assert "frame-community" in ids
+    for item in payload["questions"]:
+        assert len(item["text"].split()) >= 20
+        assert item["label"]
 
 
 def test_questions_invalid_language_falls_back_to_en(client):
