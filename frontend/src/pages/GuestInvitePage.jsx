@@ -61,22 +61,18 @@ export default function GuestInvitePage() {
         <header className="flex items-center gap-3">
           <BrandLogo className="h-10 w-10" />
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              PerspectiveLab
-            </p>
-            <h1 className="font-display text-xl font-bold text-white">
-              {t("invite.title")}
-            </h1>
+            <p className="type-micro text-slate-500">PerspectiveLab</p>
+            <h1 className="type-page-title type-page-title-sm">{t("invite.title")}</h1>
           </div>
         </header>
 
-        {loading && <p className="text-slate-400">{t("invite.loading")}</p>}
+        {loading && <p className="type-sm">{t("invite.loading")}</p>}
         {error && <PageAlert>{error}</PageAlert>}
 
         {!loading && invite && (
           <>
             {invite.case_title && (
-              <p className="text-sm text-slate-400">
+              <p className="type-sm">
                 <FlaskConical className="mr-1 inline h-3.5 w-3.5" />
                 {invite.case_title}
                 {invite.label ? ` · ${invite.label}` : ""}
@@ -84,21 +80,15 @@ export default function GuestInvitePage() {
             )}
 
             <section className="rounded-2xl border border-sky-500/20 bg-sky-500/10 px-5 py-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-sky-300/90">
-                {t("invite.questionLabel")}
-              </p>
-              <p className="mt-2 font-display text-lg font-semibold leading-snug text-white">
-                {displayQuestion(invite.question)}
-              </p>
+              <p className="type-micro text-sky-300/90">{t("invite.questionLabel")}</p>
+              <p className="type-question mt-2">{displayQuestion(invite.question)}</p>
             </section>
 
             {done ? (
               <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-6 py-8 text-center">
                 <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-400" />
-                <p className="mt-3 font-display text-xl font-semibold text-white">
-                  {t("invite.thanks")}
-                </p>
-                <p className="mt-2 text-sm text-slate-400">{t("invite.thanksBody")}</p>
+                <p className="type-section mt-3">{t("invite.thanks")}</p>
+                <p className="type-sm mt-2">{t("invite.thanksBody")}</p>
               </div>
             ) : !invite.open ? (
               <PageAlert>{invite.closed_reason || t("invite.closed")}</PageAlert>
@@ -107,7 +97,7 @@ export default function GuestInvitePage() {
                 onSubmit={handleSubmit}
                 className="space-y-4 rounded-2xl border border-white/10 bg-slate-900/50 p-5 sm:p-6"
               >
-                <p className="text-sm text-slate-400">{t("invite.formIntro")}</p>
+                <p className="type-sm">{t("invite.formIntro")}</p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <input
                     required

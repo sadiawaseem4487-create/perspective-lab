@@ -28,6 +28,21 @@
     --sidebar-foreground: 210 40% 96%;
     --sidebar-muted: 215 20% 55%;
     --sidebar-accent: 24 95% 53%;
+
+    /* Typography — single system for the whole product */
+    --font-sans: "Source Sans 3", "Segoe UI", sans-serif;
+    --font-display: Fraunces, Georgia, "Times New Roman", serif;
+    --text-micro: 0.6875rem;   /* 11px — labels / nav group */
+    --text-meta: 0.75rem;      /* 12px — captions, timestamps */
+    --text-sm: 0.875rem;       /* 14px — secondary body, controls */
+    --text-body: 0.9375rem;    /* 15px — primary body */
+    --text-question: 1.125rem; /* 18px — research question line */
+    --text-section: 1.125rem;  /* 18px — in-page section titles */
+    --text-title: 1.75rem;     /* 28px — page title */
+    --text-title-sm: 1.375rem; /* 22px — compact page title */
+    --leading-tight: 1.25;
+    --leading-snug: 1.35;
+    --leading-body: 1.55;
   }
 
   * {
@@ -39,14 +54,21 @@
     color: hsl(var(--foreground));
     margin: 0;
     min-height: 100vh;
-    font-family: "Source Sans 3", "Segoe UI", sans-serif;
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   .font-display {
-    font-family: Fraunces, Georgia, serif;
+    font-family: var(--font-display);
   }
+
+  .font-sans {
+    font-family: var(--font-sans);
+  }
+}
 
   .present-stage {
     --pptx-bg: #070b14;
@@ -59,11 +81,12 @@
     --pptx-line: rgba(148, 163, 184, 0.22);
     --pptx-accent: #f97316;
     --pptx-accent-soft: rgba(249, 115, 22, 0.16);
-    --pptx-sans: "Source Sans 3", "Segoe UI", sans-serif;
-    --pptx-display: Fraunces, Georgia, "Times New Roman", serif;
+    --pptx-sans: var(--font-sans);
+    --pptx-display: var(--font-display);
     background: var(--pptx-bg);
     color: var(--pptx-body);
     font-family: var(--pptx-sans);
+    font-size: var(--text-body);
   }
 
   /* Fixed PowerPoint-like slide geometry — same regions on every slide */
@@ -477,7 +500,8 @@
       radial-gradient(ellipse 50% 35% at 15% 70%, rgba(14, 165, 233, 0.08), transparent 48%),
       #070b14;
     color: #e2e8f0;
-    font-family: "Source Sans 3", "Segoe UI", sans-serif;
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
   }
 
   .landing-top {
@@ -764,7 +788,8 @@
 
   .landing-kicker {
     margin: 0;
-    font-size: 0.7rem;
+    font-family: var(--font-sans);
+    font-size: var(--text-micro);
     font-weight: 600;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -773,8 +798,8 @@
 
   .landing-section-title {
     margin: 0.55rem 0 0;
-    font-family: Fraunces, Georgia, serif;
-    font-size: clamp(1.4rem, 2.3vw, 1.75rem);
+    font-family: var(--font-display);
+    font-size: var(--text-title-sm);
     font-weight: 600;
     letter-spacing: -0.02em;
     line-height: 1.2;
@@ -783,14 +808,15 @@
   }
 
   .landing-section-title-lg {
-    font-size: clamp(1.65rem, 3vw, 2.15rem);
+    font-size: var(--text-title);
     max-width: 16ch;
   }
 
   .landing-section-body {
     margin: 0.7rem 0 0;
-    font-size: 1rem;
-    line-height: 1.55;
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
     color: #94a3b8;
   }
 
@@ -985,31 +1011,128 @@
       radial-gradient(ellipse 55% 40% at 100% 30%, rgba(14, 116, 144, 0.12), transparent 50%),
       linear-gradient(180deg, #0b1220 0%, #020617 100%);
   }
-}
 
 @layer components {
+  /* —— Shared type roles (use these instead of ad-hoc text-* sizes) —— */
+  .type-kicker {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-micro);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: var(--leading-tight);
+    color: #fb923c;
+  }
+
+  .type-page-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-title);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: var(--leading-tight);
+    color: #fff;
+    text-wrap: balance;
+  }
+
+  .type-page-title-sm {
+    font-size: var(--text-title-sm);
+  }
+
+  .type-section {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-section);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: var(--leading-snug);
+    color: #fff;
+  }
+
+  .type-question {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-question);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+    color: #fff;
+  }
+
+  .type-body {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    font-weight: 400;
+    line-height: var(--leading-body);
+    color: #94a3b8;
+  }
+
+  .type-body-strong {
+    color: #cbd5e1;
+  }
+
+  .type-sm {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 400;
+    line-height: var(--leading-body);
+    color: #94a3b8;
+  }
+
+  .type-meta {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-meta);
+    font-weight: 400;
+    line-height: 1.4;
+    color: #64748b;
+  }
+
+  .type-micro {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-micro);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: var(--leading-tight);
+    color: #64748b;
+  }
+
   .page-panel {
     @apply rounded-2xl border border-white/10 bg-slate-900/50 p-6 shadow-sm backdrop-blur-sm;
   }
 
   .page-input {
-    @apply rounded-lg border border-white/15 bg-slate-900/80 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500/40;
+    @apply rounded-lg border border-white/15 bg-slate-900/80 px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500/40;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
   }
 
   .page-select {
-    @apply rounded-lg border border-white/15 bg-slate-900/80 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500/40;
+    @apply rounded-lg border border-white/15 bg-slate-900/80 px-3 py-2 text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500/40;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
   }
 
   .page-btn-primary {
     @apply rounded-xl bg-orange-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-orange-500 disabled:opacity-50;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
   }
 
   .page-btn-secondary {
     @apply rounded-xl border border-white/20 px-6 py-3 font-semibold text-slate-200 transition-colors hover:bg-white/10;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
   }
 
   .page-btn-success {
     @apply rounded-xl bg-emerald-700 px-6 py-3 font-semibold text-white transition-colors hover:bg-emerald-600;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
   }
 
   .guest-quote-in {
@@ -1039,22 +1162,21 @@
 
   .guest-answer-body {
     position: relative;
-    font-family: "Source Sans 3", "Segoe UI", sans-serif;
-    font-size: 0.95rem;
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
     font-weight: 400;
-    line-height: 1.55;
+    line-height: var(--leading-body);
     letter-spacing: 0.01em;
     color: #e2e8f0;
   }
 
   .guest-answer-body-sm {
-    font-size: 0.875rem;
-    line-height: 1.5;
+    font-size: var(--text-sm);
   }
 
   .guest-answer-heading {
     margin: 0.85rem 0 0.35rem;
-    font-size: 0.98em;
+    font-size: var(--text-body);
     font-weight: 600;
     letter-spacing: -0.01em;
     color: #f8fafc;

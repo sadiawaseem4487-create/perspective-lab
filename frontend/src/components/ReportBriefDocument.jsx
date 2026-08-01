@@ -84,7 +84,7 @@ function BlockView({ block, tableLabel }) {
   }
   if (block.type === "lead" && block.text) {
     return (
-      <p className="font-display text-[1.05rem] font-medium leading-snug text-slate-100">
+      <p className="type-section text-[length:var(--text-body)] font-medium text-slate-100">
         {block.text}
       </p>
     );
@@ -501,7 +501,7 @@ export function ReportBriefDocument({
 
         {/* ========== CONTENTS ========== */}
         <article className="brief-sheet">
-          <h2 className="font-display text-2xl font-semibold text-white">{t("stage4.toc")}</h2>
+          <h2 className="type-section text-[length:var(--text-title-sm)]">{t("stage4.toc")}</h2>
           <ul className="brief-toc mt-6">
             {toc.map((item, i) => (
               <TocRow
@@ -518,7 +518,7 @@ export function ReportBriefDocument({
 
         {/* ========== LIST OF TABLES ========== */}
         <article className="brief-sheet">
-          <h2 className="font-display text-2xl font-semibold text-white">
+          <h2 className="type-section text-[length:var(--text-title-sm)]">
             {t("stage4.listOfTables")}
           </h2>
           {brief.tables?.length ? (
@@ -546,7 +546,7 @@ export function ReportBriefDocument({
             <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
               {t("stage4.pageLabel").replace("{n}", "1")}
             </p>
-            <h2 className="mt-2 font-display text-2xl font-semibold text-white">
+            <h2 className="type-section mt-2 text-[length:var(--text-title-sm)]">
               {t("stage4.framingLabel")}
             </h2>
             {editing ? (
@@ -576,10 +576,10 @@ export function ReportBriefDocument({
                       <input
                         value={section.title}
                         onChange={(e) => updateSection(sectionIndex, { title: e.target.value })}
-                        className="min-w-0 flex-1 border-b border-white/20 bg-transparent pb-1 font-display text-xl font-semibold text-white focus:outline-none"
+                        className="type-section min-w-0 flex-1 border-b border-white/20 bg-transparent pb-1 text-[length:var(--text-section)] focus:outline-none"
                       />
                     ) : (
-                      <h2 className="font-display text-xl font-semibold text-white sm:text-[1.35rem]">
+                      <h2 className="type-section">
                         {section.title}
                       </h2>
                     )}

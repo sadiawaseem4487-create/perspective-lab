@@ -89,24 +89,18 @@ export default function AppShell() {
           <Link to="/" className="flex items-center gap-3 rounded-lg outline-none focus-visible:ring-1 focus-visible:ring-orange-500/50">
             <BrandLogo className="h-9 w-9 shrink-0" />
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {t("shell.product")}
-              </p>
-              <h1 className="font-display text-lg font-bold leading-tight text-white">
-                {t("shell.productName")}
-              </h1>
+              <p className="type-micro text-slate-500">{t("shell.product")}</p>
+              <h1 className="type-section leading-tight">{t("shell.productName")}</h1>
             </div>
           </Link>
-          <p className="mt-2 text-xs leading-relaxed text-slate-400">{t("shell.tagline")}</p>
+          <p className="type-meta mt-2">{t("shell.tagline")}</p>
         </div>
 
         <ModeToggle />
         <SidebarWorkflowMode />
 
         <ScrollArea className="flex-1 px-3 py-2">
-          <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-            {t("shell.research")}
-          </p>
+          <p className="type-micro px-3 pb-2">{t("shell.research")}</p>
           <nav className="space-y-1">
             {nav.research.map((item) => (
               <NavItem key={item.to} {...item} />
@@ -115,9 +109,7 @@ export default function AppShell() {
 
           <Separator className="my-4 bg-slate-800" />
 
-          <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-            {t("shell.settings")}
-          </p>
+          <p className="type-micro px-3 pb-2">{t("shell.settings")}</p>
           <nav className="space-y-1">
             {nav.configure.map((item) => (
               <NavItem key={item.to} {...item} />

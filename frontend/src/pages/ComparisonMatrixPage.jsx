@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchComparisonMatrix, fetchReports } from "@/api";
-import { PageAlert, PageHero, PagePanel } from "@/components/PageChrome";
+import { PageAlert, PageHero, PagePanel, ResearchQuestionBlock } from "@/components/PageChrome";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAppMode } from "@/context/AppModeContext";
 import { getAgentLens, getAgentTheorist } from "@/lib/agentIcons";
@@ -206,29 +206,25 @@ export default function ComparisonMatrixPage() {
 
       {!loading && matrixData && (
         <>
-          <section className="border-b border-white/10 pb-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-              {t("stage5.researchQuestion")}
-            </p>
-            <p className="mt-1.5 text-base font-medium leading-snug text-white sm:text-lg">
-              {displayQuestion(matrixData.question)}
-            </p>
-            <p className="mt-1.5 text-xs text-slate-500">
-              {columns.filter((c) => c.kind !== "guest").length} {t("stage5.agentsShort")}
-              {guestCount > 0 ? ` · ${guestCount} ${t("stage5.guestsShort")}` : ""}
-              {matrixData.workflow_mode ? ` · ${matrixData.workflow_mode}` : ""}
-            </p>
-          </section>
+          <ResearchQuestionBlock
+            label={t("stage5.researchQuestion")}
+            question={displayQuestion(matrixData.question)}
+            meta={`${columns.filter((c) => c.kind !== "guest").length} ${t("stage5.agentsShort")}${
+              guestCount > 0 ? ` · ${guestCount} ${t("stage5.guestsShort")}` : ""
+            }${matrixData.workflow_mode ? ` · ${matrixData.workflow_mode}` : ""}`}
+          />
 
-          {guestNote && <p className="text-xs text-slate-500">{guestNote}</p>}
+          {guestNote && <p className="type-meta">{guestNote}</p>}
 
           <MatrixTable matrix={matrixData.matrix} columns={columns} lang={lang} t={t} />
 
           {(matrixData.guest_summaries || []).length > 0 && (
             <section className="space-y-2">
-              <h3 className="text-sm font-semibold text-white">
+              <h3 className="type-section">
                 {t("guests.listTitle")}
-                <span className="ml-2 text-xs font-normal text-slate-500">({guestCount})</span>
+                <span className="ml-2 type-meta font-normal normal-case tracking-normal">
+                  ({guestCount})
+                </span>
               </h3>
               <div className="overflow-x-auto rounded-xl border border-emerald-500/20">
                 <table className="w-full text-left text-xs">

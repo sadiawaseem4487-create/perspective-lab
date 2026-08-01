@@ -4,6 +4,7 @@ Newest entries at the top.
 
 | Date | Sprint | Event |
 |------|--------|-------|
+| 2026-08-01 | P5 | Typography system: shared type tokens (kicker/title/section/body/meta) across app UI. |
 | 2026-08-01 | P5 | Final polish: Present scrubber/guest slides, Invite CTAs, Matrix i18n/emerald, landing tags, guest collapse. |
 | 2026-07-25 | P5 | Present: one slide per guest + roster for many; sans typography + structured guest answers. |
 | 2026-07-25 | P5 | Full guest answers end-to-end: fixed `1.` matrix split, removed Compare/Report/Present clipping. |

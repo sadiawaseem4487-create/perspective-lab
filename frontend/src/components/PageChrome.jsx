@@ -4,26 +4,12 @@ export function PageHero({ badge, title, description, children, className, size 
   const compact = size === "sm";
   return (
     <section className={cn("page-panel", compact && "py-4", className)}>
-      {badge && (
-        <p
-          className={cn(
-            "font-semibold uppercase tracking-wide text-orange-400",
-            compact ? "text-xs" : "text-sm"
-          )}
-        >
-          {badge}
-        </p>
-      )}
-      <h2
-        className={cn(
-          "font-display font-bold text-white",
-          compact ? "mt-1 text-xl sm:text-2xl" : "text-3xl"
-        )}
-      >
+      {badge && <p className="type-kicker">{badge}</p>}
+      <h2 className={cn("type-page-title", compact ? "mt-1 type-page-title-sm" : "mt-1.5")}>
         {title}
       </h2>
       {description && (
-        <div className={cn("mt-1.5 text-slate-400", compact ? "text-sm" : "mt-2")}>{description}</div>
+        <div className={cn("type-body mt-2", compact && "mt-1.5 type-sm")}>{description}</div>
       )}
       {children}
     </section>
@@ -45,8 +31,19 @@ export function PageAlert({ variant = "error", children }) {
     info: "border-blue-500/30 bg-blue-500/10 text-blue-200",
   };
   return (
-    <p className={cn("rounded-lg border px-4 py-3 text-sm", styles[variant] || styles.error)}>
+    <p className={cn("rounded-lg border px-4 py-3 type-sm", styles[variant] || styles.error)}>
       {children}
     </p>
+  );
+}
+
+/** Shared research-question strip used on Compare / Matrix / Invite / Report */
+export function ResearchQuestionBlock({ label, question, meta }) {
+  return (
+    <section className="border-b border-white/10 pb-3">
+      {label ? <p className="type-micro">{label}</p> : null}
+      <p className={cn("type-question", label && "mt-1.5")}>{question}</p>
+      {meta ? <p className="type-meta mt-1.5">{meta}</p> : null}
+    </section>
   );
 }

@@ -384,13 +384,9 @@ export default function TheoryRoundtable() {
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
       <header className="max-w-3xl space-y-3">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-orange-400">
-          {t("workspace.heroBadge")}
-        </p>
-        <h1 className="font-display text-3xl font-bold leading-tight text-white sm:text-4xl">
-          {t("workspace.heroTitle")}
-        </h1>
-        <p className="text-base leading-relaxed text-slate-400">
+        <p className="type-kicker">{t("workspace.heroBadge")}</p>
+        <h1 className="type-page-title">{t("workspace.heroTitle")}</h1>
+        <p className="type-body">
           {isDemo ? t("workspace.heroDescDemo") : t("workspace.heroDesc")}
         </p>
       </header>
@@ -425,7 +421,7 @@ export default function TheoryRoundtable() {
           onChange={(e) => applyQuestionText(e.target.value)}
           rows={isDemo ? 12 : 6}
           disabled={Boolean(sequentialRun && sequentialRun.status !== "completed")}
-          className="w-full resize-y border-0 bg-transparent text-sm font-normal leading-relaxed text-slate-200 placeholder:text-slate-500 focus:outline-none sm:text-[15px]"
+          className="w-full resize-y border-0 bg-transparent font-sans text-[length:var(--text-body)] font-normal leading-[var(--leading-body)] text-slate-200 placeholder:text-slate-500 focus:outline-none"
           placeholder={t("roundtable.questionPlaceholder")}
         />
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-3 text-xs">

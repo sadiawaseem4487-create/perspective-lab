@@ -8,7 +8,7 @@ import {
   fetchReports,
   listInvites,
 } from "@/api";
-import { PageAlert, PageHero, PagePanel } from "@/components/PageChrome";
+import { PageAlert, PageHero, PagePanel, ResearchQuestionBlock } from "@/components/PageChrome";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAppMode } from "@/context/AppModeContext";
 import { getActiveSessionId, setActiveSessionId } from "@/utils/sessionWorkspace";
@@ -164,22 +164,16 @@ export default function ShareInvitePage() {
 
       {!loading && sessionId && (
         <>
-          <section className="border-b border-white/10 pb-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-              {t("share.researchQuestion")}
-            </p>
-            <p className="mt-1.5 text-base font-medium leading-snug text-white sm:text-lg">
-              {question}
-            </p>
-            <p className="mt-1.5 text-xs text-slate-500">
-              {guestCount} {t("share.answersSoFar")}
-            </p>
-          </section>
+          <ResearchQuestionBlock
+            label={t("share.researchQuestion")}
+            question={question}
+            meta={`${guestCount} ${t("share.answersSoFar")}`}
+          />
 
           <PagePanel>
             {!inviteUrl ? (
               <div className="space-y-4">
-                <p className="text-sm text-slate-400">{t("share.createBody")}</p>
+                <p className="type-sm">{t("share.createBody")}</p>
                 <button
                   type="button"
                   onClick={handleCreate}

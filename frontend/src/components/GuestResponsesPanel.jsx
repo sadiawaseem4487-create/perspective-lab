@@ -140,15 +140,15 @@ export function GuestResponsesPanel({
             <Users className="h-5 w-5" />
           </div>
           <div>
-            <h3 className={cn("font-display font-semibold text-white", compact ? "text-base" : "text-xl")}>
+            <h3 className={cn("type-section", compact && "text-[length:var(--text-body)]")}>
               {t("guests.listTitle")}
             </h3>
-            <p className={cn("mt-1 text-slate-400", compact ? "text-xs" : "text-sm")}>
+            <p className={cn("type-sm mt-1", !compact && "type-body")}>
               {compact ? t("guests.listDescCompact") : t("guests.listDesc")}
             </p>
             {!compact && (
               <>
-                <p className="mt-2 text-xs font-medium text-slate-300">
+                <p className="type-meta mt-2 text-slate-300">
                   {count} / {capacity} {t("guests.slotsUsed")}
                   {remaining >= 0 ? ` · ${remaining} ${t("guests.remaining")}` : ""}
                 </p>

@@ -5,7 +5,7 @@ import { fetchComparison, fetchReports, saveHumanAnswers } from "../api";
 import { AgentAvatar } from "../components/AgentAvatar";
 import { AgentResponse } from "../components/AgentResponse";
 import { GuestResponsesPanel } from "../components/GuestResponsesPanel";
-import { PageAlert, PageHero, PagePanel } from "../components/PageChrome";
+import { PageAlert, PageHero, PagePanel, ResearchQuestionBlock } from "../components/PageChrome";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useAppMode } from "@/context/AppModeContext";
 import { getAgentLens, getAgentTheorist } from "@/lib/agentIcons";
@@ -160,18 +160,13 @@ export default function Stage5Compare() {
 
       {comparison && (
         <>
-          <section className="border-b border-white/10 pb-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-              {t("stage5.researchQuestion")}
-            </p>
-            <p className="mt-1.5 text-base font-medium leading-snug text-white sm:text-lg">
-              {comparison.question}
-            </p>
-            <p className="mt-1.5 text-xs text-slate-500">
-              {agentCount} {t("stage5.agentsShort")}
-              {guestCount > 0 ? ` · ${guestCount} ${t("stage5.guestsShort")}` : ""}
-            </p>
-          </section>
+          <ResearchQuestionBlock
+            label={t("stage5.researchQuestion")}
+            question={comparison.question}
+            meta={`${agentCount} ${t("stage5.agentsShort")}${
+              guestCount > 0 ? ` · ${guestCount} ${t("stage5.guestsShort")}` : ""
+            }`}
+          />
 
           <div className="flex flex-wrap gap-1.5 rounded-lg border border-white/10 bg-slate-950/50 p-1">
             {TABS.map(({ id, icon: Icon, labelKey }) => (
@@ -180,7 +175,8 @@ export default function Stage5Compare() {
                 type="button"
                 onClick={() => setTab(id)}
                 className={cn(
-                  "inline-flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-colors min-w-[6.5rem]",
+                  "inline-flex min-w-[6.5rem] flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 font-medium transition-colors",
+                  "text-[length:var(--text-sm)]",
                   tab === id
                     ? "bg-orange-600 text-white shadow-sm"
                     : "text-slate-400 hover:bg-white/5 hover:text-white"
@@ -253,10 +249,8 @@ export default function Stage5Compare() {
                   </button>
                 ) : (
                   <>
-                    <h3 className="font-display text-lg font-semibold text-white">
-                      {t("stage5.addOneManual")}
-                    </h3>
-                    <p className="mt-1 text-sm text-slate-400">{t("stage5.addOneManualDesc")}</p>
+                    <h3 className="type-section">{t("stage5.addOneManual")}</h3>
+                    <p className="type-sm mt-1">{t("stage5.addOneManualDesc")}</p>
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
                       <input
                         value={manual.name}
