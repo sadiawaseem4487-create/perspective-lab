@@ -37,8 +37,7 @@ export default function AgentsPage() {
         <h2 className="font-display text-3xl font-bold text-stone-900">Four agents</h2>
         <p className="mt-2 max-w-3xl text-stone-600">
           Each agent represents a different theoretical tradition and answers the same research
-          question from its own lens.
-          questions with its own logic. (Research view — audience sees Agent 1–4 only.)
+          question from its own lens. (Research view — audience sees Agent 1–4 only.)
         </p>
       </section>
       <div className="grid gap-5 lg:grid-cols-2">
