@@ -150,7 +150,13 @@ export default function LandingPage() {
         </Link>
         <div className="landing-top-actions">
           <LanguageSwitcher />
-          <Link to="/question" className="landing-btn-ghost">
+          <Link to="/login" className="landing-btn-ghost">
+            Sign in
+          </Link>
+          <Link to="/register" className="landing-btn-ghost">
+            Create account
+          </Link>
+          <Link to="/login" className="landing-btn-ghost">
             {t("landing.openApp")}
           </Link>
         </div>
@@ -177,14 +183,20 @@ export default function LandingPage() {
             <p className="landing-sample-text">{t("landing.sampleText")}</p>
           </motion.aside>
           <motion.div variants={fadeUp} className="landing-cta-row">
-            <Link to="/question" className="landing-btn-primary">
-              {t("landing.ctaPrimary")}
+            <Link to="/register" className="landing-btn-primary">
+              Create account
               <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link to="/login" className="landing-btn-secondary">
+              Sign in
             </Link>
             <a href="#how" className="landing-btn-secondary">
               {t("landing.ctaSecondary")}
             </a>
           </motion.div>
+          <motion.p variants={fadeUp} className="landing-lede" style={{ marginTop: "0.5rem", fontSize: "0.95rem" }}>
+            Each person uses their own API key. Lab admin key is not shared.
+          </motion.p>
         </motion.div>
         <HeroVisual t={t} reduceMotion={reduceMotion} />
       </section>
@@ -268,8 +280,8 @@ export default function LandingPage() {
           <p className="landing-close-prompt">{t("landing.closePrompt")}</p>
           <h2 className="landing-close-title">{t("landing.closeTitle")}</h2>
           <p className="landing-close-body">{t("landing.closeBody")}</p>
-          <Link to="/question" className="landing-btn-primary">
-            {t("landing.ctaPrimary")}
+          <Link to="/register" className="landing-btn-primary">
+            Create account
             <ArrowRight className="h-4 w-4" />
           </Link>
         </Reveal>
