@@ -1,4 +1,17 @@
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+function resolveApiBase() {
+  const fromEnv = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+  if (fromEnv) return fromEnv;
+  // Vercel static UI → existing Render API (same GitHub repo, split hosting)
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname || "";
+    if (host.endsWith(".vercel.app") || host.endsWith(".vercel.sh")) {
+      return "https://perspective-lab.onrender.com";
+    }
+  }
+  return "";
+}
+
+const API_BASE = resolveApiBase();
 const API = `${API_BASE}/api`;
 const EXPORT_KEY_STORAGE = "perspective_lab_export_key";
 const AUTH_TOKEN_STORAGE = "perspective_lab_auth_token";

@@ -58,13 +58,14 @@ Details: [CLIENT_HANDOVER.md](./CLIENT_HANDOVER.md)
 
 ---
 
-## Cloud (same Render URL)
+## Cloud
 
-Keep updating **one** service — do not recreate:
+| Deploy | URL |
+|--------|-----|
+| **Render (full app + API)** | https://perspective-lab.onrender.com/ |
+| **Vercel (UI only, optional)** | Import GitHub repo — see [CLOUD_DEPLOY.md](./CLOUD_DEPLOY.md) |
 
-→ **[ONLINE_DEPLOY.md](./ONLINE_DEPLOY.md)** → https://perspective-lab.onrender.com/
-
-Optional split (Vercel UI + Render API): [CLOUD_DEPLOY.md](./CLOUD_DEPLOY.md)
+Keep updating the same Render service. Vercel is optional static hosting that talks to the Render API.
 
 ---
 

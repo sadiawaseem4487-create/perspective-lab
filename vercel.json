@@ -4,6 +4,6 @@
   "installCommand": "cd frontend && npm ci",
   "framework": null,
   "rewrites": [
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { "source": "/((?!assets/).*)", "destination": "/index.html" }
   ]
 }
