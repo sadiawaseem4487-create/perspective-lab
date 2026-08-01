@@ -46,18 +46,11 @@ fi
 echo "Copying app into team folder…"
 ditto "$MOUNT/PerspectiveLab.app" "$FOLDER/PerspectiveLab.app"
 
-if [ -f "$MOUNT/Fix Mac Open.command" ]; then
-  cp "$MOUNT/Fix Mac Open.command" "$FOLDER/Fix Mac Open.command"
-else
-  cp "$ROOT/desktop/macos/Fix-Mac-Open.command" "$FOLDER/Fix Mac Open.command"
-fi
+# Always use the latest Fix script from the repo (not the older copy inside the DMG)
+cp "$ROOT/desktop/macos/Fix-Mac-Open.command" "$FOLDER/Fix Mac Open.command"
 chmod +x "$FOLDER/Fix Mac Open.command"
 
-if [ -f "$MOUNT/About Mac security.txt" ]; then
-  cp "$MOUNT/About Mac security.txt" "$FOLDER/About Mac security.txt"
-elif [ -f "$ROOT/desktop/macos/GATEKEEPER.md" ]; then
-  cp "$ROOT/desktop/macos/GATEKEEPER.md" "$FOLDER/About Mac security.txt"
-fi
+cp "$ROOT/desktop/macos/GATEKEEPER.md" "$FOLDER/About Mac security.txt" 2>/dev/null || true
 
 cat > "$FOLDER/READ ME.txt" << 'EOF'
 PerspectiveLab — how to install & run (Mac)
@@ -75,24 +68,34 @@ STEP 1 — Unzip
 
 STEP 2 — Install the app
 ------------------------
-1. Drag "PerspectiveLab.app" into your Applications folder
-   (Finder → Applications, or the Applications shortcut)
+1. Open Finder → Go → Applications (or click Applications in the sidebar)
+2. Drag "PerspectiveLab" from this folder into Applications
+3. Wait until the copy finishes
+4. Confirm it appears in Applications (not only in this ZIP folder)
 
 
-STEP 3 — Open the first time (security)
----------------------------------------
-macOS may say it "could not verify" the app. That is normal for
-lab software that is not Apple-notarized. It is NOT malware.
+STEP 3 — First open (IMPORTANT — new macOS)
+-------------------------------------------
+If you double-click PerspectiveLab, macOS may show:
 
-Do ONE of these:
+  "Apple could not verify PerspectiveLab…"
+  buttons: Done   |   Move to Bin
 
-  A) Easiest — in this folder, double-click "Fix Mac Open.command"
-     → click Open / Allow if Terminal asks
-     → the app should start
+Do NOT click "Move to Bin" (that deletes the app).
+Click Done, then use ONE of these fixes:
 
-  B) Right-click PerspectiveLab in Applications → Open → Open
+  A) BEST — right-click "Fix Mac Open.command" → Open → Open
+     (allow Terminal if asked). It clears the block and starts the app.
 
-  C) System Settings → Privacy & Security → Open Anyway
+  B) System Settings → Privacy & Security → scroll down →
+     click "Open Anyway" next to PerspectiveLab → Open
+
+  C) Open Terminal and paste this, then press Enter:
+
+     xattr -cr /Applications/PerspectiveLab.app && open /Applications/PerspectiveLab.app
+
+This warning is normal for lab software without Apple notarization.
+It is NOT malware.
 
 
 STEP 4 — First-run setup
@@ -114,10 +117,10 @@ STEP 5 — Everyday use
 
 If something goes wrong
 -----------------------
+• Still blocked → use Fix Mac Open.command or Privacy & Security → Open Anyway
 • Browser does not open → go to http://127.0.0.1:8000
 • "Cannot connect" → Terminal was closed; open the app again
 • Agents fail → Setup → paste/save API key again
-• Still blocked by macOS → use Fix Mac Open.command again
 • See also: "About Mac security.txt"
 
 
