@@ -38,7 +38,8 @@ def test_create_and_submit_invite(client, sample_session_id, case_pack_root):
 
     listed = client.get(f"/api/comparison/{sample_session_id}/invites")
     assert listed.status_code == 200
-    assert listed.json()["invites"][0]["response_count"] == 1
+    match = next(i for i in listed.json()["invites"] if i["token"] == invite["token"])
+    assert match["response_count"] == 1
 
     closed = client.post(f"/api/invites/{invite['token']}/close")
     assert closed.status_code == 200

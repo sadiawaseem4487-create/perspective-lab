@@ -85,7 +85,8 @@ def test_sequential_advance_runs_next_stage(client, monkeypatch, mock_stage_runn
     assert payload["status"] == "awaiting_review"
     assert payload["current_vaihe"] == 2
     assert len(payload["responses"]) == 2
-    assert payload["human_checkpoints"][0]["vaihe"] == 1
+    review_checkpoints = [c for c in payload["human_checkpoints"] if "vaihe" in c]
+    assert review_checkpoints[0]["vaihe"] == 1
     assert mock_stage_runner.await_count == 2
     assert mock_stage_runner.await_args.kwargs.get("human_note") == "Looks good"
 

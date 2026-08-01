@@ -20,6 +20,13 @@ def test_save_and_reload_human_answers(client, sample_session_id, case_pack_root
     backup = human_path.read_text(encoding="utf-8") if human_path.is_file() else None
 
     try:
+        # Isolate from invite/guest data left by other tests on the same session id
+        if human_path.is_file():
+            human_path.unlink()
+        from application import clear_case_cache
+
+        clear_case_cache()
+
         body = {
             "respondents": [
                 {

@@ -63,7 +63,15 @@ def test_parallel_workflow_fan_out(mock_ask):
     assert [r["agent_number"] for r in responses] == [1, 2, 3, 4]
 
 
-def test_ask_parallel_mode_query_param(client):
+def test_ask_parallel_mode_query_param(client, monkeypatch):
+    """Query ?mode=parallel is honored when LLM is available (server or user key)."""
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    from config import get_settings
+    import main
+
+    get_settings.cache_clear()
+    main.settings = get_settings()
+
     with patch("main.ask_all_agents", new_callable=AsyncMock) as mock_ask:
         mock_ask.return_value = [
             {
@@ -99,8 +107,12 @@ def test_ask_parallel_mode_query_param(client):
             "/api/ask?mode=parallel",
             json={"question": "How should municipal education teams involve families and community partners to reduce secondary school dropout in São Paulo this year, and what measurable first steps should they take within ninety days?"},
         )
-    assert response.status_code == 503
-    mock_ask.assert_not_called()
+    assert response.status_code == 200
+    assert response.json()["workflow_mode"] == "parallel"
+    mock_ask.assert_awaited()
+    assert mock_ask.await_args.kwargs.get("mode") == "parallel" or (
+        mock_ask.await_args.args and "parallel" in str(mock_ask.await_args)
+    )
 
 
 def test_ask_parallel_mode_with_llm(client, monkeypatch):
