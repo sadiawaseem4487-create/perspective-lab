@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "PerspectiveLab"
-    app_version: str = "1.1.1"
+    app_version: str = "1.1.2"
     case_id: str = "sao-paulo-dropout"
     project_root: Path = _BACKEND_DIR.parent
     environment: str = Field(default="development", pattern="^(development|production|staging)$")
@@ -133,19 +133,19 @@ class Settings(BaseSettings):
     def validate_production(self) -> None:
         if not self.is_production:
             return
-        missing = []
+        log = logging.getLogger(__name__)
+        # SaaS: server LLM key is optional — each user pastes their own in Settings
         if not self.llm_configured:
-            missing.append("OPENROUTER_API_KEY or OPENAI_API_KEY")
+            log.warning(
+                "No server OPENROUTER_API_KEY/OPENAI_API_KEY — "
+                "only signed-in users with a personal key can ask agents."
+            )
         if self.export_api_key == "":
-            missing.append("EXPORT_API_KEY")
+            log.warning("EXPORT_API_KEY is empty in production.")
+        if not (self.auth_secret or "").strip():
+            log.warning("AUTH_SECRET is empty — set a long random secret for user accounts.")
         if self.cors_origins.strip() == "*":
-            logging.getLogger(__name__).warning(
-                "CORS_ORIGINS is set to '*' in production — restrict to your domain."
-            )
-        if missing:
-            raise RuntimeError(
-                "Production configuration incomplete. Set: " + ", ".join(missing)
-            )
+            log.warning("CORS_ORIGINS is '*' in production — restrict to your domain.")
 
 
 @lru_cache

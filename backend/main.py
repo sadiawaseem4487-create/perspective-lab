@@ -1101,9 +1101,17 @@ async def ask_question(
 
     failed = [r for r in responses if r.get("error")]
     if len(failed) == len(responses):
+        sample = next(
+            (str(r.get("error") or "").strip() for r in failed if r.get("error")),
+            "unknown error",
+        )
         raise HTTPException(
             status_code=502,
-            detail="All agents failed to respond. Check logs and OpenAI configuration.",
+            detail=(
+                "All agents failed to respond. "
+                f"First error: {sample[:300]}. "
+                "Open Settings → API key, save a valid OpenRouter/OpenAI key, then try again."
+            ),
         )
 
     owner_id = scoped_user_id(user)
