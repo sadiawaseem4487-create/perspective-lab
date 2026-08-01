@@ -125,8 +125,8 @@ def save_report(session: dict):
     return repo().save_report(session)
 
 
-def list_reports(limit: int = 50, ui_mode: Optional[str] = None):
-    return repo().list_reports(limit, ui_mode=ui_mode)
+def list_reports(limit: int = 50, ui_mode: Optional[str] = None, user_id: Optional[int] = None):
+    return repo().list_reports(limit, ui_mode=ui_mode, user_id=user_id)
 
 
 def get_report(session_id: int):

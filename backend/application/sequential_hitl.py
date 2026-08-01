@@ -53,6 +53,7 @@ async def start_sequential_hitl(
     model: Optional[str],
     language: str = "en",
     ui_mode: str = "live",
+    user_id: Optional[int] = None,
 ) -> dict:
     now = _now()
     mode = ui_mode if ui_mode in ("live", "demo") else "live"
@@ -68,6 +69,7 @@ async def start_sequential_hitl(
             "human_checkpoints": json.dumps([{"event": "meta", "ui_mode": mode}]),
             "created_at": now,
             "updated_at": now,
+            "user_id": user_id,
         }
     )
 
@@ -156,7 +158,13 @@ async def advance_sequential_hitl(
 
 
 def _finalize_run(run_id: int, row: dict, responses: List[dict], checkpoints: List[dict]) -> dict:
-    session_id = save_session(row["question"], responses, workflow_mode="sequential")
+    owner_id = row.get("user_id")
+    session_id = save_session(
+        row["question"],
+        responses,
+        workflow_mode="sequential",
+        user_id=owner_id,
+    )
     ui_mode = "live"
     for item in checkpoints or []:
         if isinstance(item, dict) and item.get("event") == "meta" and item.get("ui_mode") in ("live", "demo"):
@@ -170,6 +178,7 @@ def _finalize_run(run_id: int, row: dict, responses: List[dict], checkpoints: Li
             "model": row.get("model"),
             "workflow_mode": "sequential",
             "ui_mode": ui_mode,
+            "user_id": owner_id,
             "human_checkpoints": checkpoints,
             "responses": responses,
         }

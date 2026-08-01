@@ -3,6 +3,7 @@ import {
   ClipboardList,
   FileText,
   GitCompare,
+  History,
   KeyRound,
   Link2,
   LogIn,
@@ -73,6 +74,7 @@ export default function AppShell() {
   const nav = {
     research: [
       { to: "/question", icon: MessageSquare, label: t("shell.workspace"), end: true },
+      { to: "/history", icon: History, label: t("nav.history") },
       { to: "/compare", icon: GitCompare, label: t("nav.compare") },
       { to: "/matrix", icon: Table2, label: t("shell.matrix") },
       { to: "/share", icon: Link2, label: t("nav.share") },

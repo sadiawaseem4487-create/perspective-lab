@@ -301,6 +301,7 @@ class CaseRepository:
             "report_id": f"report_session_{session_id}",
             "session_id": session_id,
             "case_id": self.case_id,
+            "user_id": session.get("user_id"),
             "question": session["question"],
             "model": session.get("model", self.get_selected_model()),
             "workflow_mode": session.get("workflow_mode", "parallel"),
@@ -316,7 +317,12 @@ class CaseRepository:
         _write_json(path, report)
         return path
 
-    def list_reports(self, limit: int = 50, ui_mode: Optional[str] = None) -> List[dict]:
+    def list_reports(
+        self,
+        limit: int = 50,
+        ui_mode: Optional[str] = None,
+        user_id: Optional[int] = None,
+    ) -> List[dict]:
         self.paths.reports_dir.mkdir(parents=True, exist_ok=True)
         files = sorted(self.paths.reports_dir.glob("report_session_*.json"), reverse=True)
         demo_keys = self._demo_question_keys()
@@ -326,6 +332,10 @@ class CaseRepository:
             mode_filter = None
         for path in files:
             data = _read_json(path)
+            if user_id is not None:
+                report_uid = data.get("user_id")
+                if report_uid is None or int(report_uid) != int(user_id):
+                    continue
             report_mode = self._resolve_report_ui_mode(data, demo_keys)
             if mode_filter and report_mode != mode_filter:
                 continue
@@ -339,6 +349,7 @@ class CaseRepository:
                     "summary": data.get("summary", {}),
                     "ui_mode": report_mode,
                     "workflow_mode": data.get("workflow_mode", "parallel"),
+                    "user_id": data.get("user_id"),
                 }
             )
             if len(reports) >= limit:

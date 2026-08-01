@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 const ease = [0.22, 1, 0.36, 1];
@@ -139,6 +140,7 @@ function Reveal({ children, className = "" }) {
 
 export default function LandingPage() {
   const { t } = useLanguage();
+  const { isAuthenticated } = useAuth();
   const reduceMotion = useReducedMotion();
 
   return (
@@ -150,15 +152,23 @@ export default function LandingPage() {
         </Link>
         <div className="landing-top-actions">
           <LanguageSwitcher />
-          <Link to="/login" className="landing-btn-ghost">
-            Sign in
-          </Link>
-          <Link to="/register" className="landing-btn-ghost">
-            Create account
-          </Link>
-          <Link to="/login" className="landing-btn-ghost">
-            {t("landing.openApp")}
-          </Link>
+          {isAuthenticated ? (
+            <Link to="/question" className="landing-btn-ghost">
+              {t("landing.openApp")}
+            </Link>
+          ) : (
+            <>
+              <Link to="/login" className="landing-btn-ghost">
+                Sign in
+              </Link>
+              <Link to="/register" className="landing-btn-ghost">
+                Create account
+              </Link>
+              <Link to="/login" className="landing-btn-ghost">
+                {t("landing.openApp")}
+              </Link>
+            </>
+          )}
         </div>
       </header>
 
@@ -183,19 +193,28 @@ export default function LandingPage() {
             <p className="landing-sample-text">{t("landing.sampleText")}</p>
           </motion.aside>
           <motion.div variants={fadeUp} className="landing-cta-row">
-            <Link to="/register" className="landing-btn-primary">
-              Create account
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link to="/login" className="landing-btn-secondary">
-              Sign in
-            </Link>
+            {isAuthenticated ? (
+              <Link to="/question" className="landing-btn-primary">
+                {t("landing.openApp")}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            ) : (
+              <>
+                <Link to="/register" className="landing-btn-primary">
+                  Create account
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link to="/login" className="landing-btn-secondary">
+                  Sign in
+                </Link>
+              </>
+            )}
             <a href="#how" className="landing-btn-secondary">
               {t("landing.ctaSecondary")}
             </a>
           </motion.div>
           <motion.p variants={fadeUp} className="landing-lede" style={{ marginTop: "0.5rem", fontSize: "0.95rem" }}>
-            Each person uses their own API key. Lab admin key is not shared.
+            Each person uses their own API key. Your sessions stay private to your account.
           </motion.p>
         </motion.div>
         <HeroVisual t={t} reduceMotion={reduceMotion} />

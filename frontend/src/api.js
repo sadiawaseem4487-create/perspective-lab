@@ -142,7 +142,7 @@ export async function advanceSequentialRun(runId, humanNote = "") {
 export async function finalizeSequentialRun(runId, humanNote = "") {
   const res = await fetch(`${API}/sequential/${runId}/finalize`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ human_note: humanNote, approved: true }),
   });
   return parseResponse(res);
@@ -150,29 +150,39 @@ export async function finalizeSequentialRun(runId, humanNote = "") {
 
 export async function fetchReports(uiMode) {
   const qs = uiMode ? `?ui_mode=${encodeURIComponent(uiMode)}` : "";
-  const res = await fetch(`${API}/reports${qs}`);
+  const res = await fetch(`${API}/reports${qs}`, { headers: authHeaders() });
   return parseResponse(res);
 }
 
 export async function fetchReport(sessionId) {
-  const res = await fetch(`${API}/reports/${sessionId}`);
+  const res = await fetch(`${API}/reports/${sessionId}`, { headers: authHeaders() });
+  return parseResponse(res);
+}
+
+export async function fetchSessions(limit = 50) {
+  const res = await fetch(`${API}/sessions?limit=${limit}`, { headers: authHeaders() });
+  return parseResponse(res);
+}
+
+export async function fetchSession(sessionId) {
+  const res = await fetch(`${API}/sessions/${sessionId}`, { headers: authHeaders() });
   return parseResponse(res);
 }
 
 export async function fetchComparison(sessionId) {
-  const res = await fetch(`${API}/comparison/${sessionId}`);
+  const res = await fetch(`${API}/comparison/${sessionId}`, { headers: authHeaders() });
   return parseResponse(res);
 }
 
 export async function fetchComparisonMatrix(sessionId) {
-  const res = await fetch(`${API}/comparison/${sessionId}/matrix`);
+  const res = await fetch(`${API}/comparison/${sessionId}/matrix`, { headers: authHeaders() });
   return parseResponse(res);
 }
 
 export async function saveHumanAnswers(sessionId, respondents) {
   const res = await fetch(`${API}/comparison/${sessionId}/human`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ respondents }),
   });
   return parseResponse(res);
@@ -181,19 +191,22 @@ export async function saveHumanAnswers(sessionId, respondents) {
 export async function createInvite(sessionId, payload = {}) {
   const res = await fetch(`${API}/comparison/${sessionId}/invites`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(payload),
   });
   return parseResponse(res);
 }
 
 export async function listInvites(sessionId) {
-  const res = await fetch(`${API}/comparison/${sessionId}/invites`);
+  const res = await fetch(`${API}/comparison/${sessionId}/invites`, { headers: authHeaders() });
   return parseResponse(res);
 }
 
 export async function closeInvite(token) {
-  const res = await fetch(`${API}/invites/${token}/close`, { method: "POST" });
+  const res = await fetch(`${API}/invites/${token}/close`, {
+    method: "POST",
+    headers: authHeaders(),
+  });
   return parseResponse(res);
 }
 
@@ -212,12 +225,12 @@ export async function submitInviteAnswer(token, payload) {
 }
 
 export async function listSessionGuests(sessionId) {
-  const res = await fetch(`${API}/comparison/${sessionId}/guests`);
+  const res = await fetch(`${API}/comparison/${sessionId}/guests`, { headers: authHeaders() });
   return parseResponse(res);
 }
 
 export async function downloadGuestsCsv(sessionId) {
-  const res = await fetch(`${API}/comparison/${sessionId}/guests.csv`);
+  const res = await fetch(`${API}/comparison/${sessionId}/guests.csv`, { headers: authHeaders() });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     throw new Error(data.detail || "Guest export failed");
@@ -234,14 +247,14 @@ export async function downloadGuestsCsv(sessionId) {
 }
 
 export async function fetchRubricScores(sessionId) {
-  const res = await fetch(`${API}/comparison/${sessionId}/rubric`);
+  const res = await fetch(`${API}/comparison/${sessionId}/rubric`, { headers: authHeaders() });
   return parseResponse(res);
 }
 
 export async function saveRubricScores(sessionId, payload) {
   const res = await fetch(`${API}/comparison/${sessionId}/rubric`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(payload),
   });
   return parseResponse(res);

@@ -2,7 +2,7 @@
 
 **Problem today:** One shared key in `backend/.env` — anyone who opens the app can spend that key.
 
-**Goal:** Each person uses **their own** OpenRouter/OpenAI key. Your key stays for **you (admin)** only.
+**Goal:** Each person uses **their own** OpenRouter/OpenAI key. Your key stays for **you (admin)** only. Sessions and reports are private per account.
 
 ---
 
@@ -10,8 +10,8 @@
 
 | Role | Who | LLM key | Can do |
 |------|-----|---------|--------|
-| **Admin** | You | Server key in `.env` **or** personal key | Full app + manage seed admin |
-| **User** | Lab colleagues / testers | **Must** paste their own key | Workspace → agents (billed to them) |
+| **Admin** | You | Server key in `.env` **or** personal key | Full app; sees **own** history only |
+| **User** | Lab colleagues / testers | **Must** paste their own key | Workspace → agents (billed to them); own history |
 | **Guest** | Invite link respondents | None | Submit text only (no LLM) |
 
 ---
@@ -24,14 +24,26 @@ flowchart TD
   R --> S[Settings: paste MY API key]
   S --> W[Workspace Ask agents]
   W --> LLM[Calls LLM with that user key]
+  W --> H[History: only my sessions]
   I["/invite/token"] --> G[Guest form - no login]
 ```
 
 1. User creates account (email + password)
 2. Logs in
 3. Saves **their** API key (stored per-user in SQLite, not in shared `.env`)
-4. Ask agents → backend uses **that user’s key**
-5. Guests on invite links never see or use any LLM key
+4. Ask agents → backend uses **that user’s key** and tags the session with `user_id`
+5. History / reports / compare only return that user’s sessions
+6. Guests on invite links never see or use any LLM key
+
+---
+
+## Isolation rules
+
+- `sessions.user_id` and `sequential_runs.user_id` scope ownership
+- Report JSON includes `user_id`
+- List/get/ask/report/compare/share APIs require login when `AUTH_REQUIRED=true` and filter by the authenticated user
+- Public invite routes (`GET/POST /api/invites/{token}*`) stay open
+- Legacy rows with `user_id = NULL` are hidden from logged-in SaaS users
 
 ---
 
@@ -40,6 +52,7 @@ flowchart TD
 - `ADMIN_EMAIL` / `ADMIN_PASSWORD` in `.env` (seeded on startup)
 - Your existing `OPENROUTER_API_KEY` / `OPENAI_API_KEY` still work for the **admin** account
 - Production can still set server keys for admin-only demos
+- Admin does **not** see other users’ histories in this MVP
 
 ---
 
@@ -48,6 +61,7 @@ flowchart TD
 - OAuth / Google login
 - Email verification
 - Billing / quotas UI
+- Admin cross-user audit UI
 - Encrypting keys with a HSM (we use a local secret; good enough for lab)
 
 ---
@@ -55,7 +69,7 @@ flowchart TD
 ## Files
 
 - `backend/auth_service.py` — passwords, tokens, per-user keys
-- `backend/database.py` — `users`, `auth_tokens`, `user_llm_keys`
+- `backend/database.py` — `users`, sessions/runs `user_id`, ownership helpers
 - `POST /api/auth/register|login|logout`, `GET /api/auth/me`
 - `GET/PUT /api/auth/llm-key` — user’s own key
-- Frontend: Login / Register + protect AppShell
+- Frontend: Login / Register + History + protect AppShell

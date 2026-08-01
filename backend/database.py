@@ -88,12 +88,24 @@ def _migrate(conn) -> None:
         conn.execute(
             "ALTER TABLE sessions ADD COLUMN workflow_mode TEXT NOT NULL DEFAULT 'parallel'"
         )
+    if "user_id" not in session_columns:
+        conn.execute("ALTER TABLE sessions ADD COLUMN user_id INTEGER")
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id, id DESC)"
+        )
 
     columns = {row[1] for row in conn.execute("PRAGMA table_info(responses)")}
     if "latency_ms" not in columns:
         conn.execute("ALTER TABLE responses ADD COLUMN latency_ms INTEGER")
     if "error" not in columns:
         conn.execute("ALTER TABLE responses ADD COLUMN error TEXT")
+
+    seq_columns = {row[1] for row in conn.execute("PRAGMA table_info(sequential_runs)")}
+    if "user_id" not in seq_columns:
+        conn.execute("ALTER TABLE sequential_runs ADD COLUMN user_id INTEGER")
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_sequential_runs_user_id ON sequential_runs(user_id)"
+        )
 
 
 def check_db() -> bool:
@@ -115,12 +127,20 @@ def get_connection():
         conn.close()
 
 
-def save_session(question: str, responses: list, workflow_mode: str = "parallel") -> int:
+def save_session(
+    question: str,
+    responses: list,
+    workflow_mode: str = "parallel",
+    user_id: Optional[int] = None,
+) -> int:
     now = datetime.now(timezone.utc).isoformat()
     with get_connection() as conn:
         cursor = conn.execute(
-            "INSERT INTO sessions (question, created_at, workflow_mode) VALUES (?, ?, ?)",
-            (question, now, workflow_mode),
+            """
+            INSERT INTO sessions (question, created_at, workflow_mode, user_id)
+            VALUES (?, ?, ?, ?)
+            """,
+            (question, now, workflow_mode, user_id),
         )
         session_id = cursor.lastrowid
         for item in responses:
@@ -145,28 +165,46 @@ def save_session(question: str, responses: list, workflow_mode: str = "parallel"
         return session_id
 
 
-def list_sessions(limit: int = 50) -> list:
+def list_sessions(limit: int = 50, user_id: Optional[int] = None) -> list:
     limit = max(1, min(limit, 200))
     with get_connection() as conn:
-        rows = conn.execute(
-            """
-            SELECT s.id, s.question, s.created_at, s.workflow_mode,
-                   COUNT(r.id) AS response_count
-            FROM sessions s
-            LEFT JOIN responses r ON r.session_id = s.id
-            GROUP BY s.id
-            ORDER BY s.id DESC
-            LIMIT ?
-            """,
-            (limit,),
-        ).fetchall()
+        if user_id is None:
+            rows = conn.execute(
+                """
+                SELECT s.id, s.question, s.created_at, s.workflow_mode, s.user_id,
+                       COUNT(r.id) AS response_count
+                FROM sessions s
+                LEFT JOIN responses r ON r.session_id = s.id
+                GROUP BY s.id
+                ORDER BY s.id DESC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                """
+                SELECT s.id, s.question, s.created_at, s.workflow_mode, s.user_id,
+                       COUNT(r.id) AS response_count
+                FROM sessions s
+                LEFT JOIN responses r ON r.session_id = s.id
+                WHERE s.user_id = ?
+                GROUP BY s.id
+                ORDER BY s.id DESC
+                LIMIT ?
+                """,
+                (user_id, limit),
+            ).fetchall()
         return [dict(row) for row in rows]
 
 
 def get_session(session_id: int) -> Optional[dict]:
     with get_connection() as conn:
         session = conn.execute(
-            "SELECT id, question, created_at, workflow_mode FROM sessions WHERE id = ?",
+            """
+            SELECT id, question, created_at, workflow_mode, user_id
+            FROM sessions WHERE id = ?
+            """,
             (session_id,),
         ).fetchone()
         if not session:
@@ -184,6 +222,35 @@ def get_session(session_id: int) -> Optional[dict]:
             **dict(session),
             "responses": [dict(r) for r in responses],
         }
+
+
+def get_session_owner_id(session_id: int) -> Optional[int]:
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT user_id FROM sessions WHERE id = ?",
+            (session_id,),
+        ).fetchone()
+        if not row:
+            return None
+        return row["user_id"]
+
+
+def user_owns_session(session_id: int, user_id: Optional[int]) -> bool:
+    """True if session exists and is visible to this user."""
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT id, user_id FROM sessions WHERE id = ?",
+            (session_id,),
+        ).fetchone()
+    if not row:
+        return False
+    if user_id is None:
+        # Auth disabled / anonymous mode — allow (tests + local open mode)
+        return True
+    if row["user_id"] is None:
+        # Legacy unscoped rows are hidden from logged-in SaaS users
+        return False
+    return int(row["user_id"]) == int(user_id)
 
 
 def export_all() -> list:
@@ -219,8 +286,8 @@ def create_sequential_run(payload: dict) -> int:
             """
             INSERT INTO sequential_runs
             (question, model, language, current_vaihe, status, stage_outputs, responses,
-             human_checkpoints, session_id, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             human_checkpoints, session_id, created_at, updated_at, user_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 payload["question"],
@@ -234,6 +301,7 @@ def create_sequential_run(payload: dict) -> int:
                 payload.get("session_id"),
                 payload["created_at"],
                 payload["updated_at"],
+                payload.get("user_id"),
             ),
         )
         conn.commit()
@@ -246,12 +314,28 @@ def get_sequential_run(run_id: int) -> Optional[dict]:
             """
             SELECT id, question, model, language, current_vaihe, status,
                    stage_outputs, responses, human_checkpoints, session_id,
-                   created_at, updated_at
+                   created_at, updated_at, user_id
             FROM sequential_runs WHERE id = ?
             """,
             (run_id,),
         ).fetchone()
         return dict(row) if row else None
+
+
+def user_owns_sequential_run(run_id: int, user_id: Optional[int]) -> bool:
+    """True if sequential run exists and is visible to this user."""
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT id, user_id FROM sequential_runs WHERE id = ?",
+            (run_id,),
+        ).fetchone()
+    if not row:
+        return False
+    if user_id is None:
+        return True
+    if row["user_id"] is None:
+        return False
+    return int(row["user_id"]) == int(user_id)
 
 
 def update_sequential_run(run_id: int, fields: dict) -> None:

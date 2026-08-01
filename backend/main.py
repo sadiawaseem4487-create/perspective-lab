@@ -73,7 +73,16 @@ from application import (
     set_selected_model,
     set_slot_assignments,
 )
-from database import check_db, export_all, get_session, init_db, list_sessions, save_session
+from database import (
+    check_db,
+    export_all,
+    get_session,
+    init_db,
+    list_sessions,
+    save_session,
+    user_owns_sequential_run,
+    user_owns_session,
+)
 from logging_config import setup_logging
 
 setup_logging()
@@ -292,6 +301,57 @@ def require_llm_ready(user: Optional[dict] = Depends(require_user)) -> Optional[
         )
     set_request_llm_credentials(creds)
     return user
+
+
+def scoped_user_id(user: Optional[dict]) -> Optional[int]:
+    """Authenticated users are scoped to their own data; None = open/test mode."""
+    if user and user.get("id") is not None:
+        return int(user["id"])
+    return None
+
+
+def require_session_access(session_id: int, user: Optional[dict]) -> dict:
+    data = get_session(session_id)
+    if not data or not user_owns_session(session_id, scoped_user_id(user)):
+        raise HTTPException(status_code=404, detail="Session not found")
+    return data
+
+
+def resolve_owned_report(session_id: int, user: Optional[dict]) -> dict:
+    """Load report/session for an owned session; 404 if missing or not owned."""
+    uid = scoped_user_id(user)
+    session = get_session(session_id)
+    report = get_report(session_id)
+    if not session and not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+    if uid is not None:
+        if session is not None:
+            if not user_owns_session(session_id, uid):
+                raise HTTPException(status_code=404, detail="Report not found")
+        else:
+            report_uid = report.get("user_id") if report else None
+            if report_uid is None or int(report_uid) != uid:
+                raise HTTPException(status_code=404, detail="Report not found")
+    if report:
+        return report
+    return {
+        "session_id": session["id"],
+        "question": session["question"],
+        "created_at": session["created_at"],
+        "workflow_mode": session.get("workflow_mode", "parallel"),
+        "model": get_selected_model(),
+        "responses": session["responses"],
+        "user_id": session.get("user_id"),
+    }
+
+
+def require_sequential_access(run_id: int, user: Optional[dict]) -> dict:
+    from database import get_sequential_run
+
+    row = get_sequential_run(run_id)
+    if not row or not user_owns_sequential_run(run_id, scoped_user_id(user)):
+        raise HTTPException(status_code=404, detail="Sequential run not found")
+    return row
 
 
 def _question_with_language(question: str, lang: str) -> str:
@@ -537,67 +597,37 @@ async def post_model_selected(body: ModelSelectRequest):
 
 
 @app.get("/api/reports")
-async def reports(limit: int = 50, ui_mode: Optional[str] = None):
-    return list_reports(limit=limit, ui_mode=ui_mode)
+async def reports(
+    limit: int = 50,
+    ui_mode: Optional[str] = None,
+    user: Optional[dict] = Depends(require_user),
+):
+    return list_reports(limit=limit, ui_mode=ui_mode, user_id=scoped_user_id(user))
 
 
 @app.get("/api/reports/{session_id}")
-async def report_detail(session_id: int):
-    report = get_report(session_id)
-    if not report:
-        data = get_session(session_id)
-        if not data:
-            raise HTTPException(status_code=404, detail="Report not found")
-        report = {
-            "session_id": data["id"],
-            "question": data["question"],
-            "created_at": data["created_at"],
-            "model": get_selected_model(),
-            "responses": data["responses"],
-        }
-    return report
+async def report_detail(session_id: int, user: Optional[dict] = Depends(require_user)):
+    return resolve_owned_report(session_id, user)
 
 
 @app.get("/api/comparison/{session_id}")
-async def get_comparison(session_id: int):
-    report = get_report(session_id)
-    if not report:
-        data = get_session(session_id)
-        if not data:
-            raise HTTPException(status_code=404, detail="Session not found")
-        report = {
-            "session_id": data["id"],
-            "question": data["question"],
-            "created_at": data["created_at"],
-            "model": get_selected_model(),
-            "responses": data["responses"],
-        }
+async def get_comparison(session_id: int, user: Optional[dict] = Depends(require_user)):
+    report = resolve_owned_report(session_id, user)
     return build_comparison(session_id, report)
 
 
 @app.get("/api/comparison/{session_id}/matrix")
-async def get_comparison_matrix(session_id: int):
-    report = get_report(session_id)
-    if not report:
-        data = get_session(session_id)
-        if not data:
-            raise HTTPException(status_code=404, detail="Session not found")
-        report = {
-            "session_id": data["id"],
-            "question": data["question"],
-            "created_at": data["created_at"],
-            "workflow_mode": data.get("workflow_mode", "parallel"),
-            "model": get_selected_model(),
-            "responses": data["responses"],
-        }
+async def get_comparison_matrix(session_id: int, user: Optional[dict] = Depends(require_user)):
+    report = resolve_owned_report(session_id, user)
     human = get_human_answers(session_id) or {}
     return build_comparison_matrix(report, human_answers=human.get("respondents") or [])
 
 
 @app.get("/api/comparison/{session_id}/human")
-async def get_human(session_id: int):
+async def get_human(session_id: int, user: Optional[dict] = Depends(require_user)):
     from core.constants import MAX_HUMAN_ANSWERS_PER_SESSION
 
+    resolve_owned_report(session_id, user)
     data = get_human_answers(session_id)
     if not data:
         return {
@@ -615,11 +645,11 @@ async def get_human(session_id: int):
 
 
 @app.get("/api/comparison/{session_id}/guests")
-async def list_session_guests(session_id: int):
+async def list_session_guests(session_id: int, user: Optional[dict] = Depends(require_user)):
     """List every guest/human answer for a session (shared invite + manual)."""
     from core.constants import MAX_HUMAN_ANSWERS_PER_SESSION
 
-    _session_question(session_id)
+    resolve_owned_report(session_id, user)
     data = get_human_answers(session_id) or {}
     respondents = list(data.get("respondents") or [])
     return {
@@ -633,9 +663,9 @@ async def list_session_guests(session_id: int):
 
 
 @app.get("/api/comparison/{session_id}/guests.csv")
-async def export_session_guests_csv(session_id: int):
+async def export_session_guests_csv(session_id: int, user: Optional[dict] = Depends(require_user)):
     """CSV of all guest answers for one session (one row per person)."""
-    _session_question(session_id)
+    resolve_owned_report(session_id, user)
     data = get_human_answers(session_id) or {}
     respondents = list(data.get("respondents") or [])
     output = io.StringIO()
@@ -679,17 +709,15 @@ async def export_session_guests_csv(session_id: int):
 
 
 @app.post("/api/comparison/{session_id}/human")
-async def save_human(session_id: int, body: HumanAnswersRequest):
+async def save_human(
+    session_id: int,
+    body: HumanAnswersRequest,
+    user: Optional[dict] = Depends(require_user),
+):
     from core.constants import MAX_HUMAN_ANSWERS_PER_SESSION
 
-    report = get_report(session_id)
-    if not report:
-        session = get_session(session_id)
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
-        question = session["question"]
-    else:
-        question = report["question"]
+    report = resolve_owned_report(session_id, user)
+    question = report["question"]
 
     respondents = [r.model_dump() for r in body.respondents]
     existing = get_human_answers(session_id) or {}
@@ -772,7 +800,13 @@ def _invite_is_open(invite: dict) -> tuple[bool, str]:
 
 
 @app.post("/api/comparison/{session_id}/invites")
-async def create_session_invite(session_id: int, body: CreateInviteRequest, request: Request):
+async def create_session_invite(
+    session_id: int,
+    body: CreateInviteRequest,
+    request: Request,
+    user: Optional[dict] = Depends(require_user),
+):
+    resolve_owned_report(session_id, user)
     question = _session_question(session_id)
     invite = create_invite(
         session_id,
@@ -788,8 +822,12 @@ async def create_session_invite(session_id: int, body: CreateInviteRequest, requ
 
 
 @app.get("/api/comparison/{session_id}/invites")
-async def list_session_invites(session_id: int, request: Request):
-    _session_question(session_id)  # 404 if missing
+async def list_session_invites(
+    session_id: int,
+    request: Request,
+    user: Optional[dict] = Depends(require_user),
+):
+    resolve_owned_report(session_id, user)
     invites = list_invites(session_id)
     return {
         "session_id": session_id,
@@ -800,11 +838,15 @@ async def list_session_invites(session_id: int, request: Request):
 
 
 @app.post("/api/invites/{token}/close")
-async def close_invite(token: str):
-    invite = deactivate_invite(token)
+async def close_invite(token: str, user: Optional[dict] = Depends(require_user)):
+    invite = get_invite(token)
     if not invite:
         raise HTTPException(status_code=404, detail="Invite not found")
-    return invite
+    resolve_owned_report(int(invite["session_id"]), user)
+    closed = deactivate_invite(token)
+    if not closed:
+        raise HTTPException(status_code=404, detail="Invite not found")
+    return closed
 
 
 @app.get("/api/invites/{token}")
@@ -871,11 +913,8 @@ RUBRIC_DIMENSIONS = [
 
 
 @app.get("/api/comparison/{session_id}/rubric")
-async def get_rubric(session_id: int):
-    report = get_report(session_id)
-    session = get_session(session_id) if not report else None
-    if not report and not session:
-        raise HTTPException(status_code=404, detail="Session not found")
+async def get_rubric(session_id: int, user: Optional[dict] = Depends(require_user)):
+    report = resolve_owned_report(session_id, user)
     data = get_rubric_scores(session_id) or {
         "session_id": session_id,
         "scores": {},
@@ -895,15 +934,17 @@ async def get_rubric(session_id: int):
         },
     }
     data["dimensions"] = RUBRIC_DIMENSIONS
-    data["question"] = (report or session or {}).get("question", "")
+    data["question"] = report.get("question", "")
     return data
 
 
 @app.post("/api/comparison/{session_id}/rubric")
-async def save_rubric(session_id: int, body: RubricScoresRequest):
-    report = get_report(session_id)
-    if not report and not get_session(session_id):
-        raise HTTPException(status_code=404, detail="Session not found")
+async def save_rubric(
+    session_id: int,
+    body: RubricScoresRequest,
+    user: Optional[dict] = Depends(require_user),
+):
+    resolve_owned_report(session_id, user)
 
     scores = {}
     for dim in RUBRIC_DIMENSIONS:
@@ -958,7 +999,7 @@ async def theory_judge(
 async def sequential_start(
     request: Request,
     body: SequentialStartRequest,
-    _user: Optional[dict] = Depends(require_llm_ready),
+    user: Optional[dict] = Depends(require_llm_ready),
 ):
     from application.sequential_hitl import start_sequential_hitl
 
@@ -970,6 +1011,7 @@ async def sequential_start(
             model=model,
             language=body.language or "en",
             ui_mode=body.ui_mode or "live",
+            user_id=scoped_user_id(user),
         )
     except Exception as exc:
         logger.exception("Sequential start failed")
@@ -977,13 +1019,10 @@ async def sequential_start(
 
 
 @app.get("/api/sequential/{run_id}")
-async def sequential_status(run_id: int):
+async def sequential_status(run_id: int, user: Optional[dict] = Depends(require_user)):
     from application.sequential_hitl import serialize_run
-    from database import get_sequential_run
 
-    row = get_sequential_run(run_id)
-    if not row:
-        raise HTTPException(status_code=404, detail="Sequential run not found")
+    row = require_sequential_access(run_id, user)
     return serialize_run(row)
 
 
@@ -993,10 +1032,11 @@ async def sequential_advance(
     request: Request,
     run_id: int,
     body: SequentialAdvanceRequest,
-    _user: Optional[dict] = Depends(require_llm_ready),
+    user: Optional[dict] = Depends(require_llm_ready),
 ):
     from application.sequential_hitl import advance_sequential_hitl
 
+    require_sequential_access(run_id, user)
     try:
         return await advance_sequential_hitl(run_id, human_note=body.human_note, approved=body.approved)
     except ValueError as exc:
@@ -1007,9 +1047,14 @@ async def sequential_advance(
 
 
 @app.post("/api/sequential/{run_id}/finalize")
-async def sequential_finalize(run_id: int, body: SequentialAdvanceRequest):
+async def sequential_finalize(
+    run_id: int,
+    body: SequentialAdvanceRequest,
+    user: Optional[dict] = Depends(require_llm_ready),
+):
     from application.sequential_hitl import finalize_sequential_hitl
 
+    require_sequential_access(run_id, user)
     try:
         return await finalize_sequential_hitl(run_id, human_note=body.human_note, approved=body.approved)
     except ValueError as exc:
@@ -1025,7 +1070,7 @@ async def ask_question(
     request: Request,
     body: AskRequest,
     mode: Optional[str] = None,
-    _user: Optional[dict] = Depends(require_llm_ready),
+    user: Optional[dict] = Depends(require_llm_ready),
 ):
     workflow_mode = (mode or body.mode or "parallel").strip().lower()
     if workflow_mode not in ("parallel", "sequential"):
@@ -1051,7 +1096,8 @@ async def ask_question(
             detail="All agents failed to respond. Check logs and OpenAI configuration.",
         )
 
-    session_id = save_session(question, responses, workflow_mode=workflow_mode)
+    owner_id = scoped_user_id(user)
+    session_id = save_session(question, responses, workflow_mode=workflow_mode, user_id=owner_id)
     session = get_session(session_id)
     ui_mode = (body.ui_mode or "live").strip().lower()
     if ui_mode not in ("live", "demo"):
@@ -1064,6 +1110,7 @@ async def ask_question(
             "model": model,
             "workflow_mode": workflow_mode,
             "ui_mode": ui_mode,
+            "user_id": owner_id,
             "responses": responses,
         }
     )
@@ -1082,16 +1129,13 @@ async def ask_question(
 
 
 @app.get("/api/sessions")
-async def sessions(limit: int = 50):
-    return list_sessions(limit=limit)
+async def sessions(limit: int = 50, user: Optional[dict] = Depends(require_user)):
+    return list_sessions(limit=limit, user_id=scoped_user_id(user))
 
 
 @app.get("/api/sessions/{session_id}")
-async def session_detail(session_id: int):
-    data = get_session(session_id)
-    if not data:
-        raise HTTPException(status_code=404, detail="Session not found")
-    return data
+async def session_detail(session_id: int, user: Optional[dict] = Depends(require_user)):
+    return require_session_access(session_id, user)
 
 
 @app.get("/api/export/json")

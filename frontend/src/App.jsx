@@ -10,6 +10,7 @@ import FacilitatorGuidePage from "./pages/FacilitatorGuidePage";
 import SettingsPage from "./pages/SettingsPage";
 import GuestInvitePage from "./pages/GuestInvitePage";
 import ShareInvitePage from "./pages/ShareInvitePage";
+import HistoryPage from "./pages/HistoryPage";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="agents" element={<Navigate to="/settings?tab=agents" replace />} />
           <Route path="models" element={<Navigate to="/settings?tab=models" replace />} />
           <Route path="question" element={<Stage3Question />} />
+          <Route path="history" element={<HistoryPage />} />
           <Route path="report" element={<Stage4Report />} />
           <Route path="compare" element={<Stage5Compare />} />
           <Route path="share" element={<ShareInvitePage />} />
