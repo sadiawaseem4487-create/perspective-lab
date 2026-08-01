@@ -54,6 +54,7 @@ async def start_sequential_hitl(
     language: str = "en",
     ui_mode: str = "live",
     user_id: Optional[int] = None,
+    llm_creds: Optional[Dict[str, Any]] = None,
 ) -> dict:
     now = _now()
     mode = ui_mode if ui_mode in ("live", "demo") else "live"
@@ -73,7 +74,13 @@ async def start_sequential_hitl(
         }
     )
 
-    response = await run_single_sequential_stage(question, vaihe=1, stage_outputs={}, model=model)
+    response = await run_single_sequential_stage(
+        question,
+        vaihe=1,
+        stage_outputs={},
+        model=model,
+        llm_creds=llm_creds,
+    )
     stage_outputs: Dict[str, str] = {}
     if not response.get("error"):
         stage_outputs[response["agent_key"]] = response.get("response", "")
@@ -95,6 +102,7 @@ async def advance_sequential_hitl(
     run_id: int,
     human_note: str = "",
     approved: bool = True,
+    llm_creds: Optional[Dict[str, Any]] = None,
 ) -> dict:
     row = get_sequential_run(run_id)
     if not row:
@@ -138,6 +146,7 @@ async def advance_sequential_hitl(
         stage_outputs=stage_outputs,
         model=row.get("model"),
         human_note=human_note.strip(),
+        llm_creds=llm_creds,
     )
     responses.append(response)
     if not response.get("error"):

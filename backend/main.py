@@ -1064,9 +1064,11 @@ async def sequential_start(
     user: Optional[dict] = Depends(require_llm_ready),
 ):
     from application.sequential_hitl import start_sequential_hitl
+    from llm_context import get_request_llm_credentials
 
     question = _question_with_language(body.question.strip(), body.language or "en")
     model = body.model or get_selected_model()
+    llm_creds = get_request_llm_credentials() or resolve_llm_credentials(user)
     try:
         return await start_sequential_hitl(
             question,
@@ -1074,6 +1076,7 @@ async def sequential_start(
             language=body.language or "en",
             ui_mode=body.ui_mode or "live",
             user_id=scoped_user_id(user),
+            llm_creds=llm_creds,
         )
     except Exception as exc:
         logger.exception("Sequential start failed")
@@ -1097,10 +1100,17 @@ async def sequential_advance(
     user: Optional[dict] = Depends(require_llm_ready),
 ):
     from application.sequential_hitl import advance_sequential_hitl
+    from llm_context import get_request_llm_credentials
 
     require_sequential_access(run_id, user)
+    llm_creds = get_request_llm_credentials() or resolve_llm_credentials(user)
     try:
-        return await advance_sequential_hitl(run_id, human_note=body.human_note, approved=body.approved)
+        return await advance_sequential_hitl(
+            run_id,
+            human_note=body.human_note,
+            approved=body.approved,
+            llm_creds=llm_creds,
+        )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
