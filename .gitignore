@@ -1,17 +1,40 @@
-backend/.venv/
-backend/.env
-backend/data/
-frontend/node_modules/
-frontend/dist/
-frontend/src-tauri/target/
-__pycache__/
-*.pyc
-.DS_Store
+# Secrets & local env
 .env
 .env.*
 !.env.example
 !backend/.env.example
+backend/.env
+
+# Python
+backend/.venv/
+backend/data/
 backend/.pytest_cache/
-.pytest_cache/
+__pycache__/
+*.pyc
 *.db
+.pytest_cache/
+
+# Frontend / desktop build artifacts
+frontend/node_modules/
+frontend/dist/
+frontend/src-tauri/target/
+frontend/src-tauri/icons/android/
+frontend/src-tauri/icons/ios/
+
+# Case runtime data (generated while using the app — do not commit)
+cases/**/reports/**
+!cases/**/reports/.gitkeep
+cases/**/human_answers/**
+!cases/**/human_answers/.gitkeep
+cases/**/invites/**
+!cases/**/invites/.gitkeep
+cases/**/rubric_scores/**
+!cases/**/rubric_scores/.gitkeep
+
+# Local / packaging clutter
+branding/
+START_HERE.txt
+*.dmg
+*.zip
+.DS_Store
 .cursor/
