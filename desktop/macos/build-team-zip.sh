@@ -60,20 +60,68 @@ elif [ -f "$ROOT/desktop/macos/GATEKEEPER.md" ]; then
 fi
 
 cat > "$FOLDER/READ ME.txt" << 'EOF'
-PerspectiveLab — team install (Mac)
-===================================
+PerspectiveLab — how to install & run (Mac)
+===========================================
 
-No Node.js or Python install needed.
+You need: a Mac (macOS 11+). You do NOT need Node.js or Python.
 
-1. Drag PerspectiveLab into Applications
-2. If macOS says it "could not verify" the app:
-     • Double-click "Fix Mac Open.command"   ← easiest
-     • Or right-click PerspectiveLab → Open → Open (once)
-3. Browser opens → Setup → paste your API key
-4. Keep the Terminal window open while using the app
 
-This ZIP is for internal lab testing. The security warning is normal
-without Apple notarization — it is NOT malware.
+STEP 1 — Unzip
+--------------
+1. Download PerspectiveLab-Team.zip
+2. Double-click the ZIP to unpack it
+3. Open the folder "PerspectiveLab-Team"
+
+
+STEP 2 — Install the app
+------------------------
+1. Drag "PerspectiveLab.app" into your Applications folder
+   (Finder → Applications, or the Applications shortcut)
+
+
+STEP 3 — Open the first time (security)
+---------------------------------------
+macOS may say it "could not verify" the app. That is normal for
+lab software that is not Apple-notarized. It is NOT malware.
+
+Do ONE of these:
+
+  A) Easiest — in this folder, double-click "Fix Mac Open.command"
+     → click Open / Allow if Terminal asks
+     → the app should start
+
+  B) Right-click PerspectiveLab in Applications → Open → Open
+
+  C) System Settings → Privacy & Security → Open Anyway
+
+
+STEP 4 — First-run setup
+------------------------
+1. A prepare dialog may appear once (wait — it copies files)
+2. A Terminal window opens and starts the local server
+   → keep that Terminal window OPEN while you use the app
+3. Your browser opens to PerspectiveLab
+4. Go to Setup (if asked) and paste your OpenRouter or OpenAI API key
+5. Save — then open Workspace and ask a question
+
+
+STEP 5 — Everyday use
+---------------------
+1. Open Applications → PerspectiveLab
+2. Keep the Terminal window open
+3. Use the app in the browser window that opens
+
+
+If something goes wrong
+-----------------------
+• Browser does not open → go to http://127.0.0.1:8000
+• "Cannot connect" → Terminal was closed; open the app again
+• Agents fail → Setup → paste/save API key again
+• Still blocked by macOS → use Fix Mac Open.command again
+• See also: "About Mac security.txt"
+
+
+Need help? Ask the person who shared this ZIP with you.
 EOF
 
 hdiutil detach "$MOUNT" -quiet 2>/dev/null || true
