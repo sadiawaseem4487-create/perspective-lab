@@ -26,7 +26,7 @@ def test_sequential_workflow_runs_four_stages(mock_ask):
 
     call_order = []
 
-    async def _fake_ask(slot_number, agent_id, question, model=None):
+    async def _fake_ask(slot_number, agent_id, question, model=None, llm_creds=None):
         call_order.append(agent_id)
         return {
             "agent_key": agent_id,
