@@ -4,6 +4,7 @@ Newest entries at the top.
 
 | Date | Sprint | Event |
 |------|--------|-------|
+| 2026-08-01 | Auth | Ask agents enabled when framing is ready; missing API key opens Settings instead of a dead button (v1.1.4). |
 | 2026-08-01 | Auth | Fix: pass per-user LLM key through LangGraph fan-out; Docker defaults production; Sign out hard-redirect. |
 | 2026-08-01 | Auth | Synced README/wiki/env for SaaS; live Render must set ENVIRONMENT=production. |
 | 2026-08-01 | Auth | SaaS auth hardening: Sign out → login, production always requires login, personal API key UX. |
