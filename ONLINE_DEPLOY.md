@@ -1,55 +1,47 @@
-# Online deploy — clean working copy
+# Online deploy — same site (update, don’t recreate)
 
-GitHub (source of truth): https://github.com/sadiawaseem4487-create/perspective-lab  
+**Live app (keep this URL):** https://perspective-lab.onrender.com/
 
-**Tests:** 87 passed · **Frontend build:** OK · **Auth:** user accounts + per-user API keys
+GitHub source: https://github.com/sadiawaseem4487-create/perspective-lab  
+
+Always **update this Render service** — do not create a new Web Service.
 
 ---
 
-## Recommended: one URL on Render (UI + API together)
+## Update the existing Render deploy
 
-The Docker image already includes the React UI. You do **not** need Vercel for a working lab site.
+1. Open https://dashboard.render.com → service **`perspective-lab`** (the one serving `perspective-lab.onrender.com`)
+2. Confirm it is connected to GitHub repo **`perspective-lab`** / branch **`main`**
+3. **Manual Deploy** → **Deploy latest commit** (or “Clear build cache & deploy”)
+4. Wait until status is **Live**
 
-1. Open https://dashboard.render.com → **New Web Service**
-2. Connect **`sadiawaseem4487-create/perspective-lab`**
-3. Runtime: **Docker** · Instance: **Free** · Health: `/api/health`
-4. Environment variables:
+### Environment on that same service
+
+Set / fix these on the **existing** service (Environment tab):
 
 | Key | Value |
 |-----|--------|
 | `ENVIRONMENT` | `production` |
 | `CASE_ID` | `sao-paulo-dropout` |
 | `WORKERS` | `1` |
-| `ALLOWED_HOSTS` | `*` |
-| `CORS_ORIGINS` | `*` |
+| `ALLOWED_HOSTS` | `perspective-lab.onrender.com` |
+| `CORS_ORIGINS` | `https://perspective-lab.onrender.com` |
+| `PUBLIC_APP_URL` | `https://perspective-lab.onrender.com` |
 | `AUTH_REQUIRED` | `true` |
-| `AUTH_SECRET` | *(paste generated secret)* |
+| `AUTH_SECRET` | *(long random string)* |
 | `ADMIN_EMAIL` | `admin@perspectivelab.local` |
-| `ADMIN_PASSWORD` | *(paste generated password)* |
-| `EXPORT_API_KEY` | *(paste generated export key)* |
-| `OPENROUTER_API_KEY` or `OPENAI_API_KEY` | *your key from `backend/.env`* |
+| `ADMIN_PASSWORD` | *(your chosen admin password)* |
+| `EXPORT_API_KEY` | *(long random string)* |
+| `OPENROUTER_API_KEY` or `OPENAI_API_KEY` | *your key* |
 
-5. Deploy → wait until green → open `https://YOUR-SERVICE.onrender.com`
-6. **/login** as admin → Workspace works with your server key  
-7. Colleagues **/register** → paste **their** key in Settings
-
-First request after idle can take ~30–60s (free tier sleep).
+Save → Render redeploys the **same** URL.
 
 ---
 
-## Optional: Vercel UI + Render API
+## After deploy — smoke check
 
-Only if you want the UI on Vercel:
+- https://perspective-lab.onrender.com/api/health → `environment: production`, `auth_required: true`
+- https://perspective-lab.onrender.com/login → admin login
+- Colleagues: **/register** → paste **their** API key in Settings
 
-1. Finish Render API first (same env as above)
-2. https://vercel.com/new → import repo → **Root Directory = `frontend`**
-3. Env: `VITE_API_BASE_URL=https://YOUR-SERVICE.onrender.com`
-4. On Render set:
-   - `CORS_ORIGINS=https://YOUR-APP.vercel.app`
-   - `PUBLIC_APP_URL=https://YOUR-APP.vercel.app`
-
----
-
-## After deploy
-
-Paste the live URL here so we can smoke-test health + login.
+Optional Vercel UI is not required; this Render URL already serves UI + API.
