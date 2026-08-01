@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   ClipboardList,
   FileText,
@@ -13,7 +13,7 @@ import {
   Table2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { checkHealth, fetchAgentsCatalog } from "@/api";
+import { fetchAgentsCatalog } from "@/api";
 import BrandLogo from "@/components/BrandLogo";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ModeToggle from "@/components/ModeToggle";
@@ -46,13 +46,14 @@ function NavItem({ to, icon: Icon, label, end = false }) {
 
 export default function AppShell() {
   const { t } = useLanguage();
-  const { user, isAuthenticated, logout, isAdmin } = useAuth();
+  const { user, isAuthenticated, logout, isAdmin, llmConfigured, refresh } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const isWorkspace = location.pathname === "/question";
   const isPresent = location.pathname === "/present";
   const fillCanvas = isWorkspace || isPresent;
   const [caseInfo, setCaseInfo] = useState(null);
-  const [needsSetup, setNeedsSetup] = useState(false);
+  const needsSetup = isAuthenticated && !llmConfigured;
 
   useEffect(() => {
     fetchAgentsCatalog()
@@ -60,15 +61,16 @@ export default function AppShell() {
       .catch(() => {});
   }, []);
 
-  // Banner only — do not force-redirect (that trapped users on Settings after save).
   useEffect(() => {
-    checkHealth()
-      .then((h) => {
-        const missing = !h.llm_configured && h.setup_allowed !== false;
-        setNeedsSetup(missing);
-      })
-      .catch(() => {});
-  }, [location.pathname]);
+    if (isAuthenticated) {
+      refresh().catch(() => {});
+    }
+  }, [location.pathname, isAuthenticated]);
+
+  async function handleSignOut() {
+    await logout();
+    navigate("/login", { replace: true });
+  }
 
   // Research flow: ask → analyze → invite → report → present → guide
   const nav = {
@@ -129,7 +131,7 @@ export default function AppShell() {
               </p>
               <button
                 type="button"
-                onClick={() => logout()}
+                onClick={handleSignOut}
                 className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
               >
                 <LogOut className="h-4 w-4" />

@@ -22,6 +22,7 @@ import { RunMetadataBar } from "@/components/RunMetadataBar";
 import { SequentialFlowGraph } from "@/components/SequentialFlowGraph";
 import { Button } from "@/components/ui/button";
 import { useAppMode } from "@/context/AppModeContext";
+import { useAuth } from "@/context/AuthContext";
 import { useWorkflowMode } from "@/context/WorkflowModeContext";
 import { extractInsight } from "@/utils/extractInsights";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -50,6 +51,7 @@ export default function TheoryRoundtable() {
   const { t, lang } = useLanguage();
   const { isDemo, mode } = useAppMode();
   const { workflowMode, setWorkflowMode } = useWorkflowMode();
+  const { llmConfigured } = useAuth();
   const uiMode = isDemo ? "demo" : "live";
 
   const [agents, setAgents] = useState([]);
@@ -158,6 +160,10 @@ export default function TheoryRoundtable() {
     clearRunState();
     applyQuestionText("");
   }
+
+  useEffect(() => {
+    if (llmConfigured) setApiReady(true);
+  }, [llmConfigured]);
 
   useEffect(() => {
     let cancelled = false;

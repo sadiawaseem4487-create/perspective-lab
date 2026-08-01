@@ -301,7 +301,13 @@ export async function fetchAuthMe() {
   const res = await fetch(`${API}/auth/me`, { headers: authHeaders() });
   if (res.status === 401) {
     setAuthToken("");
-    return { authenticated: false, user: null, auth_required: true };
+    return {
+      authenticated: false,
+      user: null,
+      auth_required: true,
+      personal_key: null,
+      llm: { configured: false },
+    };
   }
   return parseResponse(res);
 }

@@ -73,3 +73,5 @@ flowchart TD
 - `POST /api/auth/register|login|logout`, `GET /api/auth/me`
 - `GET/PUT /api/auth/llm-key` — user’s own key
 - Frontend: Login / Register + History + protect AppShell
+- **Sign out** always returns to `/login`; production builds never leave the workspace open anonymously
+- Production (`ENVIRONMENT=production`) **always** requires login, even if `AUTH_REQUIRED=false`

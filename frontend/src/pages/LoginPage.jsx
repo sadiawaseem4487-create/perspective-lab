@@ -1,18 +1,26 @@
 import { useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { PageAlert, PageHero, PagePanel } from "@/components/PageChrome";
 
+function postAuthPath(me, from) {
+  if (from && from !== "/login" && from !== "/register") return from;
+  if (me?.llm?.configured) return "/question";
+  return "/settings?tab=api";
+}
+
 export default function LoginPage() {
-  const { login, isAuthenticated, authRequired, loading } = useAuth();
+  const { login, isAuthenticated, loading, llmConfigured } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
   if (!loading && isAuthenticated) {
-    return <Navigate to="/question" replace />;
+    return <Navigate to={llmConfigured ? "/question" : "/settings?tab=api"} replace />;
   }
 
   async function onSubmit(e) {
@@ -20,8 +28,8 @@ export default function LoginPage() {
     setError("");
     setSaving(true);
     try {
-      await login(email.trim(), password);
-      navigate("/settings?tab=api");
+      const data = await login(email.trim(), password);
+      navigate(postAuthPath(data.me, from), { replace: true });
     } catch (err) {
       setError(err.message || "Login failed");
     } finally {
@@ -37,9 +45,7 @@ export default function LoginPage() {
         size="sm"
         description={
           <p className="text-slate-400">
-            {authRequired
-              ? "Use your PerspectiveLab account. Each person uses their own API key."
-              : "Sign in to save your own API key and run agents."}
+            Use your PerspectiveLab account. Each person pastes their own API key in Settings before asking agents.
           </p>
         }
       />

@@ -465,10 +465,15 @@ async def auth_logout(token: Optional[str] = Depends(_extract_bearer)):
 
 
 @app.get("/api/auth/me")
-async def auth_me(user: dict = Depends(require_user)):
+async def auth_me(user: Optional[dict] = Depends(get_optional_user)):
     if not user:
-        # auth disabled — anonymous
-        return {"authenticated": False, "user": None, "auth_required": False, "personal_key": None}
+        return {
+            "authenticated": False,
+            "user": None,
+            "auth_required": auth_required(),
+            "personal_key": None,
+            "llm": {"configured": False, "source": None},
+        }
     return {
         "authenticated": True,
         "user": public_user(user),

@@ -1,5 +1,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { fetchAuthMe, login as apiLogin, logout as apiLogout, register as apiRegister } from "@/api";
+import {
+  fetchAuthMe,
+  login as apiLogin,
+  logout as apiLogout,
+  register as apiRegister,
+  setAuthToken,
+} from "@/api";
 
 const AuthContext = createContext(null);
 
@@ -17,10 +23,12 @@ export function AuthProvider({ children }) {
       setUser(data.user || null);
       setPersonalKey(data.personal_key || null);
       setLlmConfigured(Boolean(data.llm?.configured));
+      return data;
     } catch {
       setUser(null);
       setPersonalKey(null);
       setLlmConfigured(false);
+      return null;
     } finally {
       setLoading(false);
     }
@@ -33,19 +41,20 @@ export function AuthProvider({ children }) {
   async function login(email, password) {
     const data = await apiLogin(email, password);
     setUser(data.user);
-    await refresh();
-    return data;
+    const me = await refresh();
+    return { ...data, me };
   }
 
   async function register(email, password, name) {
     const data = await apiRegister(email, password, name);
     setUser(data.user);
-    await refresh();
-    return data;
+    const me = await refresh();
+    return { ...data, me };
   }
 
   async function logout() {
     await apiLogout().catch(() => {});
+    setAuthToken("");
     setUser(null);
     setPersonalKey(null);
     setLlmConfigured(false);

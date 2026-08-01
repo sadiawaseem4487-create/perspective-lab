@@ -4,6 +4,7 @@ Newest entries at the top.
 
 | Date | Sprint | Event |
 |------|--------|-------|
+| 2026-08-01 | Auth | SaaS auth hardening: Sign out → login, production always requires login, personal API key UX. |
 | 2026-08-01 | Auth | Per-user session isolation + History UI; Open app gated via login; same Render URL redeploy. |
 | 2026-08-01 | Auth | User accounts: register/login, per-user API keys, admin keeps server key; guests stay public. |
 | 2026-08-01 | 8 | Desktop polish: Gatekeeper fix in DMG, regenerated app icons, Sprint 8 marked complete. |

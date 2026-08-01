@@ -20,6 +20,8 @@ So every push to `main` updates https://perspective-lab.onrender.com/ without Ma
 
 Then push to `main` as usual; Render builds automatically.
 
+**Production auth:** login is always required on the live site. Set `ENVIRONMENT=production`. `AUTH_REQUIRED=false` is ignored in production so the app cannot stay open after Sign out.
+
 ---
 
 ## Update the existing Render deploy
