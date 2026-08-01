@@ -28,9 +28,17 @@ Admin seed account (if `ADMIN_*` env vars are set): `ADMIN_EMAIL` / `ADMIN_PASSW
 
 ---
 
-Live health must show `environment: production` and `auth_required: true`.
+---
 
-If https://perspective-lab.onrender.com/api/health still shows `environment: development` or `auth_required: false`, open the service → **Environment** and set:
+## Critical: fix Environment on Render (do this once)
+
+Live health must show `environment: production`, `auth_required: true`, and version ≥ `1.1.2`.
+
+The Docker entrypoint **forces production on Render** even if the dashboard still says `development`. After a cache-clear deploy, confirm:
+
+https://perspective-lab.onrender.com/api/health
+
+Also set these on the service:
 
 | Key | Value |
 |-----|--------|
@@ -42,12 +50,12 @@ If https://perspective-lab.onrender.com/api/health still shows `environment: dev
 | `PUBLIC_APP_URL` | `https://perspective-lab.onrender.com` |
 | `CORS_ORIGINS` | `https://perspective-lab.onrender.com` |
 | `ALLOWED_HOSTS` | `perspective-lab.onrender.com` |
-| `OPENROUTER_API_KEY` or `OPENAI_API_KEY` | *(admin server key)* |
+| `OPENROUTER_API_KEY` or `OPENAI_API_KEY` | *(optional admin key)* |
 | `EXPORT_API_KEY` | *(long random string)* |
 | `CASE_ID` | `sao-paulo-dropout` |
 | `WORKERS` | `1` |
 
-Save → wait for redeploy → re-check `/api/health`.
+**Manual Deploy → Clear build cache & deploy.** Each user must paste their own API key in Settings before Ask agents works.
 
 ---
 

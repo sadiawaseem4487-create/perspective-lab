@@ -128,3 +128,5 @@ def test_ask_all_agents_fail(mock_ask, client, monkeypatch):
         json={"question": "How should municipal education teams involve families and community partners to reduce secondary school dropout in São Paulo this year, and what measurable first steps should they take within ninety days?"},
     )
     assert response.status_code == 502
+    assert "All agents failed" in response.json()["detail"]
+    assert "timeout" in response.json()["detail"]
