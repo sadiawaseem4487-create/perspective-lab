@@ -23,7 +23,7 @@ def mock_stage_runner():
         ("rogers", 4, "scaling_roadmap"),
     ]
 
-    async def _run(question, vaihe, stage_outputs, model=None, human_note=""):
+    async def _run(question, vaihe, stage_outputs, model=None, human_note="", llm_creds=None):
         agent_id, slot, role = stages[vaihe - 1]
         result = _stage_response(agent_id, vaihe, role, slot)
         if human_note:
