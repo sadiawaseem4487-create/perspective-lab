@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   advanceSequentialRun,
@@ -51,7 +51,8 @@ export default function TheoryRoundtable() {
   const { t, lang } = useLanguage();
   const { isDemo, mode } = useAppMode();
   const { workflowMode, setWorkflowMode } = useWorkflowMode();
-  const { llmConfigured } = useAuth();
+  const { llmConfigured, personalKey, refresh: refreshAuth } = useAuth();
+  const navigate = useNavigate();
   const uiMode = isDemo ? "demo" : "live";
 
   const [agents, setAgents] = useState([]);
@@ -162,19 +163,17 @@ export default function TheoryRoundtable() {
   }
 
   useEffect(() => {
-    if (llmConfigured) setApiReady(true);
-  }, [llmConfigured]);
-
-  useEffect(() => {
     let cancelled = false;
-    function refreshHealth() {
-      checkHealth()
-        .then((d) => {
-          if (!cancelled) setApiReady(Boolean(d.llm_configured ?? d.openai_configured));
-        })
-        .catch(() => {
-          if (!cancelled) setApiReady(false);
-        });
+    async function refreshHealth() {
+      try {
+        const me = await refreshAuth();
+        const fromAuth = Boolean(me?.llm?.configured);
+        const health = await checkHealth();
+        const fromHealth = Boolean(health.llm_configured ?? health.openai_configured);
+        if (!cancelled) setApiReady(fromAuth || fromHealth);
+      } catch {
+        if (!cancelled) setApiReady(Boolean(llmConfigured));
+      }
     }
     refreshHealth();
     window.addEventListener("focus", refreshHealth);
@@ -203,6 +202,7 @@ export default function TheoryRoundtable() {
       window.removeEventListener("focus", refreshHealth);
       window.clearInterval(id);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
 
   // Hydrate per Live/Demo mode (Strict Mode safe: always clear restoring in finally)
@@ -304,6 +304,19 @@ export default function TheoryRoundtable() {
 
   async function handleRun() {
     if (!assessQuestionQuality(question).ok) return;
+
+    // Always allow the click — if key missing, take user to Settings instead of a dead button
+    const me = await refreshAuth().catch(() => null);
+    const ready = Boolean(
+      me?.llm?.configured || llmConfigured || apiReady || personalKey?.configured
+    );
+    setApiReady(ready);
+    if (!ready) {
+      setError(t("stage3.apiMissing"));
+      navigate("/settings?tab=api");
+      return;
+    }
+
     setLoading(true);
     setError("");
     setResult(null);
@@ -312,13 +325,6 @@ export default function TheoryRoundtable() {
     setSelectedKey(null);
 
     try {
-      const health = await checkHealth();
-      const ready = Boolean(health.llm_configured ?? health.openai_configured);
-      setApiReady(ready);
-      if (!ready) {
-        throw new Error(t("stage3.apiMissing"));
-      }
-
       if (workflowMode === "sequential_hitl") {
         const run = await startSequentialRun(question.trim(), model, lang, uiMode);
         setSequentialRun(run);
@@ -399,8 +405,9 @@ export default function TheoryRoundtable() {
   const quality = assessQuestionQuality(question);
   const wordCount = quality.wordCount;
   const framingReady = quality.ok;
-  const canAsk =
-    !loading && !restoring && framingReady && !sequentialRun && apiReady === true;
+  const keyReady = Boolean(llmConfigured || apiReady || personalKey?.configured);
+  // Enable Ask whenever framing is ready — missing key routes to Settings on click
+  const canAsk = !loading && !restoring && framingReady && !sequentialRun;
 
   const qualityHint = (() => {
     if (framingReady) {
@@ -426,7 +433,7 @@ export default function TheoryRoundtable() {
         </p>
       </header>
 
-      {apiReady === false && (
+      {!keyReady && (
         <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
           <p>{t("stage3.apiMissing")}</p>
           <Link
