@@ -146,6 +146,18 @@ def ensure_auth_tables() -> None:
             )
             """
         )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS lab_llm_settings (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                provider TEXT NOT NULL,
+                key_cipher TEXT NOT NULL,
+                model TEXT NOT NULL DEFAULT '',
+                updated_at TEXT NOT NULL,
+                updated_by INTEGER
+            )
+            """
+        )
         conn.commit()
 
 
@@ -169,17 +181,18 @@ def seed_admin_user() -> None:
             if row["role"] != "admin":
                 conn.execute("UPDATE users SET role = 'admin' WHERE id = ?", (row["id"],))
                 conn.commit()
-            return
-        now = datetime.now(timezone.utc).isoformat()
-        conn.execute(
-            """
-            INSERT INTO users (email, password_hash, role, name, created_at)
-            VALUES (?, ?, 'admin', 'Administrator', ?)
-            """,
-            (email, hash_password(password), now),
-        )
-        conn.commit()
-        logger.info("Seeded admin user %s", email)
+        else:
+            now = datetime.now(timezone.utc).isoformat()
+            conn.execute(
+                """
+                INSERT INTO users (email, password_hash, role, name, created_at)
+                VALUES (?, ?, 'admin', 'Administrator', ?)
+                """,
+                (email, hash_password(password), now),
+            )
+            conn.commit()
+            logger.info("Seeded admin user %s", email)
+    sync_lab_llm_from_env()
 
 
 def create_user(email: str, password: str, name: str = "") -> Dict[str, Any]:
@@ -382,8 +395,8 @@ def load_user_llm_credentials(user_id: int) -> Optional[Dict[str, str]]:
 def resolve_llm_credentials(user: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     """
     Prefer the signed-in user's personal key.
-    Otherwise fall back to the server OPENROUTER_API_KEY / OPENAI_API_KEY
-    so workshop users can ask agents without pasting their own key.
+    Else use server env OPENROUTER_API_KEY / OPENAI_API_KEY.
+    Else use the durable lab key stored in the database (admin-managed).
     """
     settings = get_settings()
 
@@ -397,35 +410,30 @@ def resolve_llm_credentials(user: Optional[Dict[str, Any]]) -> Dict[str, Any]:
             "base_url": settings.llm_base_url,
         }
 
+    def _from_stored(stored: Dict[str, str], source: str) -> Dict[str, Any]:
+        provider = stored["provider"]
+        return {
+            "configured": True,
+            "source": source,
+            "provider": provider,
+            "api_key": stored["api_key"],
+            "model": stored.get("model")
+            or ("openai/gpt-4o-mini" if provider == "openrouter" else settings.llm_model),
+            "base_url": "https://openrouter.ai/api/v1" if provider == "openrouter" else None,
+        }
+
     if user:
         personal = load_user_llm_credentials(user["id"])
         if personal and personal.get("api_key"):
-            provider = personal["provider"]
-            model = personal.get("model") or (
-                "openai/gpt-4o-mini" if provider == "openrouter" else settings.llm_model
-            )
-            return {
-                "configured": True,
-                "source": "user",
-                "provider": provider,
-                "api_key": personal["api_key"],
-                "model": model,
-                "base_url": "https://openrouter.ai/api/v1" if provider == "openrouter" else None,
-            }
-        if settings.llm_configured:
-            return _server_creds()
-        return {
-            "configured": False,
-            "source": None,
-            "provider": None,
-            "api_key": "",
-            "model": "",
-            "base_url": None,
-        }
+            return _from_stored(personal, "user")
 
-    # No user (auth disabled / legacy)
     if settings.llm_configured:
         return _server_creds()
+
+    lab = load_lab_llm_credentials()
+    if lab and lab.get("api_key"):
+        return _from_stored(lab, "lab")
+
     return {
         "configured": False,
         "source": None,
@@ -434,3 +442,97 @@ def resolve_llm_credentials(user: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "model": "",
         "base_url": None,
     }
+
+
+def set_lab_llm_key(
+    provider: str,
+    api_key: str,
+    model: str = "",
+    updated_by: Optional[int] = None,
+) -> None:
+    """Store the shared lab LLM key in Postgres/SQLite (survives Render redeploys)."""
+    key = (api_key or "").strip()
+    if len(key) < 8:
+        raise ValueError("API key looks too short")
+    provider = "openrouter" if (provider == "openrouter" or key.startswith("sk-or-")) else "openai"
+    if provider == "openrouter":
+        model_value = (model or "openai/gpt-4o-mini").strip()
+        if "/" not in model_value:
+            model_value = f"openai/{model_value}"
+    else:
+        model_value = (model or "gpt-4o-mini").strip()
+        if model_value.startswith("openai/"):
+            model_value = model_value[len("openai/") :]
+
+    now = datetime.now(timezone.utc).isoformat()
+    cipher = encrypt_secret(key)
+    with get_connection() as conn:
+        conn.execute(
+            """
+            INSERT INTO lab_llm_settings (id, provider, key_cipher, model, updated_at, updated_by)
+            VALUES (1, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+              provider = EXCLUDED.provider,
+              key_cipher = EXCLUDED.key_cipher,
+              model = EXCLUDED.model,
+              updated_at = EXCLUDED.updated_at,
+              updated_by = EXCLUDED.updated_by
+            """,
+            (provider, cipher, model_value, now, updated_by),
+        )
+        conn.commit()
+
+
+def get_lab_llm_key_meta() -> Optional[Dict[str, Any]]:
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT provider, model, updated_at FROM lab_llm_settings WHERE id = 1"
+        ).fetchone()
+    if not row:
+        return None
+    return {
+        "configured": True,
+        "provider": row["provider"],
+        "model": row["model"] or "",
+        "updated_at": row["updated_at"],
+    }
+
+
+def load_lab_llm_credentials() -> Optional[Dict[str, str]]:
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT provider, key_cipher, model FROM lab_llm_settings WHERE id = 1"
+        ).fetchone()
+    if not row:
+        return None
+    try:
+        api_key = decrypt_secret(row["key_cipher"])
+    except Exception:
+        logger.exception("Failed to decrypt lab LLM key")
+        return None
+    return {
+        "provider": row["provider"],
+        "api_key": api_key,
+        "model": row["model"] or "",
+    }
+
+
+def sync_lab_llm_from_env() -> bool:
+    """If env has a server key and DB has none, copy env → lab_llm_settings."""
+    settings = get_settings()
+    if not settings.llm_configured:
+        return False
+    if get_lab_llm_key_meta():
+        return False
+    try:
+        set_lab_llm_key(
+            settings.resolved_llm_provider,
+            settings.llm_api_key,
+            settings.llm_model,
+            updated_by=None,
+        )
+        logger.info("Synced server LLM key into durable lab_llm_settings")
+        return True
+    except Exception:
+        logger.exception("Could not sync lab LLM key from env")
+        return False

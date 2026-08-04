@@ -351,6 +351,16 @@ export async function saveUserLlmKey({ provider, api_key, model }) {
   return parseResponse(res);
 }
 
+/** Admin: shared lab key stored in Postgres (all users can use it). */
+export async function saveLabLlmKey({ provider, api_key, model }) {
+  const res = await fetch(`${API}/admin/lab-llm-key`, {
+    method: "PUT",
+    headers: authHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify({ provider, api_key, model }),
+  });
+  return parseResponse(res);
+}
+
 export async function fetchAuthMe() {
   const res = await fetch(`${API}/auth/me`, { headers: authHeaders() });
   if (res.status === 401) {

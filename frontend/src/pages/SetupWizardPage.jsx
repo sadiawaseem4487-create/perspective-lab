@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { KeyRound, ShieldCheck } from "lucide-react";
-import { fetchSetupStatus, saveSetupKeys, saveUserLlmKey } from "@/api";
+import { fetchSetupStatus, saveLabLlmKey, saveSetupKeys, saveUserLlmKey } from "@/api";
 import { ModelPicker } from "@/components/ModelPicker";
 import { PageAlert, PageHero, PagePanel } from "@/components/PageChrome";
 import { useAuth } from "@/context/AuthContext";
@@ -47,6 +47,19 @@ export default function SetupWizardPage({ embedded = false }) {
     try {
       const keyTrim = apiKey.trim();
       if (isAuthenticated) {
+        if (isAdmin && keyTrim) {
+          // Shared lab key (Postgres) — all signed-in users can ask without a personal key.
+          try {
+            await saveLabLlmKey({
+              provider,
+              api_key: keyTrim,
+              model: model.trim() || undefined,
+            });
+          } catch (err) {
+            // Fall through to personal key if not admin on this deploy yet.
+            if (!String(err.message || "").includes("Admin")) throw err;
+          }
+        }
         await saveUserLlmKey({
           provider,
           api_key: keyTrim,
@@ -60,7 +73,7 @@ export default function SetupWizardPage({ embedded = false }) {
               model: model.trim() || undefined,
             });
           } catch {
-            // Personal key is enough; server .env write is optional for admin.
+            // Personal/lab key is enough; server .env write is optional.
           }
         }
       } else if (status?.setup_allowed) {
@@ -104,8 +117,8 @@ export default function SetupWizardPage({ embedded = false }) {
         <p className="text-sm text-slate-400">
           {isAuthenticated
             ? serverLlmAvailable
-              ? "Optional: paste your own OpenRouter or OpenAI key. If you skip this, agents use the lab’s shared server key."
-              : "Paste your own OpenRouter or OpenAI key, then pick a model. No shared server key is configured yet."
+              ? "Optional personal key, or (admin) paste a key to set the shared lab key for everyone."
+              : "Paste an OpenRouter or OpenAI key. Admins set the shared lab key for all users."
             : t("setup.desc")}
         </p>
       )}

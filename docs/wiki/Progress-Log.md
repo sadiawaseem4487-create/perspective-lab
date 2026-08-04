@@ -4,6 +4,7 @@ Newest entries at the top.
 
 | Date | Sprint | Event |
 |------|--------|-------|
+| 2026-08-04 | Auth | Durable shared lab LLM key in Postgres + admin API; set online without Render env UI (v1.2.6). |
 | 2026-08-04 | Auth | Shared server OpenRouter/OpenAI key for all signed-in users; personal key optional (v1.2.5). |
 | 2026-08-04 | Ops | Render free-tier cold start: keep-alive Action, `/api/healthz`, wake banner (v1.2.4). |
 | 2026-08-01 | UX | Faster Report/Present: skip list waterfall, reuse brief cache, light guest fetch, prefer report file (v1.2.3). |

@@ -25,15 +25,17 @@ from setup_keys import apply_llm_keys, setup_allowed
 from auth_service import (
     auth_required,
     create_user,
+    get_lab_llm_key_meta,
+    get_user_by_email,
     get_user_llm_key_meta,
     issue_token,
     public_user,
     resolve_llm_credentials,
     revoke_token,
+    set_lab_llm_key,
     set_user_llm_key,
     user_from_token,
     verify_password,
-    get_user_by_email,
 )
 from llm_context import set_request_llm_credentials
 from application import (
@@ -417,14 +419,19 @@ async def health(user: Optional[dict] = Depends(get_optional_user)):
 
     persistent = storage_is_persistent()
     user_count = count_users_safe() if db_ok else 0
+    lab_meta = get_lab_llm_key_meta()
+    # Report shared key availability even when the request is anonymous.
+    shared_ready = bool(current.llm_configured or lab_meta)
     payload = {
         "status": status,
         "version": current.app_version,
         "environment": current.environment,
-        "llm_configured": bool(creds.get("configured")),
-        "llm_provider": creds.get("provider") or current.resolved_llm_provider,
-        "llm_source": creds.get("source"),
-        "openai_configured": bool(creds.get("configured")),
+        "llm_configured": shared_ready or bool(creds.get("configured")),
+        "llm_provider": (creds.get("provider") if creds.get("configured") else None)
+        or (lab_meta or {}).get("provider")
+        or current.resolved_llm_provider,
+        "llm_source": creds.get("source") if creds.get("configured") else ("lab" if lab_meta else None),
+        "openai_configured": shared_ready or bool(creds.get("configured")),
         "database_ok": db_ok,
         "database_path": str(current.database_path),
         "storage_backend": storage_backend(),
@@ -434,6 +441,8 @@ async def health(user: Optional[dict] = Depends(get_optional_user)):
         "auth_required": auth_required(),
         "authenticated": bool(user),
         "user": public_user(user) if user else None,
+        "lab_llm": lab_meta,
+        "server_llm_available": shared_ready,
     }
     return JSONResponse(content=payload, status_code=code)
 
@@ -442,11 +451,13 @@ async def health(user: Optional[dict] = Depends(get_optional_user)):
 async def setup_status(user: Optional[dict] = Depends(get_optional_user)):
     current = get_settings()
     creds = resolve_llm_credentials(user)
+    lab_meta = get_lab_llm_key_meta()
     return {
         "llm_configured": bool(creds.get("configured")),
         "llm_source": creds.get("source"),
         "llm_provider": creds.get("provider") or current.resolved_llm_provider,
-        "server_llm_available": current.llm_configured,
+        "server_llm_available": bool(current.llm_configured or lab_meta),
+        "lab_llm": lab_meta,
         "setup_allowed": setup_allowed(current),
         "environment": current.environment,
         "auth_required": auth_required(),
@@ -515,13 +526,14 @@ async def auth_logout(token: Optional[str] = Depends(_extract_bearer)):
 
 @app.get("/api/auth/me")
 async def auth_me(user: Optional[dict] = Depends(get_optional_user)):
-    server_llm = get_settings().llm_configured
+    server_llm = bool(get_settings().llm_configured or get_lab_llm_key_meta())
     if not user:
         return {
             "authenticated": False,
             "user": None,
             "auth_required": auth_required(),
             "personal_key": None,
+            "lab_llm": get_lab_llm_key_meta(),
             "server_llm_available": server_llm,
             "llm": {"configured": False, "source": None},
         }
@@ -531,6 +543,7 @@ async def auth_me(user: Optional[dict] = Depends(get_optional_user)):
         "user": public_user(user),
         "auth_required": auth_required(),
         "personal_key": get_user_llm_key_meta(user["id"]),
+        "lab_llm": get_lab_llm_key_meta(),
         "server_llm_available": server_llm,
         "llm": {
             "configured": bool(creds.get("configured")),
@@ -550,6 +563,23 @@ async def auth_save_llm_key(body: UserLlmKeyRequest, user: dict = Depends(requir
     return {
         "ok": True,
         "personal_key": get_user_llm_key_meta(user["id"]),
+        "llm_configured": True,
+    }
+
+
+@app.put("/api/admin/lab-llm-key")
+async def admin_save_lab_llm_key(body: UserLlmKeyRequest, user: dict = Depends(require_user)):
+    """Admin sets the shared lab key (stored in Postgres — survives Render redeploys)."""
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    try:
+        set_lab_llm_key(body.provider, body.api_key, body.model or "", updated_by=user["id"])
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return {
+        "ok": True,
+        "lab_llm": get_lab_llm_key_meta(),
+        "server_llm_available": True,
         "llm_configured": True,
     }
 
