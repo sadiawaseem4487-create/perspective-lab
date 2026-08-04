@@ -14,6 +14,8 @@ export function AuthProvider({ children }) {
   const [authRequired, setAuthRequired] = useState(false);
   const [personalKey, setPersonalKey] = useState(null);
   const [llmConfigured, setLlmConfigured] = useState(false);
+  const [llmSource, setLlmSource] = useState(null);
+  const [serverLlmAvailable, setServerLlmAvailable] = useState(false);
   const [loading, setLoading] = useState(true);
 
   async function refresh() {
@@ -25,12 +27,16 @@ export function AuthProvider({ children }) {
         setUser(data.user || null);
         setPersonalKey(data.personal_key || null);
         setLlmConfigured(Boolean(data.llm?.configured));
+        setLlmSource(data.llm?.source || null);
+        setServerLlmAvailable(Boolean(data.server_llm_available));
         return data;
       } catch {
         if (attempt === maxAttempts) {
           setUser(null);
           setPersonalKey(null);
           setLlmConfigured(false);
+          setLlmSource(null);
+          setServerLlmAvailable(false);
           return null;
         }
         // Render free-tier cold start: wait and retry
@@ -64,6 +70,8 @@ export function AuthProvider({ children }) {
     setUser(null);
     setPersonalKey(null);
     setLlmConfigured(false);
+    setLlmSource(null);
+    setServerLlmAvailable(false);
   }
 
   const value = {
@@ -71,6 +79,8 @@ export function AuthProvider({ children }) {
     authRequired,
     personalKey,
     llmConfigured,
+    llmSource,
+    serverLlmAvailable,
     loading,
     isAdmin: user?.role === "admin",
     isAuthenticated: Boolean(user),

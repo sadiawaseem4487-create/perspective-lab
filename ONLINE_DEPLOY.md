@@ -42,8 +42,11 @@ Then create accounts once — they survive future deploys.
 | `ALLOWED_HOSTS` | `perspective-lab.onrender.com` |
 | `CASE_ID` | `sao-paulo-dropout` |
 | `WORKERS` | `1` |
+| `OPENROUTER_API_KEY` | **Recommended** — shared key so users can ask without pasting their own |
+| `OPENAI_API_KEY` | Alternative to OpenRouter (set `LLM_PROVIDER=openai` if needed) |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | optional seed admin |
-| `OPENROUTER_API_KEY` | optional (users still paste their own keys) |
+
+Users may still paste a **personal** key in Settings; that overrides the shared key for their asks.
 
 ---
 

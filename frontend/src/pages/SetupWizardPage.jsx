@@ -10,7 +10,8 @@ import { useLanguage } from "@/i18n/LanguageContext";
 export default function SetupWizardPage({ embedded = false }) {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { isAuthenticated, isAdmin, refresh, personalKey } = useAuth();
+  const { isAuthenticated, isAdmin, refresh, personalKey, llmConfigured, llmSource, serverLlmAvailable } =
+    useAuth();
   const [provider, setProvider] = useState("openrouter");
   const [apiKey, setApiKey] = useState("");
   const [model, setModel] = useState("openai/gpt-4o-mini");
@@ -102,9 +103,21 @@ export default function SetupWizardPage({ embedded = false }) {
       {embedded && (
         <p className="text-sm text-slate-400">
           {isAuthenticated
-            ? "Paste your own OpenRouter or OpenAI key, then pick any model from the catalog. Agents bill this key — not the lab admin key."
+            ? serverLlmAvailable
+              ? "Optional: paste your own OpenRouter or OpenAI key. If you skip this, agents use the lab’s shared server key."
+              : "Paste your own OpenRouter or OpenAI key, then pick a model. No shared server key is configured yet."
             : t("setup.desc")}
         </p>
+      )}
+
+      {isAuthenticated && serverLlmAvailable && !personalKey?.configured && llmConfigured && (
+        <PageAlert>
+          <span>
+            Ready to ask agents using the <strong>shared lab key</strong>
+            {llmSource === "server" ? " (server)" : ""}. Add a personal key below only if you
+            want billing on your own account.
+          </span>
+        </PageAlert>
       )}
 
       {!isAuthenticated && (

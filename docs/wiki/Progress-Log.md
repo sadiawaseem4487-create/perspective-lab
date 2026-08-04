@@ -4,6 +4,7 @@ Newest entries at the top.
 
 | Date | Sprint | Event |
 |------|--------|-------|
+| 2026-08-04 | Auth | Shared server OpenRouter/OpenAI key for all signed-in users; personal key optional (v1.2.5). |
 | 2026-08-04 | Ops | Render free-tier cold start: keep-alive Action, `/api/healthz`, wake banner (v1.2.4). |
 | 2026-08-01 | UX | Faster Report/Present: skip list waterfall, reuse brief cache, light guest fetch, prefer report file (v1.2.3). |
 | 2026-08-01 | UX | Generalize UI branding (no São Paulo chrome); faster agent replies via leaner prompts (v1.2.1). |

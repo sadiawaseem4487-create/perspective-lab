@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "PerspectiveLab"
-    app_version: str = "1.2.4"
+    app_version: str = "1.2.5"
     case_id: str = "sao-paulo-dropout"
     project_root: Path = _BACKEND_DIR.parent
     environment: str = Field(default="development", pattern="^(development|production|staging)$")
@@ -136,11 +136,16 @@ class Settings(BaseSettings):
         if not self.is_production:
             return
         log = logging.getLogger(__name__)
-        # SaaS: server LLM key is optional — each user pastes their own in Settings
+        # Shared server key lets all signed-in users ask without a personal key.
         if not self.llm_configured:
             log.warning(
                 "No server OPENROUTER_API_KEY/OPENAI_API_KEY — "
-                "only signed-in users with a personal key can ask agents."
+                "users must paste a personal key in Settings to ask agents."
+            )
+        else:
+            log.info(
+                "Server LLM key configured — signed-in users can ask agents "
+                "without a personal key (personal keys still preferred when set)."
             )
         if self.export_api_key == "":
             log.warning("EXPORT_API_KEY is empty in production.")

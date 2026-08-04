@@ -382,9 +382,21 @@ def load_user_llm_credentials(user_id: int) -> Optional[Dict[str, str]]:
 def resolve_llm_credentials(user: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     """
     Prefer the signed-in user's personal key.
-    Admin may fall back to server .env key.
+    Otherwise fall back to the server OPENROUTER_API_KEY / OPENAI_API_KEY
+    so workshop users can ask agents without pasting their own key.
     """
     settings = get_settings()
+
+    def _server_creds() -> Dict[str, Any]:
+        return {
+            "configured": True,
+            "source": "server",
+            "provider": settings.resolved_llm_provider,
+            "api_key": settings.llm_api_key,
+            "model": settings.llm_model,
+            "base_url": settings.llm_base_url,
+        }
+
     if user:
         personal = load_user_llm_credentials(user["id"])
         if personal and personal.get("api_key"):
@@ -400,25 +412,25 @@ def resolve_llm_credentials(user: Optional[Dict[str, Any]]) -> Dict[str, Any]:
                 "model": model,
                 "base_url": "https://openrouter.ai/api/v1" if provider == "openrouter" else None,
             }
-        if user.get("role") == "admin" and settings.llm_configured:
-            return {
-                "configured": True,
-                "source": "server",
-                "provider": settings.resolved_llm_provider,
-                "api_key": settings.llm_api_key,
-                "model": settings.llm_model,
-                "base_url": settings.llm_base_url,
-            }
-        return {"configured": False, "source": None, "provider": None, "api_key": "", "model": "", "base_url": None}
+        if settings.llm_configured:
+            return _server_creds()
+        return {
+            "configured": False,
+            "source": None,
+            "provider": None,
+            "api_key": "",
+            "model": "",
+            "base_url": None,
+        }
 
     # No user (auth disabled / legacy)
     if settings.llm_configured:
-        return {
-            "configured": True,
-            "source": "server",
-            "provider": settings.resolved_llm_provider,
-            "api_key": settings.llm_api_key,
-            "model": settings.llm_model,
-            "base_url": settings.llm_base_url,
-        }
-    return {"configured": False, "source": None, "provider": None, "api_key": "", "model": "", "base_url": None}
+        return _server_creds()
+    return {
+        "configured": False,
+        "source": None,
+        "provider": None,
+        "api_key": "",
+        "model": "",
+        "base_url": None,
+    }

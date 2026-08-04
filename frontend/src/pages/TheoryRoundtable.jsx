@@ -51,7 +51,7 @@ export default function TheoryRoundtable() {
   const { t, lang } = useLanguage();
   const { isDemo, mode } = useAppMode();
   const { workflowMode, setWorkflowMode } = useWorkflowMode();
-  const { llmConfigured, personalKey, refresh: refreshAuth, user } = useAuth();
+  const { llmConfigured, llmSource, personalKey, refresh: refreshAuth, user } = useAuth();
   const navigate = useNavigate();
   const uiMode = isDemo ? "demo" : "live";
   const userId = user?.id;
@@ -443,6 +443,12 @@ export default function TheoryRoundtable() {
           >
             {t("stage3.openSettings")}
           </Link>
+        </div>
+      )}
+
+      {keyReady && llmSource === "server" && !personalKey?.configured && (
+        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-sm text-emerald-100/90">
+          <p>{t("stage3.apiUsingServer")}</p>
         </div>
       )}
 

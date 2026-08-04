@@ -45,7 +45,7 @@ export default function LoginPage() {
         size="sm"
         description={
           <p className="text-slate-400">
-            Use your PerspectiveLab account. Each person pastes their own API key in Settings before asking agents.
+            Use your PerspectiveLab account. Agents can use the lab’s shared API key, or your own key from Settings.
           </p>
         }
       />

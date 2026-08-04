@@ -298,7 +298,10 @@ def require_llm_ready(user: Optional[dict] = Depends(require_user)) -> Optional[
     if not creds.get("configured"):
         raise HTTPException(
             status_code=503,
-            detail="Add your own API key in Settings before asking agents.",
+            detail=(
+                "No LLM API key available. Add OPENROUTER_API_KEY or OPENAI_API_KEY "
+                "on the server, or paste your own key in Settings."
+            ),
         )
     set_request_llm_credentials(creds)
     return user
@@ -441,8 +444,9 @@ async def setup_status(user: Optional[dict] = Depends(get_optional_user)):
     creds = resolve_llm_credentials(user)
     return {
         "llm_configured": bool(creds.get("configured")),
-        "llm_provider": creds.get("provider") or current.resolved_llm_provider,
         "llm_source": creds.get("source"),
+        "llm_provider": creds.get("provider") or current.resolved_llm_provider,
+        "server_llm_available": current.llm_configured,
         "setup_allowed": setup_allowed(current),
         "environment": current.environment,
         "auth_required": auth_required(),
@@ -511,22 +515,26 @@ async def auth_logout(token: Optional[str] = Depends(_extract_bearer)):
 
 @app.get("/api/auth/me")
 async def auth_me(user: Optional[dict] = Depends(get_optional_user)):
+    server_llm = get_settings().llm_configured
     if not user:
         return {
             "authenticated": False,
             "user": None,
             "auth_required": auth_required(),
             "personal_key": None,
+            "server_llm_available": server_llm,
             "llm": {"configured": False, "source": None},
         }
+    creds = resolve_llm_credentials(user)
     return {
         "authenticated": True,
         "user": public_user(user),
         "auth_required": auth_required(),
         "personal_key": get_user_llm_key_meta(user["id"]),
+        "server_llm_available": server_llm,
         "llm": {
-            "configured": resolve_llm_credentials(user).get("configured"),
-            "source": resolve_llm_credentials(user).get("source"),
+            "configured": bool(creds.get("configured")),
+            "source": creds.get("source"),
         },
     }
 

@@ -41,7 +41,7 @@ export const translations = {
       openApp: "Open app",
       signIn: "Sign in",
       createAccount: "Create account",
-      accountNote: "Each person uses their own API key. Your sessions stay private to your account.",
+      accountNote: "Sign in to keep your sessions private. You can use the lab’s shared API key, or paste your own in Settings.",
       headline: "Four theories. One research question.",
       lede: "A multi-agent workspace that keeps competing perspectives visible—from ask to brief to presentation.",
       sampleLabel: "Sample framing",
@@ -456,7 +456,9 @@ export const translations = {
       desc: "Choose parallel (independent answers) or sequential (Freire → Weber → Montessori → Rogers). Optional human review between sequential stages.",
       usingModel: "Using model",
       apiMissing:
-        "API key not configured. Open Settings → API key, paste your OpenRouter or OpenAI key, then try again.",
+        "No API key available yet. Ask an admin to set OPENROUTER_API_KEY or OPENAI_API_KEY on the server, or paste your own key in Settings.",
+      apiUsingServer:
+        "Using the lab’s shared API key. You can paste your own key in Settings anytime.",
       openSettings: "Open Settings → API key",
       placeholder: "Describe your problem and what you need decided…",
       workflowMode: "Workflow mode",
@@ -820,7 +822,7 @@ export const translations = {
       openApp: "Abrir app",
       signIn: "Entrar",
       createAccount: "Criar conta",
-      accountNote: "Cada pessoa usa a própria chave de API. Suas sessões ficam privadas na sua conta.",
+      accountNote: "Entre para manter suas sessões privadas. Você pode usar a chave compartilhada do lab ou colar a sua em Configurações.",
       headline: "Quatro teorias. Uma pergunta de pesquisa.",
       lede: "Um espaço multi-agente que mantém perspectivas concorrentes visíveis—da pergunta ao brief e à apresentação.",
       sampleLabel: "Exemplo de enquadramento",
@@ -1235,7 +1237,9 @@ export const translations = {
       desc: "Escolha paralelo (respostas independentes) ou sequencial (Freire → Weber → Montessori → Rogers). Revisão humana opcional entre etapas.",
       usingModel: "Usando modelo",
       apiMissing:
-        "Chave API não configurada. Abra Configurações → Chave de API, cole sua chave OpenRouter ou OpenAI e tente de novo.",
+        "Nenhuma chave API disponível. Peça ao admin para configurar OPENROUTER_API_KEY ou OPENAI_API_KEY no servidor, ou cole a sua em Configurações.",
+      apiUsingServer:
+        "Usando a chave compartilhada do lab. Você pode colar a sua em Configurações a qualquer momento.",
       openSettings: "Abrir Configurações → Chave de API",
       placeholder: "Descreva o problema e o que precisa ser decidido…",
       workflowMode: "Modo de fluxo",
@@ -1598,7 +1602,7 @@ export const translations = {
       openApp: "Avaa sovellus",
       signIn: "Kirjaudu",
       createAccount: "Luo tili",
-      accountNote: "Jokainen käyttää omaa API-avaintaan. Istunnot pysyvät tililläsi yksityisinä.",
+      accountNote: "Kirjaudu sisään pitääksesi istunnot yksityisinä. Voit käyttää labin jaettua API-avainta tai liittää oman Asetuksiin.",
       headline: "Neljä teoriaa. Yksi tutkimuskysymys.",
       lede: "Moniagenttinen työtila, joka pitää kilpailevat näkökulmat näkyvissä—kysymyksestä briefiin ja esitykseen.",
       sampleLabel: "Esimerkkikehystys",
@@ -2013,7 +2017,9 @@ export const translations = {
       desc: "Valitse rinnakkainen (itsenäiset vastaukset) tai peräkkäinen (Freire → Weber → Montessori → Rogers). Valinnainen ihmisen tarkistus vaiheiden välissä.",
       usingModel: "Käytettävä malli",
       apiMissing:
-        "API-avainta ei ole asetettu. Avaa Asetukset → API-avain, liitä OpenRouter- tai OpenAI-avain ja yritä uudelleen.",
+        "API-avainta ei ole saatavilla. Pyydä adminia asettamaan OPENROUTER_API_KEY tai OPENAI_API_KEY palvelimelle, tai liitä oma avain Asetuksiin.",
+      apiUsingServer:
+        "Käytössä labin jaettu API-avain. Voit lisätä oman avaimen Asetuksiin milloin tahansa.",
       openSettings: "Avaa Asetukset → API-avain",
       placeholder: "Kuvaile ongelma ja mitä pitää päättää…",
       workflowMode: "Työnkulun tila",
