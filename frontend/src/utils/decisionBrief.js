@@ -672,9 +672,11 @@ export function generateDecisionBrief(report, opts = {}) {
     source: "generated",
   };
 
-  const polished = polishBriefForClarity(draft, {
-    preparedFor: L.preparedForDefault || "Programme decision owners",
-  });
+  const polished = opts.fast
+    ? draft
+    : polishBriefForClarity(draft, {
+        preparedFor: L.preparedForDefault || "Programme decision owners",
+      });
   const synced = syncBriefToFraming(polished, L);
   const catalog = rebuildBriefCatalog(synced);
   return { ...synced, ...catalog };

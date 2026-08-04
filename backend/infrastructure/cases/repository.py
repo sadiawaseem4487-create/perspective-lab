@@ -357,6 +357,9 @@ class CaseRepository:
         return reports
 
     def _demo_question_keys(self) -> set:
+        cached = getattr(self, "_demo_question_keys_cache", None)
+        if cached is not None:
+            return cached
         keys = set()
         try:
             for lang in ("en", "pt", "fi"):
@@ -369,7 +372,9 @@ class CaseRepository:
                 if main_q:
                     keys.add(" ".join(main_q.split()))
         except Exception:
+            self._demo_question_keys_cache = keys
             return keys
+        self._demo_question_keys_cache = keys
         return keys
 
     def _resolve_report_ui_mode(self, data: dict, demo_keys: Optional[set] = None) -> str:

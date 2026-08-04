@@ -17,25 +17,31 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   async function refresh() {
-    try {
-      const data = await fetchAuthMe();
-      setAuthRequired(Boolean(data.auth_required));
-      setUser(data.user || null);
-      setPersonalKey(data.personal_key || null);
-      setLlmConfigured(Boolean(data.llm?.configured));
-      return data;
-    } catch {
-      setUser(null);
-      setPersonalKey(null);
-      setLlmConfigured(false);
-      return null;
-    } finally {
-      setLoading(false);
+    const maxAttempts = 8;
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      try {
+        const data = await fetchAuthMe();
+        setAuthRequired(Boolean(data.auth_required));
+        setUser(data.user || null);
+        setPersonalKey(data.personal_key || null);
+        setLlmConfigured(Boolean(data.llm?.configured));
+        return data;
+      } catch {
+        if (attempt === maxAttempts) {
+          setUser(null);
+          setPersonalKey(null);
+          setLlmConfigured(false);
+          return null;
+        }
+        // Render free-tier cold start: wait and retry
+        await new Promise((r) => setTimeout(r, Math.min(4000 * attempt, 15000)));
+      }
     }
+    return null;
   }
 
   useEffect(() => {
-    refresh();
+    refresh().finally(() => setLoading(false));
   }, []);
 
   async function login(email, password) {

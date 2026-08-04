@@ -10,7 +10,7 @@ services:
     runtime: docker
     plan: free
     autoDeployTrigger: commit
-    healthCheckPath: /api/health
+    healthCheckPath: /api/healthz
     envVars:
       - key: ENVIRONMENT
         value: production

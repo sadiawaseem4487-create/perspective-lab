@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { fetchComparison, fetchPresentationConfig, fetchReport, fetchReports } from "@/api";
+import { fetchHumanAnswers, fetchPresentationConfig, fetchReport, fetchReports } from "@/api";
 import { AgentAvatar } from "@/components/AgentAvatar";
 import { PresentPlaylistBar } from "@/components/QuestionSessionBar";
 import {
@@ -393,25 +393,41 @@ export default function PresentPage() {
 
   useEffect(() => {
     const fromQuery = Number(params.get("session"));
-    setLoading(true);
+    const activeId = getActiveSessionId(uiMode, userId);
+    const seed = fromQuery || activeId || null;
+
+    // Start deck fetch immediately from the known session — don't wait on the list.
+    if (seed) {
+      setPlaylist([seed]);
+      setActiveSessionId(seed, uiMode, userId);
+      setPresentPlaylist([seed], uiMode, userId);
+    } else {
+      setLoading(true);
+    }
+
     fetchReports(uiMode)
       .then((list) => {
         const unique = uniqueReportsByQuestion(list);
         setReports(unique);
-        const preferred =
-          fromQuery ||
-          resolvePreferredSessionId(list, getActiveSessionId(uiMode, userId)) ||
-          unique[0]?.session_id;
-        const next = preferred ? [preferred] : [];
-        setPlaylist(next);
-        if (next[0]) {
-          setActiveSessionId(next[0], uiMode, userId);
-          setPresentPlaylist(next, uiMode, userId);
+        if (!seed) {
+          const preferred =
+            resolvePreferredSessionId(list, getActiveSessionId(uiMode, userId)) ||
+            unique[0]?.session_id;
+          const next = preferred ? [preferred] : [];
+          setPlaylist(next);
+          if (next[0]) {
+            setActiveSessionId(next[0], uiMode, userId);
+            setPresentPlaylist(next, uiMode, userId);
+          } else {
+            setLoading(false);
+          }
         }
       })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [params, uiMode]);
+      .catch((err) => {
+        setError(err.message);
+        if (!seed) setLoading(false);
+      });
+  }, [params, uiMode, userId]);
 
   useEffect(() => {
     if (!playlist.length) {
@@ -422,16 +438,17 @@ export default function PresentPage() {
     let cancelled = false;
 
     async function loadDeck({ resetSlide = false } = {}) {
+      setLoading(true);
       try {
         const payload = await Promise.all(
           playlist.map(async (id) => {
-            const [report, comparison] = await Promise.all([
+            const [report, human] = await Promise.all([
               fetchReport(id),
-              fetchComparison(id).catch(() => ({ human_answers: [] })),
+              fetchHumanAnswers(id).catch(() => ({ human_answers: [] })),
             ]);
             return {
               report: { ...report, question: displayQuestion(report.question) },
-              humanAnswers: comparison.human_answers || [],
+              humanAnswers: human.human_answers || [],
             };
           })
         );
@@ -445,16 +462,17 @@ export default function PresentPage() {
         setError("");
       } catch (err) {
         if (!cancelled) setError(err.message);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     }
 
     loadDeck({ resetSlide: true });
 
-    // Avoid full deck rebuild on every tab focus — Present felt slow for large reports.
     return () => {
       cancelled = true;
     };
-  }, [playlist, uiMode, params]);
+  }, [playlist, uiMode, userId]);
 
   const slides = useMemo(() => {
     if (!sessionsPayload.length) return [];

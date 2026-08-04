@@ -56,6 +56,30 @@ async function parseResponse(res) {
   return data;
 }
 
+/** Fast liveness ping (Render cold-start / keep-alive). */
+export async function fetchHealthz({ timeoutMs = 15000 } = {}) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${API}/healthz`, { signal: ctrl.signal, cache: "no-store" });
+    if (!res.ok) throw new Error("Server not ready");
+    return res.json().catch(() => ({ ok: true }));
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export async function fetchHealth({ timeoutMs = 20000 } = {}) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${API}/health`, { signal: ctrl.signal, cache: "no-store" });
+    return parseResponse(res);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function fetchAgents() {
   const res = await fetch(`${API}/agents`);
   return parseResponse(res);
@@ -192,6 +216,16 @@ export async function fetchSession(sessionId) {
 export async function fetchComparison(sessionId) {
   const res = await fetch(`${API}/comparison/${sessionId}`, { headers: authHeaders() });
   return parseResponse(res);
+}
+
+/** Lightweight guests-only fetch for Report/Present (faster than full comparison). */
+export async function fetchHumanAnswers(sessionId) {
+  const res = await fetch(`${API}/comparison/${sessionId}/human`, { headers: authHeaders() });
+  const data = await parseResponse(res);
+  return {
+    human_answers: data.respondents || data.human_answers || [],
+    count: data.count || 0,
+  };
 }
 
 export async function fetchComparisonMatrix(sessionId) {

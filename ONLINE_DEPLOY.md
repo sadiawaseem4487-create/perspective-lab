@@ -47,7 +47,23 @@ Then create accounts once — they survive future deploys.
 
 ---
 
-## Auto-deploy
+## Cold start (free Render)
+
+Free web services **sleep after ~15 minutes** idle. The first visit shows Render’s
+“APPLICATION LOADING / SERVICE WAKING UP” screen for **30–90 seconds**. That is
+platform behavior, not an app crash.
+
+Mitigations in this repo:
+
+1. **GitHub Action** `.github/workflows/keep-alive.yml` pings `/api/healthz` every 10 minutes  
+2. Lightweight **`GET /api/healthz`** for fast liveness  
+3. UI **wake banner** + auth retries when the API is still booting  
+
+After pushing to `main`, open Actions → “Keep Render awake” → **Run workflow** once.
+If the interstitial still appears often, upgrade the Render web service off Free
+(always-on) or open the health URL once before a workshop.
+
+---
 
 Service → **Settings → Build & Deploy** → Auto-Deploy **On Commit** → branch `main`.
 

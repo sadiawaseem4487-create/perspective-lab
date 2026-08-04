@@ -7,3 +7,12 @@ def test_health_ok(client):
     assert "version" in payload
     assert "llm_configured" in payload
     assert payload["environment"] == "development"
+
+
+def test_healthz_alive(client):
+    response = client.get("/api/healthz")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload.get("ok") is True
+    assert payload.get("status") == "alive"
+    assert "version" in payload

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { PageAlert, PageHero } from "../components/PageChrome";
 import { ReportBriefDocument, ReportModeToggle } from "../components/ReportBriefDocument";
-import { fetchComparison, fetchReport, fetchReports } from "../api";
+import { fetchHumanAnswers, fetchReport, fetchReports } from "../api";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useAppMode } from "@/context/AppModeContext";
 import { useAuth } from "@/context/AuthContext";
@@ -40,6 +40,7 @@ export default function Stage4Report() {
   const [error, setError] = useState("");
   const [exportNote, setExportNote] = useState("");
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
   const locale = lang === "fi" ? "fi-FI" : lang === "pt" ? "pt-BR" : "en-GB";
 
   const briefLabels = useMemo(
@@ -125,43 +126,88 @@ export default function Stage4Report() {
     [t]
   );
 
-  function buildFreshBrief(report, guests = []) {
+  function buildFreshBrief(report, guests = [], { fast = true } = {}) {
     return ensureBriefMeta(
-      generateDecisionBrief(report, { lang, labels: briefLabels, humanAnswers: guests }),
+      generateDecisionBrief(report, {
+        lang,
+        labels: briefLabels,
+        humanAnswers: guests,
+        fast,
+      }),
       briefLabels
     );
   }
 
-  function hydrateFromActiveSession() {
-    return fetchReports(uiMode)
-      .then((list) => {
-        const unique = uniqueReportsByQuestion(list);
-        setReports(unique);
-        const id = resolvePreferredSessionId(list, getActiveSessionId(uiMode, userId));
-        if (id) return loadReport(id);
-        setSelected(null);
-        setHumanAnswers([]);
-        setBrief(null);
-        return null;
-      })
-      .catch((err) => setError(err.message));
-  }
-
   useEffect(() => {
-    hydrateFromActiveSession();
-    // Prefetch PDF libs so Export PDF is fast on first click
-    import("jspdf").catch(() => {});
-    import("jspdf-autotable").catch(() => {});
+    let cancelled = false;
+
+    async function hydrate() {
+      setLoading(true);
+      setError("");
+      const activeId = getActiveSessionId(uiMode, userId);
+
+      // Reports list is for the dropdown only — do not block first paint.
+      const listPromise = fetchReports(uiMode)
+        .then((list) => {
+          if (cancelled) return [];
+          const unique = uniqueReportsByQuestion(list);
+          setReports(unique);
+          return unique;
+        })
+        .catch((err) => {
+          if (!cancelled) setError(err.message);
+          return [];
+        });
+
+      try {
+        if (activeId) {
+          await loadReport(activeId);
+        } else {
+          const unique = await listPromise;
+          if (cancelled) return;
+          const id = resolvePreferredSessionId(unique, null) || unique[0]?.session_id;
+          if (id) {
+            await loadReport(id);
+          } else {
+            setSelected(null);
+            setHumanAnswers([]);
+            setBrief(null);
+          }
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+      await listPromise;
+    }
+
+    hydrate();
+    // Defer PDF libs until after brief paint so they don't compete for bandwidth.
+    const idle =
+      typeof requestIdleCallback === "function"
+        ? requestIdleCallback(() => {
+            import("jspdf").catch(() => {});
+            import("jspdf-autotable").catch(() => {});
+          })
+        : setTimeout(() => {
+            import("jspdf").catch(() => {});
+            import("jspdf-autotable").catch(() => {});
+          }, 1500);
+    return () => {
+      cancelled = true;
+      if (typeof cancelIdleCallback === "function" && typeof idle === "number") {
+        cancelIdleCallback(idle);
+      } else {
+        clearTimeout(idle);
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uiMode, lang]);
 
-  // Do not re-fetch/rebuild the brief on every window focus — that made Report feel slow.
-
   async function loadReport(sessionId) {
     try {
-      const [data, comparison] = await Promise.all([
+      const [data, human] = await Promise.all([
         fetchReport(sessionId),
-        fetchComparison(sessionId).catch(() => ({ human_answers: [] })),
+        fetchHumanAnswers(sessionId).catch(() => ({ human_answers: [] })),
       ]);
       setActiveSessionId(sessionId, uiMode, userId);
       setPresentPlaylist([sessionId], uiMode, userId);
@@ -169,7 +215,7 @@ export default function Stage4Report() {
         ...data,
         question: displayQuestion(data.question),
       };
-      const guests = comparison.human_answers || [];
+      const guests = human.human_answers || [];
       setSelected(report);
       setHumanAnswers(guests);
       const saved = loadBrief(sessionId, uiMode);
@@ -180,6 +226,11 @@ export default function Stage4Report() {
       const contentFp = contentFingerprint(report, guests);
       const isEdited =
         saved?.source === "edited" && Number(saved?.version || 0) >= 7 && framingMatches;
+      const cacheHit =
+        saved &&
+        Number(saved?.version || 0) >= 7 &&
+        framingMatches &&
+        saved.contentFingerprint === contentFp;
 
       let next;
       if (isEdited) {
@@ -189,9 +240,27 @@ export default function Stage4Report() {
           { ...next, contentFingerprint: contentFp, source: "edited" },
           briefLabels
         );
+      } else if (cacheHit) {
+        next = ensureBriefMeta(saved, briefLabels);
       } else {
-        next = buildFreshBrief(report, guests);
+        // Fast draft first so the page paints; polish later when idle.
+        next = buildFreshBrief(report, guests, { fast: true });
         clearBrief(sessionId, uiMode);
+        const polishSessionId = sessionId;
+        const schedule =
+          typeof requestIdleCallback === "function" ? requestIdleCallback : (fn) => setTimeout(fn, 0);
+        schedule(() => {
+          try {
+            const polished = buildFreshBrief(report, guests, { fast: false });
+            const current = loadBrief(polishSessionId, uiMode);
+            if (current?.source === "edited") return;
+            if (getActiveSessionId(uiMode, userId) !== polishSessionId) return;
+            saveBrief(polished, uiMode);
+            setBrief(polished);
+          } catch {
+            /* keep fast draft */
+          }
+        });
       }
       saveBrief(next, uiMode);
       setBrief(next);
@@ -223,7 +292,7 @@ export default function Stage4Report() {
     if (!selected) return;
     if (!window.confirm(t("stage4.resetConfirm"))) return;
     clearBrief(selected.session_id, uiMode);
-    const fresh = buildFreshBrief(selected, humanAnswers);
+    const fresh = buildFreshBrief(selected, humanAnswers, { fast: false });
     setBrief(fresh);
     saveBrief(fresh, uiMode);
   }
@@ -283,7 +352,11 @@ export default function Stage4Report() {
       {error && <PageAlert>{error}</PageAlert>}
       {exportNote && <p className="text-sm text-slate-400">{exportNote}</p>}
 
-      {!selected || !brief ? (
+      {loading && !brief ? (
+        <div className="rounded-2xl border border-white/10 bg-slate-950/50 px-6 py-12 text-center text-slate-400">
+          {t("stage4.loadingBrief")}
+        </div>
+      ) : !selected || !brief ? (
         <div className="rounded-2xl border border-white/10 bg-slate-950/50 px-6 py-12 text-center text-slate-400">
           {reports.length === 0 ? t("stage4.noReports") : t("stage4.selectReport")}
           {reports.length > 0 && (

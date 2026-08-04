@@ -39,3 +39,6 @@ START_HERE.txt
 *.zip
 .DS_Store
 .cursor/
+
+# Local paper draft wiki + Overleaf starter (never commit / push)
+docs/paper-private/

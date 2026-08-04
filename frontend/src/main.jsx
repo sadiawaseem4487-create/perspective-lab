@@ -6,6 +6,7 @@ import { LanguageProvider } from "./i18n/LanguageContext";
 import { AppModeProvider } from "./context/AppModeContext";
 import { WorkflowModeProvider } from "./context/WorkflowModeContext";
 import { AuthProvider } from "./context/AuthContext";
+import ServerWakeBanner from "./components/ServerWakeBanner";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -15,6 +16,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <AuthProvider>
           <AppModeProvider>
             <WorkflowModeProvider>
+              <ServerWakeBanner />
               <App />
             </WorkflowModeProvider>
           </AppModeProvider>

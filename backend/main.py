@@ -319,22 +319,32 @@ def require_session_access(session_id: int, user: Optional[dict]) -> dict:
 
 
 def resolve_owned_report(session_id: int, user: Optional[dict]) -> dict:
-    """Load report/session for an owned session; 404 if missing or not owned."""
+    """Load report/session for an owned session; 404 if missing or not owned.
+
+    Prefer the report JSON file (already has responses) — avoid loading the full
+    SQLite session when the report exists (Report/Present first paint).
+    """
+    from database import get_session_owner_id
+
     uid = scoped_user_id(user)
-    session = get_session(session_id)
     report = get_report(session_id)
-    if not session and not report:
-        raise HTTPException(status_code=404, detail="Report not found")
-    if uid is not None:
-        if session is not None:
-            if not user_owns_session(session_id, uid):
-                raise HTTPException(status_code=404, detail="Report not found")
-        else:
-            report_uid = report.get("user_id") if report else None
-            if report_uid is None or int(report_uid) != uid:
-                raise HTTPException(status_code=404, detail="Report not found")
     if report:
+        if uid is not None:
+            report_uid = report.get("user_id")
+            if report_uid is not None:
+                if int(report_uid) != uid:
+                    raise HTTPException(status_code=404, detail="Report not found")
+            else:
+                owner = get_session_owner_id(session_id)
+                if owner is None or int(owner) != uid:
+                    raise HTTPException(status_code=404, detail="Report not found")
         return report
+
+    session = get_session(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Report not found")
+    if uid is not None and not user_owns_session(session_id, uid):
+        raise HTTPException(status_code=404, detail="Report not found")
     return {
         "session_id": session["id"],
         "question": session["question"],
@@ -344,6 +354,20 @@ def resolve_owned_report(session_id: int, user: Optional[dict]) -> dict:
         "responses": session["responses"],
         "user_id": session.get("user_id"),
     }
+
+
+def assert_owned_session(session_id: int, user: Optional[dict]) -> None:
+    """Ownership check without loading full report JSON (for guests/human endpoints)."""
+    from database import get_session_owner_id
+
+    uid = scoped_user_id(user)
+    owner = get_session_owner_id(session_id)
+    if owner is not None:
+        if uid is not None and int(owner) != uid:
+            raise HTTPException(status_code=404, detail="Report not found")
+        return
+    # Orphaned report file (no session row) — fall back to full resolve once.
+    resolve_owned_report(session_id, user)
 
 
 def require_sequential_access(run_id: int, user: Optional[dict]) -> dict:
@@ -370,6 +394,12 @@ def require_export_key(x_export_key: str = Header(default="")) -> None:
         return
     if x_export_key != settings.export_api_key:
         raise HTTPException(status_code=401, detail="Invalid export key")
+
+
+@app.get("/api/healthz")
+async def healthz():
+    """Lightweight liveness for Render / keep-alive (no DB)."""
+    return {"ok": True, "status": "alive", "version": get_settings().app_version}
 
 
 @app.get("/api/health")
@@ -689,7 +719,7 @@ async def get_comparison_matrix(session_id: int, user: Optional[dict] = Depends(
 async def get_human(session_id: int, user: Optional[dict] = Depends(require_user)):
     from core.constants import MAX_HUMAN_ANSWERS_PER_SESSION
 
-    resolve_owned_report(session_id, user)
+    assert_owned_session(session_id, user)
     data = get_human_answers(session_id)
     if not data:
         return {
@@ -711,7 +741,7 @@ async def list_session_guests(session_id: int, user: Optional[dict] = Depends(re
     """List every guest/human answer for a session (shared invite + manual)."""
     from core.constants import MAX_HUMAN_ANSWERS_PER_SESSION
 
-    resolve_owned_report(session_id, user)
+    assert_owned_session(session_id, user)
     data = get_human_answers(session_id) or {}
     respondents = list(data.get("respondents") or [])
     return {
@@ -727,7 +757,7 @@ async def list_session_guests(session_id: int, user: Optional[dict] = Depends(re
 @app.get("/api/comparison/{session_id}/guests.csv")
 async def export_session_guests_csv(session_id: int, user: Optional[dict] = Depends(require_user)):
     """CSV of all guest answers for one session (one row per person)."""
-    resolve_owned_report(session_id, user)
+    assert_owned_session(session_id, user)
     data = get_human_answers(session_id) or {}
     respondents = list(data.get("respondents") or [])
     output = io.StringIO()
