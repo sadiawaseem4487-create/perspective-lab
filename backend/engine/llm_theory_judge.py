@@ -13,12 +13,15 @@ from typing import Any, Dict, Optional
 logger = logging.getLogger(__name__)
 
 JUDGE_SYSTEM = """You are a research methods judge for PerspectiveLab.
-Score whether an agent answer stays faithful to ONE classical theory lens.
+Score whether an agent answer stays faithful to ONE named theory's ORIGINAL ideology.
 Return ONLY compact JSON with keys:
   fidelity_score (1-5 integer),
-  passed (boolean — true if score >= 3),
+  passed (boolean — true if score >= 4),
   rationale (one short sentence),
   foreign_theory_risk (none|low|medium|high).
+Score 5: reasoning follows the original ideology and core concepts; other theories are not the main frame.
+Score 3: partial alignment, some generic or mixed language.
+Score 1: wrong theorist, mixed methods, or generic policy talk.
 Do not rewrite the answer. Do not add markdown."""
 
 
@@ -43,11 +46,17 @@ async def llm_theory_fidelity_check(
 
     theory = (profile or {}).get("theory") or agent_id
     diagnostic = (profile or {}).get("diagnostic_question") or ""
+    ideology = (profile or {}).get("ideology") or ""
+    concepts = ", ".join((profile or {}).get("core_concepts") or [])
+    forbidden = "; ".join((profile or {}).get("forbidden_frames") or [])
     must_not = "; ".join((profile or {}).get("must_not_do") or [])
     user = (
         f"Agent id: {agent_id}\n"
         f"Theory: {theory}\n"
+        f"Original ideology: {ideology or 'n/a'}\n"
+        f"Core concepts: {concepts or 'n/a'}\n"
         f"Diagnostic question: {diagnostic}\n"
+        f"Forbidden as primary method: {forbidden or 'n/a'}\n"
         f"Must not do: {must_not or 'n/a'}\n\n"
         f"Answer to judge:\n{(text or '')[:4000]}"
     )
@@ -66,7 +75,7 @@ async def llm_theory_fidelity_check(
         raw = (completion.choices[0].message.content or "").strip()
         parsed = _parse_judge_json(raw)
         score = int(parsed.get("fidelity_score") or 0)
-        passed = bool(parsed.get("passed")) if "passed" in parsed else score >= 3
+        passed = bool(parsed.get("passed")) if "passed" in parsed else score >= 4
         return {
             "id": "llm_fidelity",
             "passed": passed,
@@ -100,7 +109,7 @@ def _parse_judge_json(raw: str) -> dict:
     score = int(score_match.group(1)) if score_match else 0
     return {
         "fidelity_score": score,
-        "passed": score >= 3,
+        "passed": score >= 4,
         "rationale": raw[:180],
         "foreign_theory_risk": "unknown",
     }

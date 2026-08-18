@@ -40,10 +40,15 @@ Selected via `mode: "parallel" | "sequential"` on `/api/ask`.
 
 Each agent gets a `*.profile.json`:
 
+- `ideology` — original theoretical stance (canonical)
+- `core_concepts` — terms the agent must reason with
+- `forbidden_frames` — other theories it must not adopt as the main method
 - `diagnostic_question`
 - `reasoning_chain`
 - `must_do` / `must_not_do`
 - `output_sections`
+
+Prompt injection (`engine/profiles.py`) prepends a **theory boundary**: the agent may use only that ideology. Unprofiled lenses get a generic bound so they do not collapse into Freire/Weber/Montessori/Rogers. Sequential stages may *translate* prior output but must not *become* the previous theorist.
 
 ## Anti-patterns to avoid
 

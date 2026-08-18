@@ -116,7 +116,8 @@ def test_ask_uses_server_key_without_personal_key(mock_ask, client, monkeypatch)
     mock_ask.assert_awaited_once()
 
 
-def test_ask_validates_question_length(client):
+def test_ask_validates_question_length(client, monkeypatch):
+    _enable_llm(monkeypatch)
     response = client.post("/api/ask", json={"question": "hi"})
     assert response.status_code == 422
 

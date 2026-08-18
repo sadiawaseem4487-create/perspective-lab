@@ -13,7 +13,7 @@ This page defines the **measurement instrument**. Scores are stored in the case 
 | PS3 | Actionability | Vague advice | Specific actions | Actions with owner, timeline, measure |
 | PS4 | Assumptions | None stated | Implicit | Explicit assumptions + limits |
 | PS5 | Uncertainty | Overconfident | Some caveats | Clear unknowns and next evidence needed |
-| PS6 | Theory fidelity | Buzzwords only | Partial alignment | Reasoning matches the chosen theory’s process |
+| PS6 | Theory fidelity | Buzzwords only | Partial alignment | Reasoning matches the chosen theory’s original ideology and process |
 
 ## Conditions
 

@@ -66,8 +66,9 @@ def build_stage_question(
     parts.append(f"\nYOUR TASK — {_stage_deliverable(agent_id)}:")
     parts.append(_stage_task(agent_id))
     parts.append(
-        "\nRespond only for your stage. Reference prior stages where relevant. "
-        "If a human reviewer note is present, incorporate it explicitly. "
-        "Keep output structured per your theory profile."
+        "\nRespond only for your stage and ONLY through your own original ideology. "
+        "Prior stages are material to translate into your theory — do not copy their methods "
+        "or speak as another theorist. If a human reviewer note is present, incorporate it "
+        "explicitly without leaving your lens. Keep output structured per your theory profile."
     )
     return "\n".join(parts)

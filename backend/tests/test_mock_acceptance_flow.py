@@ -196,7 +196,7 @@ def test_mock_digital_inclusion_case_pack():
 
 
 def test_mock_sequential_hitl_flow(client, monkeypatch):
-    async def _run(question, vaihe, stage_outputs, model=None, human_note=""):
+    async def _run(question, vaihe, stage_outputs, model=None, human_note="", llm_creds=None):
         order = ["freire", "weber", "montessori", "rogers"]
         agent_id = order[vaihe - 1]
         return {

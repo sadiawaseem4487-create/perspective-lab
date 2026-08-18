@@ -4,24 +4,56 @@ from typing import Optional
 
 from application import load_theory_profile
 
+GENERIC_LENS_BOUNDARY = """=== LENS BOUNDARY (AUTHORITATIVE) ===
+Stay strictly inside the role, theory, and ideology named in your system prompt.
+Do not adopt Freire, Weber, Montessori, or Rogers as your primary method unless that is your assigned identity.
+Do not mix competing theories. Answer only through your own lens.
+Connect every recommendation to your named ideology."""
+
 
 def format_profile_instructions(agent_id: str, include_sections: bool = True) -> str:
     """Build authoritative prompt block from a case-pack theory profile.
 
-    Profiles are the source of truth for reasoning chain, must/must-not,
-    and section structure. Keep agents.json prompts short.
+    Profiles are the source of truth for original ideology, reasoning chain,
+    must/must-not, and section structure. Keep agents.json prompts short.
     """
     profile = load_theory_profile(agent_id)
     if not profile:
         return ""
 
     lines = [
-        "=== THEORY PROFILE (AUTHORITATIVE — follow in order) ===",
+        "=== THEORY BOUNDARY (AUTHORITATIVE — follow in order) ===",
         f"Theory: {profile.get('theory', agent_id)}",
-        f"Diagnostic question: {profile.get('diagnostic_question', '')}",
-        "",
-        "Reasoning chain (work through each step in this order):",
+        "You may use ONLY this theory's original ideology. "
+        "Do not switch lenses. Do not blend other theorists into your main frame.",
     ]
+
+    ideology = (profile.get("ideology") or "").strip()
+    if ideology:
+        lines.extend(["", "Original ideology (canonical — this is who you are):", ideology])
+
+    concepts = profile.get("core_concepts") or []
+    if concepts:
+        lines.append("")
+        lines.append("Core concepts you must reason with (use several of these as your frame):")
+        for concept in concepts:
+            lines.append(f"- {concept}")
+
+    forbidden = profile.get("forbidden_frames") or []
+    if forbidden:
+        lines.append("")
+        lines.append("Forbidden as your PRIMARY method (mentioning them to reject them is allowed):")
+        for item in forbidden:
+            lines.append(f"- {item}")
+
+    lines.extend(
+        [
+            "",
+            f"Diagnostic question: {profile.get('diagnostic_question', '')}",
+            "",
+            "Reasoning chain (work through each step in this order):",
+        ]
+    )
     for index, step in enumerate(profile.get("reasoning_chain", []), start=1):
         lines.append(f"{index}. {step}")
 
@@ -51,10 +83,16 @@ def format_profile_instructions(agent_id: str, include_sections: bool = True) ->
 
     lines.append("")
     lines.append(
-        "Connect every recommendation to this theory. "
-        "Do not borrow another theorist's primary method as your main frame."
+        "Connect every recommendation to this original ideology. "
+        "Prior context from other agents is input to translate — not a license to become them."
     )
     return "\n".join(lines)
+
+
+def format_lens_boundary(agent_id: str, include_sections: bool = False) -> str:
+    """Profile-backed bound for theory agents; generic bound for all other lenses."""
+    block = format_profile_instructions(agent_id, include_sections=include_sections)
+    return block or GENERIC_LENS_BOUNDARY
 
 
 def get_diagnostic_question(agent_id: str) -> Optional[str]:

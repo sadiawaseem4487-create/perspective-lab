@@ -80,6 +80,7 @@ def test_theory_native_output_instructions():
     assert "Assumptions" in instructions
     assert "do NOT prefix the title with" in instructions
     assert "THEORY-NATIVE OUTPUT FORMAT" in instructions
+    assert "original ideology" in instructions
 
     generic = get_output_instructions_for_agent("teacher")
     assert "Problem Diagnosis" in generic
@@ -251,6 +252,7 @@ def test_hitl_note_injected_into_stage_question():
     assert "HUMAN REVIEWER NOTE" in question
     assert "documentation of absences" in question
     assert "Prior Freire map" in question
+    assert "ONLY through your own original ideology" in question
 
 
 def test_comparison_matrix_api(client, sample_session_id):

@@ -7,9 +7,9 @@ from openai import APITimeoutError, AsyncOpenAI, RateLimitError
 
 from agents.prompts import AGENT_DEFINITIONS
 from config import get_settings
-from application import SLOT_ORDER, get_slot_assignments, load_agents_catalog
+from application import SLOT_ORDER, get_slot_assignments, load_agents_catalog, load_theory_profile
 from engine.output_formats import get_output_instructions_for_agent
-from engine.profiles import format_profile_instructions
+from engine.profiles import format_lens_boundary
 
 logger = logging.getLogger(__name__)
 
@@ -93,14 +93,16 @@ async def ask_agent_slot(
     active_model = model or active.get("model") or settings.llm_model
     prompt = agent.get("system_prompt") or agent.get("prompt", "")
     # Avoid duplicating section lists (profile + format) — fewer tokens, faster replies
-    profile_block = format_profile_instructions(agent_id, include_sections=False)
-    if profile_block:
-        prompt = f"{prompt}\n\n{profile_block}"
+    bound = format_lens_boundary(agent_id, include_sections=False)
+    prompt = f"{prompt}\n\n{bound}"
     full_prompt = f"{prompt}\n\n{get_output_instructions_for_agent(agent_id)}"
+    theory_bound = load_theory_profile(agent_id) is not None
     user_content = (
         f"Research question:\n{question}\n\n"
-        "Answer this exact question. Be specific and concise (within the length limit). "
-        "Tailor every section to what was asked — do not repeat a generic template."
+        "Answer this exact question through YOUR assigned theory or lens only. "
+        "Be specific and concise (within the length limit). "
+        "Tailor every section to what was asked — do not repeat a generic template "
+        "and do not adopt another theorist's method as your main frame."
     )
 
     for attempt in range(settings.openai_max_retries + 1):
@@ -112,7 +114,7 @@ async def ask_agent_slot(
                     {"role": "system", "content": full_prompt},
                     {"role": "user", "content": user_content},
                 ],
-                temperature=0.4,
+                temperature=0.25 if theory_bound else 0.4,
                 max_tokens=1100,
             )
             text = completion.choices[0].message.content or ""

@@ -34,11 +34,13 @@ Do not put the section title itself on a bullet line.
 If the section is an action plan, you may use structured action blocks with:
 Action:, Owner:, Timeline:, Measure:
 
-Every recommendation must connect clearly to the agent's theory.
+Every recommendation must connect clearly to the agent's original ideology.
+Do not use another theory as your primary method.
 If information is missing, add: Missing information: [what is needed].
 
 Quality check before finishing:
 1. Specific, not generic
-2. Clearly connected to the agent's theory
+2. Clearly connected to the agent's original ideology (not a mix of theories)
 3. Followable steps with measurable indicators
+4. Did not adopt another theorist's method as the main frame
 """.strip()
