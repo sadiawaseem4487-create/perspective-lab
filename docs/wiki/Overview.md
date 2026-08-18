@@ -9,7 +9,7 @@ The first case pack is **school dropout in São Paulo**. The platform itself is 
 ## Goals
 
 1. **Generic** — any case via `cases/{case_id}/`
-2. **Theory-faithful agents** — Freire, Weber, Montessori, Rogers behave differently
+2. **Theory-faithful agents** — Freire, Weber, Montessori, Rogers stay inside original ideology (bounded profiles + anti-drift)
 3. **Two workflow modes** — parallel (Phase 1) then sequential (Phase 2)
 4. **Research-ready** — export, human comparison, presentation mode, rubric
 5. **Local-first** — run on a laptop; desktop app in Sprint 8

@@ -46,6 +46,7 @@ Close the gap between **prompt theater** and **research instrumentation**.
 
 ## Remaining
 
+- [x] Follow-up: original-ideology bounds in theory profiles (`ideology`, `core_concepts`, `forbidden_frames`)
 - [ ] Open PR / merge (when requested)
 
 [← Sprint 7](Sprint-07-GUI-Research.md) · [Sprint 8 Desktop →](Sprint-08-Desktop.md) · [Rubric](../Problem-Solving-Rubric.md)

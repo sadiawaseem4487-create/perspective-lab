@@ -13,7 +13,7 @@ Developer notes for architecture, sprints, and progress.
 |--|--|
 | **Live** | https://perspective-lab.onrender.com/ |
 | **Accounts** | Login + personal API keys + Postgres |
-| **Updated** | 2026-08-01 |
+| **Updated** | 2026-08-18 |
 
 ---
 

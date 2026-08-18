@@ -127,6 +127,7 @@ See [Sprint-08-Desktop.md](Sprints/Sprint-08-Desktop.md).
 | P4.3 | Second case pack `digital-inclusion` | [x] |
 | P4.4 | Cohen’s kappa in inter-rater stats + CSV | [x] |
 | P4.5 | Repo rename `perspective-lab` | [ ] cosmetic / optional |
+| P4.6 | Bound agents to original ideology (profiles + anti-drift) | [x] |
 
 **Cross-OS client run:** macOS / Windows / Linux starters + [CLIENT_HANDOVER.md](../../CLIENT_HANDOVER.md).
 

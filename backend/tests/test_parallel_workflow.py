@@ -16,6 +16,8 @@ def test_freire_profile_has_diagnostic_question():
     profile = load_theory_profile("freire")
     assert profile["diagnostic_question"]
     assert len(profile["reasoning_chain"]) >= 3
+    assert "ideology" in profile
+    assert "dialogue" in " ".join(profile["core_concepts"]).lower()
 
 
 @patch("agents.service.ask_agent_slot", new_callable=AsyncMock)

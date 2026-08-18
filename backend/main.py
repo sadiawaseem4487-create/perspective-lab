@@ -666,6 +666,8 @@ async def get_agents_catalog():
                 "diagnostic_question": profile.get("diagnostic_question"),
                 "reasoning_chain": profile.get("reasoning_chain", []),
                 "output_sections": profile.get("output_sections", []),
+                "ideology": profile.get("ideology"),
+                "core_concepts": profile.get("core_concepts", []),
             }
         )
     return {
