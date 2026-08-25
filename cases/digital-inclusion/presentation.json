@@ -2,12 +2,12 @@
   "topic": {
     "en": "Multi-theory agentic problem-solving",
     "pt": "Resolução de problemas com IA multi-teoria",
-    "fi": "Moniteoreettinen agenttinen ongelmanratkaisu"
+    "fi": "Moniteoreettinen, agenttipohjainen ongelmanratkaisu"
   },
   "topic_subtitle": {
     "en": "Can we become better problem solvers with agentic AI?",
     "pt": "Podemos nos tornar melhores solucionadores de problemas com IA agentica?",
-    "fi": "Voimmeko tulla paremmiksi ongelmanratkaisijoiksi agenttisella tekoälyllä?"
+    "fi": "Voimmeko tulla paremmiksi ongelmanratkaisijoiksi agenttipohjaisella tekoälyllä?"
   },
   "introduction": {
     "en": {
@@ -64,12 +64,12 @@
       "title": "Tapaus: digitaalinen osallisuus kouluissa",
       "paragraphs": [
         "Koulut kohtaavat pysyviä eroja laitteiden, yhteyksien ja digitaalisten oppimisvälineiden saatavuudessa — köyhyyden, infrastruktuurin, opettajien valmiuden ja luottamuksen kaltaisten tekijöiden muovaamina.",
-        "Tämä tapauspaketti kysyy, miten klassiset teoriat kehystävät ja toimivat saman ongelman kanssa — ja kutsuu ihmisvieraita vertailemaan."
+        "Tämä tapauspaketti kysyy, miten klassiset teoriat kehystävät ja toimivat saman ongelman kanssa — ja kutsuu osallistujia vertailemaan."
       ],
       "bullets": [
         "Alue: koulutusjärjestelmät ja epätasa-arvoinen pääsy digitaaliseen oppimiseen",
         "Menetelmä: moniteoria-agentit rinnakkain + valinnainen ketju",
-        "Näyttö: ihmisvastaukset, rubriikki ja avainkohtien esitys"
+        "Näyttö: ihmisvastaukset, arviointikehikko ja avainkohtien esitys"
       ]
     }
   },
@@ -141,22 +141,22 @@
     "freire": {
       "en": "Voice, dialogue, and whose experience is missing",
       "pt": "Voz, diálogo e experiências ausentes",
-      "fi": "Ääni, dialogi ja puuttuvat kokemukset"
+      "fi": "Osallisuus, dialogi ja puuttuvat kokemukset"
     },
     "weber": {
       "en": "Authority, rules, and accountable procedures",
       "pt": "Autoridade, regras e procedimentos responsabilizáveis",
-      "fi": "Valta, säännöt ja vastuulliset menettelyt"
+      "fi": "Auktoriteetti, säännöt ja vastuulliset menettelyt"
     },
     "montessori": {
       "en": "Prepared environment and learner autonomy",
       "pt": "Ambiente preparado e autonomia do aprendiz",
-      "fi": "Valmistettu ympäristö ja oppijan autonomia"
+      "fi": "Valmistettu ympäristö ja oppijan itsenäisyys"
     },
     "rogers": {
       "en": "Adoption barriers, pilots, and diffusion",
       "pt": "Barreiras de adoção, pilotos e difusão",
-      "fi": "Omaksumisen esteet, pilotit ja diffuusio"
+      "fi": "Omaksumisen esteet, pilotit ja leviäminen"
     }
   }
 }
