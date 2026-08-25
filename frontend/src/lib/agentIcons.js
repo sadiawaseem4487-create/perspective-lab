@@ -15,10 +15,10 @@ export const AGENT_THEORIST = {
 };
 
 export const AGENT_LENS = {
-  freire: { en: "Voice & participation", pt: "Voz e participação", fi: "Ääni ja osallistuminen" },
+  freire: { en: "Voice & participation", pt: "Voz e participação", fi: "Osallisuus ja osallistuminen" },
   weber: { en: "Rules & accountability", pt: "Regras e responsabilidade", fi: "Säännöt ja vastuu" },
-  montessori: { en: "Environment & autonomy", pt: "Ambiente e autonomia", fi: "Ympäristö ja autonomia" },
-  rogers: { en: "Adoption & scaling", pt: "Adoção e escala", fi: "Omaksuminen ja laajennus" },
+  montessori: { en: "Environment & autonomy", pt: "Ambiente e autonomia", fi: "Ympäristö ja itsenäisyys" },
+  rogers: { en: "Adoption & scaling", pt: "Adoção e escala", fi: "Omaksuminen ja laajentaminen" },
 };
 
 export function getAgentIcon(agentKey) {
