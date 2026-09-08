@@ -25,12 +25,33 @@ cd /app/backend
 python - <<'PY'
 from config import get_settings, refresh_settings
 from database import init_db, storage_is_persistent, count_users_safe
-from db import storage_backend
+from db import (
+    _postgres_connect_kwargs,
+    _safe_postgres_target,
+    database_url,
+    storage_backend,
+)
 from auth_service import auth_required
 
 refresh_settings()
 settings = get_settings()
 settings.validate_production()
+url = database_url()
+if url:
+    # Help diagnose bad copy/paste without printing the password.
+    at_count = url.count("@")
+    print(
+        "DATABASE_URL diagnostics: "
+        f"len={len(url)} at_count={at_count} "
+        f"has_brackets={'[' in url or ']' in url} "
+        f"has_sslmode={'sslmode=' in url} "
+        f"starts={url[:28]!r}"
+    )
+    try:
+        params = _postgres_connect_kwargs(url)
+        print(f"Postgres target: {_safe_postgres_target(params)}")
+    except Exception as exc:
+        print(f"DATABASE_URL parse failed: {exc}")
 init_db()
 persistent = storage_is_persistent()
 users = count_users_safe()

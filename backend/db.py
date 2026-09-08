@@ -17,6 +17,9 @@ def database_url() -> str:
 
     settings = get_settings()
     url = (getattr(settings, "database_url", None) or os.environ.get("DATABASE_URL") or "").strip()
+    # Render UI / copy-paste sometimes wraps values in quotes.
+    if len(url) >= 2 and url[0] == url[-1] and url[0] in {'"', "'"}:
+        url = url[1:-1].strip()
     if url.startswith("postgres://"):
         url = "postgresql://" + url[len("postgres://") :]
     return url
@@ -28,6 +31,60 @@ def using_postgres() -> bool:
 
 def storage_backend() -> str:
     return "postgres" if using_postgres() else "sqlite"
+
+
+def _postgres_connect_kwargs(url: str) -> dict[str, str]:
+    """Normalize DATABASE_URL so Docker/psycopg never gets an empty port.
+
+    Empty/invalid port → ``Servname not supported for ai_socktype`` on Render.
+    """
+    from urllib.parse import unquote, urlparse
+
+    params: dict[str, str] = {}
+    try:
+        from psycopg.conninfo import conninfo_to_dict
+
+        params = {k: str(v) for k, v in dict(conninfo_to_dict(url)).items() if v is not None}
+    except Exception:
+        params = {}
+
+    parsed = urlparse(url)
+    if parsed.hostname and not params.get("host"):
+        params["host"] = parsed.hostname
+    if parsed.port and not str(params.get("port") or "").strip().isdigit():
+        params["port"] = str(parsed.port)
+    if parsed.username and not params.get("user"):
+        params["user"] = unquote(parsed.username)
+    if parsed.password is not None and "password" not in params:
+        params["password"] = unquote(parsed.password)
+    if parsed.path and parsed.path not in {"", "/"} and not params.get("dbname"):
+        params["dbname"] = unquote(parsed.path.lstrip("/").split("/")[0])
+    if parsed.query:
+        from urllib.parse import parse_qs
+
+        for key, values in parse_qs(parsed.query).items():
+            if values and key not in params:
+                params[key] = values[0]
+
+    port = str(params.get("port") or "").strip()
+    if not port.isdigit():
+        params["port"] = "5432"
+
+    host = str(params.get("host") or "")
+    if "supabase" in host and not params.get("sslmode"):
+        params["sslmode"] = "require"
+
+    return {k: str(v) for k, v in params.items() if v is not None and str(v) != ""}
+
+
+def _safe_postgres_target(params: dict[str, str]) -> str:
+    return (
+        f"user={params.get('user', '?')} "
+        f"host={params.get('host', '?')} "
+        f"port={params.get('port', '?')} "
+        f"dbname={params.get('dbname', '?')} "
+        f"sslmode={params.get('sslmode', '?')}"
+    )
 
 
 class Result:
@@ -132,10 +189,16 @@ def pk_sql() -> str:
 def open_connection() -> Iterator[DbConnection]:
     if using_postgres():
         import psycopg
+        from psycopg.conninfo import make_conninfo
         from psycopg.rows import dict_row
 
         url = database_url()
-        raw = psycopg.connect(url, row_factory=dict_row)
+        params = _postgres_connect_kwargs(url)
+        try:
+            raw = psycopg.connect(make_conninfo(**params), row_factory=dict_row)
+        except Exception:
+            logger.exception("Postgres connect failed (%s)", _safe_postgres_target(params))
+            raise
         conn = DbConnection(raw, "postgres")
         try:
             yield conn
