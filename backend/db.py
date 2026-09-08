@@ -51,8 +51,13 @@ def _postgres_connect_kwargs(url: str) -> dict[str, str]:
     parsed = urlparse(url)
     if parsed.hostname and not params.get("host"):
         params["host"] = parsed.hostname
-    if parsed.port and not str(params.get("port") or "").strip().isdigit():
-        params["port"] = str(parsed.port)
+    try:
+        parsed_port = parsed.port
+    except ValueError:
+        # Bad copy/paste often puts the DB password where :5432 should be.
+        parsed_port = None
+    if parsed_port and not str(params.get("port") or "").strip().isdigit():
+        params["port"] = str(parsed_port)
     if parsed.username and not params.get("user"):
         params["user"] = unquote(parsed.username)
     if parsed.password is not None and "password" not in params:
@@ -69,6 +74,12 @@ def _postgres_connect_kwargs(url: str) -> dict[str, str]:
     port = str(params.get("port") or "").strip()
     if not port.isdigit():
         params["port"] = "5432"
+
+    if not params.get("password"):
+        raise ValueError(
+            "DATABASE_URL is missing the password before @. "
+            "Use: postgresql://USER:PASSWORD@HOST:5432/postgres?sslmode=require"
+        )
 
     host = str(params.get("host") or "")
     if "supabase" in host and not params.get("sslmode"):
