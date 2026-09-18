@@ -822,48 +822,49 @@ export const translations = {
       openApp: "Abrir app",
       signIn: "Entrar",
       createAccount: "Criar conta",
-      accountNote: "Entre para manter suas sessões privadas. Você pode usar a chave compartilhada do lab ou colar a sua em Configurações.",
+      accountNote:
+        "Entre na sua conta para manter as sessões privadas. Você pode usar a chave de API compartilhada do laboratório ou colar a sua em Configurações.",
       headline: "Quatro teorias. Uma pergunta de pesquisa.",
-      lede: "Um espaço multi-agente que mantém perspectivas concorrentes visíveis—da pergunta ao brief e à apresentação.",
+      lede: "Um espaço multiagente que mantém perspectivas concorrentes visíveis—da pergunta ao brief e à apresentação.",
       sampleLabel: "Exemplo de enquadramento",
       sampleText:
-        "Um serviço público enfrenta resultados desiguais entre bairros. Com orçamento limitado, quais ações priorizar nos próximos 90 dias—e que trade-offs revelam as quatro teorias?",
+        "Um serviço público de educação enfrenta resultados desiguais entre bairros. Com orçamento limitado, quais ações priorizar nos próximos 90 dias—e que trade-offs as quatro teorias rivais revelam?",
       ctaPrimary: "Entrar na área de trabalho",
       ctaSecondary: "Ver como funciona",
       problemKicker: "O desafio",
-      problemTitle: "Um modelo, uma lente, não basta.",
+      problemTitle: "Só um modelo, ou só uma lente, não basta.",
       problemBody:
-        "Problemas difíceis em educação e políticas públicas mudam segundo participação, regras, ambientes de aprendizagem e adoção. Uma única resposta de IA apaga essas diferenças. O PerspectiveLab mantém-nas visíveis para que as equipas decidam com trade-offs mais claros.",
+        "Problemas difíceis em educação e políticas públicas mudam conforme participação, regras, ambientes de aprendizagem e adoção. Uma única resposta de IA apaga essas diferenças. O PerspectiveLab mantém as perspectivas visíveis para que equipes e tomadores de decisão escolham com trade-offs mais claros.",
       howKicker: "O sistema",
       howTitle: "Um fluxo de pesquisa, não um chatbot.",
       howBody:
-        "Do enquadramento à apresentação, cada etapa serve a uma investigação facilitada com IA agentica.",
+        "Do enquadramento à apresentação, cada etapa conduz à construção de um cenário com investigação facilitada e agentes de IA generativa.",
       flow: {
         ask: {
           title: "Perguntar",
-          body: "Enquadre uma vez. Quatro agentes teóricos respondem em paralelo—ou em cadeia.",
+          body: "Enquadre a pergunta uma vez. Quatro agentes teóricos respondem em paralelo—ou em cadeia.",
         },
         compare: {
           title: "Comparar",
-          body: "Leia lado a lado e coloque as vozes dos convidados ao lado.",
+          body: "Leia as respostas dos agentes lado a lado e coloque as vozes dos profissionais convidados ao lado.",
         },
         invite: {
           title: "Convidar",
-          body: "Um link para que profissionais respondam à mesma pergunta.",
+          body: "Compartilhe um link para que profissionais respondam à mesma pergunta.",
         },
         brief: {
           title: "Brief",
-          body: "Entrega editável com convidados—exporte Word ou PDF.",
+          body: "Resumo editável dos resultados, incluindo as respostas dos convidados—exporte para Word ou PDF.",
         },
         present: {
           title: "Apresentar",
-          body: "Um deck limpo alinhado ao brief.",
+          body: "Uma apresentação limpa alinhada ao brief.",
         },
       },
       lensesKicker: "Os agentes",
-      lensesTitle: "Quatro teorias. Uma pergunta partilhada.",
+      lensesTitle: "Quatro teorias. Uma pergunta compartilhada.",
       lensesBody:
-        "Cada agente segue uma lente diagnóstica distinta para que as soluções permaneçam comparáveis em vez de se fundirem numa resposta genérica.",
+        "Cada agente segue uma lente diagnóstica distinta para que as soluções permaneçam comparáveis, em vez de se fundirem numa resposta genérica.",
       lens: {
         freire: {
           short: "Freire",
@@ -887,14 +888,15 @@ export const translations = {
         },
       },
       whoKicker: "Para quem",
-      whoTitle: "Equipas de pesquisa que precisam de mais do que uma resposta.",
-      whoBody: "O PerspectiveLab apoia sessões facilitadas onde perspectivas de IA e julgamento humano se encontram.",
-      who1: "Investigadores que comparam caminhos teóricos de solução",
-      who2: "Facilitadores que conduzem workshops com input ao vivo e convidados",
-      who3: "Responsáveis de decisão que precisam de um brief claro de entrega",
-      closePrompt: "Podemos ser melhores a resolver problemas com IA agentica?",
+      whoTitle: "Equipes de pesquisa que precisam de mais do que uma única resposta.",
+      whoBody: "O PerspectiveLab apoia sessões facilitadas em que perspectivas de IA e julgamento humano se encontram.",
+      who1: "Pesquisadores que comparam caminhos de solução baseados em teorias",
+      who2: "Facilitadores que conduzem workshops com participação ao vivo de convidados",
+      who3: "Tomadores de decisão que precisam de um brief claro de entrega",
+      closePrompt: "Podemos ser melhores a resolver problemas com a ajuda de agentes de IA generativa?",
       closeTitle: "Comece pelo problema. Mantenha as perspectivas.",
-      closeBody: "Abra a área de trabalho, enquadre a pergunta e deixe quatro agentes—e os seus convidados—formar a próxima decisão.",
+      closeBody:
+        "Abra a área de trabalho, faça a pergunta e deixe quatro agentes—e os profissionais que você convidou—formularem a próxima decisão.",
       footerMeta: "Resolução de problemas com IA multi-teoria",
     },
     guide: {
@@ -1095,7 +1097,7 @@ export const translations = {
       sectionSources: "Fontes",
       topicDefault: "Resolução de problemas com IA multi-teoria",
       questionSlide: "Pergunta de pesquisa",
-      titleSub: "Podemos nos tornar melhores solucionadores de problemas com IA agentica?",
+      titleSub: "Podemos ser melhores a resolver problemas com a ajuda de agentes de IA generativa?",
       introTitle: "Por que quatro lentes teóricas?",
       introBullet1: "A mesma pergunta é respondida por Freire, Weber, Montessori e Rogers — de forma independente.",
       introBullet2: "Cada agente segue um processo diagnóstico diferente, para soluções comparáveis.",
@@ -1178,7 +1180,7 @@ export const translations = {
     setup: {
       badge: "Primeira execução",
       title: "Configurar chave de API",
-      desc: "Cole sua própria chave OpenRouter ou OpenAI. Os agentes usam a sua chave — não a chave compartilhada do laboratório.",
+      desc: "Cole sua própria chave OpenRouter ou OpenAI. Os agentes usam a sua chave — não a chave de API compartilhada do laboratório.",
       provider: "Provedor",
       apiKey: "Chave de API",
       apiKeyPh: "Cole a chave",
@@ -1239,7 +1241,7 @@ export const translations = {
       apiMissing:
         "Nenhuma chave API disponível. Peça ao admin para configurar OPENROUTER_API_KEY ou OPENAI_API_KEY no servidor, ou cole a sua em Configurações.",
       apiUsingServer:
-        "Usando a chave compartilhada do lab. Você pode colar a sua em Configurações a qualquer momento.",
+        "Usando a chave de API compartilhada do laboratório. Você pode colar a sua em Configurações a qualquer momento.",
       openSettings: "Abrir Configurações → Chave de API",
       placeholder: "Descreva o problema e o que precisa ser decidido…",
       workflowMode: "Modo de fluxo",

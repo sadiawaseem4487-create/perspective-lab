@@ -4,6 +4,7 @@ Newest entries at the top.
 
 | Date | Sprint | Event |
 |------|--------|-------|
+| 2026-09-18 | UX | Portuguese landing wording polish from review: grammar, API-key clarity, equipes/pesquisadores/tomadores de decisão, close prompt (v1.2.9). |
 | 2026-08-25 | UX | Finnish UI/case wording polish: agenttipohjainen (not agenttinen), koulutuksen keskeyttäminen (not pudokkuus), kutsutut osallistujat, päätösdokumentti (v1.2.8). |
 | 2026-08-18 | P4 | Bound each agent to its original ideology: profile `ideology` / `core_concepts` / `forbidden_frames`, prompt theory-boundary, tighter anti-drift + sequential stay-in-lens (v1.2.7). |
 | 2026-08-04 | Auth | Durable shared lab LLM key in Postgres + admin API; set online without Render env UI (v1.2.6). |
