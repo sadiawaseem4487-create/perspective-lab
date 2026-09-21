@@ -823,12 +823,12 @@ export const translations = {
       signIn: "Entrar",
       createAccount: "Criar conta",
       accountNote:
-        "Entre na sua conta para manter as sessões privadas. Você pode usar a chave de API compartilhada do laboratório ou colar a sua em Configurações.",
+        "Faça login para manter suas sessões privadas. Você pode usar a chave compartilhada do lab ou colar a sua em Configurações.",
       headline: "Quatro teorias. Uma pergunta de pesquisa.",
       lede: "Um espaço multiagente que mantém perspectivas concorrentes visíveis—da pergunta ao brief e à apresentação.",
       sampleLabel: "Exemplo de enquadramento",
       sampleText:
-        "Um serviço público de educação enfrenta resultados desiguais entre bairros. Com orçamento limitado, quais ações priorizar nos próximos 90 dias—e que trade-offs as quatro teorias rivais revelam?",
+        "Um serviço público enfrenta resultados desiguais entre bairros da cidade. O orçamento é limitado. Quais ações devem ser priorizadas nos próximos 90 dias — e que trade-offs são revelados sob a luz de quatro diferentes quadros teóricos?",
       ctaPrimary: "Entrar na área de trabalho",
       ctaSecondary: "Ver como funciona",
       problemKicker: "O desafio",
