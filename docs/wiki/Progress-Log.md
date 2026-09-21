@@ -4,6 +4,7 @@ Newest entries at the top.
 
 | Date | Sprint | Event |
 |------|--------|-------|
+| 2026-09-21 | UX | More PT landing Word-review copy: challenge body, fluxo de estudo, Pergunte/Compare/Convide/Sintetize/Apresente (v1.2.11). |
 | 2026-09-21 | UX | Portuguese landing sample + login note set to Word review wording (v1.2.10). |
 | 2026-09-18 | UX | Portuguese landing wording polish from review: grammar, API-key clarity, equipes/pesquisadores/tomadores de decisão, close prompt (v1.2.9). |
 | 2026-08-25 | UX | Finnish UI/case wording polish: agenttipohjainen (not agenttinen), koulutuksen keskeyttäminen (not pudokkuus), kutsutut osallistujat, päätösdokumentti (v1.2.8). |

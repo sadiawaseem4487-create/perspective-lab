@@ -832,32 +832,32 @@ export const translations = {
       ctaPrimary: "Entrar na área de trabalho",
       ctaSecondary: "Ver como funciona",
       problemKicker: "O desafio",
-      problemTitle: "Só um modelo, ou só uma lente, não basta.",
+      problemTitle: "Só um modelo; ou só uma lente; não basta.",
       problemBody:
-        "Problemas difíceis em educação e políticas públicas mudam conforme participação, regras, ambientes de aprendizagem e adoção. Uma única resposta de IA apaga essas diferenças. O PerspectiveLab mantém as perspectivas visíveis para que equipes e tomadores de decisão escolham com trade-offs mais claros.",
+        "Problemas complexos em políticas de educação e políticas públicas podem ser encarados a partir de diferentes perspectivas. Dependendo do enfoque—seja na participação das partes interessadas, na construção das regras, nos ambientes de aprendizagem, e nos desafios da implementação—diferentes soluções podem ser desenvolvidas. Respostas únicas de modelos de IA ignoram essas diferenças, podendo comprometer a qualidade das decisões. O PerspectiveLab mantém as perspectivas teóricas visíveis para que as equipes de tomadores de decisão enxerguem os possíveis trade-offs de forma clara.",
       howKicker: "O sistema",
-      howTitle: "Um fluxo de pesquisa, não um chatbot.",
+      howTitle: "Um fluxo de estudo, não um chatbot.",
       howBody:
-        "Do enquadramento à apresentação, cada etapa conduz à construção de um cenário com investigação facilitada e agentes de IA generativa.",
+        "Do enquadramento à apresentação, cada etapa do fluxo compreende um estudo facilitado com agentes de IA agentica.",
       flow: {
         ask: {
-          title: "Perguntar",
-          body: "Enquadre a pergunta uma vez. Quatro agentes teóricos respondem em paralelo—ou em cadeia.",
+          title: "Pergunte",
+          body: "Faça a pergunta. Quatro agentes teóricos respondem em paralelo—ou em cadeia.",
         },
         compare: {
-          title: "Comparar",
-          body: "Leia as respostas dos agentes lado a lado e coloque as vozes dos profissionais convidados ao lado.",
+          title: "Compare",
+          body: "Leia as respostas dos agentes lado a lado com a de profissionais convidados.",
         },
         invite: {
-          title: "Convidar",
+          title: "Convide",
           body: "Compartilhe um link para que profissionais respondam à mesma pergunta.",
         },
         brief: {
-          title: "Brief",
-          body: "Resumo editável dos resultados, incluindo as respostas dos convidados—exporte para Word ou PDF.",
+          title: "Sintetize",
+          body: "Resumo dos resultados, incluindo as respostas dos convidados, editável — exporte para Word ou PDF.",
         },
         present: {
-          title: "Apresentar",
+          title: "Apresente",
           body: "Uma apresentação limpa alinhada ao brief.",
         },
       },
