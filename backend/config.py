@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "PerspectiveLab"
-    app_version: str = "1.2.12"
+    app_version: str = "1.2.13"
     case_id: str = "sao-paulo-dropout"
     project_root: Path = _BACKEND_DIR.parent
     environment: str = Field(default="development", pattern="^(development|production|staging)$")
